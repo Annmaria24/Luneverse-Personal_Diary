@@ -1,23 +1,55 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./Styles/LoginPage.css";
 import { auth } from "../firebase/config"; // adjust the path if needed
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { createUserProfile, updateLastLogin } from "../services/userService";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check for success message from email verification
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      // Clear the message after 5 seconds
+      setTimeout(() => setSuccessMessage(""), 5000);
+    }
+  }, [location]);
 
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User signed in:", userCredential.user);
-    // Redirect to dashboard or diary page
-    navigate("/dashboard"); // You can change this route name based on your project
+    const user = userCredential.user;
+
+    // SECURITY CHECK: Verify email before allowing access
+    if (!user.emailVerified) {
+      alert("🔒 Please verify your email before logging in.\n\nCheck your inbox for the verification link.");
+      await signOut(auth); // Sign out unverified user immediately
+      return;
+    }
+
+    console.log("✅ User signed in with verified email:", user.email);
+
+    // ONLY NOW create/update user profile in Firestore (after email verification)
+    try {
+      await createUserProfile(user);
+      await updateLastLogin(user.uid);
+      console.log("✅ User profile created/updated in database");
+    } catch (dbError) {
+      console.error("❌ Database error:", dbError);
+      // Still allow login even if database update fails
+    }
+
+    // Redirect to dashboard
+    navigate("/dashboard");
   } catch (error) {
     console.error("Login error:", error.message);
     alert("Login failed. Please check your email and password.");
@@ -69,6 +101,12 @@ const handleSubmit = async (e) => {
             <h2>Sign In</h2>
             <p>Enter your credentials to access your personal sanctuary</p>
           </div>
+
+          {successMessage && (
+            <div className="success-message">
+              {successMessage}
+            </div>
+          )}
 
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="input-group">

@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Styles/SignUpPage.css";
 import { auth } from "../firebase/config";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signOut
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 function SignUpPage() {
@@ -14,6 +18,8 @@ function SignUpPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -23,19 +29,70 @@ function SignUpPage() {
       return;
     }
 
+    // Enhanced password validation
     if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
       return;
     }
 
+    if (!/(?=.*[0-9])/.test(password)) {
+      setError("Password must contain at least one number.");
+      return;
+    }
+
+    if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) {
+      setError("Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;':\",./<>?).");
+      return;
+    }
+
     try {
+      // STEP 1: Create user account (this creates Firebase Auth user)
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("User created:", userCredential.user);
-      // Redirect to login page after successful signup
-      navigate("/login");
+      const user = userCredential.user;
+
+      console.log("🔐 Firebase Auth user created:", user.email);
+      console.log("📧 Email verified status:", user.emailVerified);
+
+      // STEP 2: Send email verification BEFORE allowing any database access
+      try {
+        console.log("📤 Sending verification email to:", user.email);
+
+        await sendEmailVerification(user, {
+          url: `${window.location.origin}/verify-success`,
+          handleCodeInApp: false
+        });
+
+        console.log("✅ Verification email sent successfully");
+
+        // IMPORTANT: Sign out the user immediately after creating account
+        // This prevents them from accessing the app until email is verified
+        await signOut(auth);
+        console.log("🚪 User signed out - must verify email first");
+
+        // Show success message without alert
+        console.log("✅ Account created and verification email sent to:", user.email);
+
+        // Store email for verification tracking
+        localStorage.setItem('pendingVerificationEmail', user.email);
+        navigate("/verify-email");
+
+      } catch (emailError) {
+        console.error("❌ Email verification failed:", emailError);
+
+        // If email verification fails, delete the created user account
+        try {
+          await user.delete();
+          console.log("🗑️ Deleted unverified user account");
+        } catch (deleteError) {
+          console.error("Failed to delete user:", deleteError);
+        }
+
+        setError("Failed to send verification email. Please try again.");
+      }
+
     } catch (error) {
-      console.error("Signup error:", error.message);
-      setError(error.message);
+      console.error("Signup error:", error);
+      setError("Signup failed: " + error.message);
     }
   };
 
@@ -90,7 +147,7 @@ function SignUpPage() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a password (min. 6 characters)"
+                  placeholder="Password (6+ chars, 1 number, 1 special char)"
                   required
                 />
                 <button
@@ -148,6 +205,7 @@ function SignUpPage() {
               <span className="privacy-icon">🔒</span>
               Your data is encrypted and completely private
             </div>
+
           </div>
         </div>
 

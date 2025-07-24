@@ -332,6 +332,7 @@
   border: 2px solid var(--neutral-gray-300);
   border-radius: var(--radius-md);
   background: var(--neutral-white);
+  color: var(--neutral-gray-800);
   transition: all 0.3s ease;
   font-family: var(--font-primary);
   box-sizing: border-box;
@@ -352,6 +353,10 @@
   position: relative;
 }
 
+.password-input input {
+  padding-right: 45px !important; /* Make space for the eye icon */
+}
+
 .password-toggle {
   position: absolute;
   right: var(--spacing-sm);
@@ -364,6 +369,7 @@
   color: var(--neutral-gray-600);
   transition: color 0.3s ease;
   padding: 2px;
+  z-index: 10;
 }
 
 .password-toggle:hover {
