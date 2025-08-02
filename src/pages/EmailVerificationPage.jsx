@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase/config";
+import { applyActionCode } from "firebase/auth";
+import { useLocation } from "react-router-dom";
+
 import { 
   onAuthStateChanged, 
   sendEmailVerification, 
@@ -16,7 +19,7 @@ function EmailVerificationPage() {
   const [isChecking, setIsChecking] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     // Check for pending verification email in localStorage
     const pendingEmail = localStorage.getItem('pendingVerificationEmail');

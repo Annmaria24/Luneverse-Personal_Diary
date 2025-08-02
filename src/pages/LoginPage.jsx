@@ -1,64 +1,76 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import "./Styles/LoginPage.css";
-import { auth } from "../firebase/config"; // adjust the path if needed
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword, signOut, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../firebase/config";
 import { createUserProfile, updateLastLogin } from "../services/userService";
+import CustomModal from "../components/CustomModal";
+import { useModal } from "../hooks/useModal";
+import "./Styles/LoginPage.css";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { modalState, hideModal, showError, showAlert } = useModal();
 
   useEffect(() => {
-    // Check for success message from email verification
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
-      // Clear the message after 5 seconds
       setTimeout(() => setSuccessMessage(""), 5000);
     }
   }, [location]);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // SECURITY CHECK: Verify email before allowing access
-    if (!user.emailVerified) {
-      alert("🔒 Please verify your email before logging in.\n\nCheck your inbox for the verification link.");
-      await signOut(auth); // Sign out unverified user immediately
-      return;
-    }
-
-    console.log("✅ User signed in with verified email:", user.email);
-
-    // ONLY NOW create/update user profile in Firestore (after email verification)
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
     try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
       await createUserProfile(user);
       await updateLastLogin(user.uid);
-      console.log("✅ User profile created/updated in database");
-    } catch (dbError) {
-      console.error("❌ Database error:", dbError);
-      // Still allow login even if database update fails
-    }
 
-    // Redirect to dashboard
-    navigate("/dashboard");
-  } catch (error) {
-    console.error("Login error:", error.message);
-    alert("Login failed. Please check your email and password.");
-  }
-};
+      if (result._tokenResponse.isNewUser) {
+        navigate("/set-password");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Google Sign-in error:", error);
+      showError("Google Sign-In failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        showAlert("Please verify your email before logging in.", "Email Verification Required");
+        await signOut(auth);
+        return;
+      }
+
+      await createUserProfile(user);
+      await updateLastLogin(user.uid);
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error.message);
+      showError("Login failed. Please check your email and password.");
+    }
+  };
 
   return (
     <div className="login-page">
-      {/* Background Elements */}
       <div className="login-background">
         <div className="floating-element element-1">🌙</div>
         <div className="floating-element element-2">✨</div>
@@ -67,111 +79,115 @@ const handleSubmit = async (e) => {
         <div className="floating-element element-5">🦋</div>
       </div>
 
-      {/* Main Content */}
       <div className="login-container">
-        {/* Left Side - Welcome Back */}
         <div className="login-welcome">
           <div className="welcome-content">
             <h1>Welcome Back</h1>
             <p>Continue your wellness journey with Luneverse</p>
             <div className="welcome-features">
-              <div className="feature-item">
-                <span className="feature-icon">📝</span>
-                <span>Private Journaling</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">📊</span>
-                <span>Mood Tracking</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">🌸</span>
-                <span>Cycle Insights</span>
-              </div>
+              <div className="feature-item">📝 Private Journaling</div>
+              <div className="feature-item">📊 Mood Tracking</div>
+              <div className="feature-item">🌸 Cycle Insights</div>
             </div>
           </div>
         </div>
 
-        {/* Right Side - Login Form */}
         <div className="login-form-section">
-          <div className="form-header">
-            <Link to="/" className="back-to-home">
-              <span className="back-arrow">←</span>
-              Back to Home
-            </Link>
-            <h2>Sign In</h2>
-            <p>Enter your credentials to access your personal sanctuary</p>
-          </div>
+          <Link to="/" className="back-to-home">
+            ← Back to Home
+          </Link>
 
-          {successMessage && (
-            <div className="success-message">
-              {successMessage}
-            </div>
-          )}
-
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label htmlFor="email">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
+          <div className="form-content-wrapper">
+            <div className="form-header">
+              <h2>Sign In</h2>
+              <p>Enter your credentials to access your personal sanctuary</p>
             </div>
 
-            <div className="input-group">
-              <label htmlFor="password">Password</label>
-              <div className="password-input">
+            {successMessage && <div className="success-message">{successMessage}</div>}
+
+            <form className="login-form" onSubmit={handleSubmit}>
+              <div className="input-group">
+                <label>Email Address</label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
                   required
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
-                </button>
               </div>
+
+              <div className="input-group">
+                <label>Password</label>
+                <div className="password-input">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-options">
+                <label>
+                  <input type="checkbox" /> Remember me
+                </label>
+                <Link to="/forgot-password">Forgot password?</Link>
+              </div>
+
+              <button type="submit" className="login-button">Sign In to Luneverse</button>
+            </form>
+
+            <div className="alternative-login">
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="google-login-btn"
+                disabled={loading}
+              >
+                <img
+                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                  alt="Google Logo"
+                />
+                {loading ? "Signing in..." : "Sign in with Google"}
+              </button>
             </div>
 
-            <div className="form-options">
-              <label className="remember-me">
-                <input type="checkbox" />
-                <span className="checkmark"></span>
-                Remember me
-              </label>
-              <Link to="/forgot-password" className="forgot-password">
-                Forgot password?
-              </Link>
-            </div>
+            <hr className="divider" />
 
-            <button type="submit" className="login-button">
-              Sign In to Luneverse
-            </button>
-          </form>
-
-          <div className="form-footer">
-            <p>
-              Don't have an account?{" "}
-              <Link to="/signup" className="signup-link">
-                Create one here
-              </Link>
-            </p>
-            <div className="privacy-note">
-              <span className="privacy-icon">🔒</span>
-              Your data is encrypted and completely private
+            <div className="form-footer">
+              <p>
+                Don't have an account? <Link to="/signup">Sign up here</Link>
+              </p>
+              <div className="privacy-note">
+                🔒 Your data is encrypted and completely private
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Custom Modal */}
+      <CustomModal
+        isOpen={modalState.isOpen}
+        onClose={hideModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        onConfirm={modalState.onConfirm}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 }

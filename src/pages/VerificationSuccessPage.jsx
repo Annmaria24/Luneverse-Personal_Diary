@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { auth } from '../firebase/config';
-import { applyActionCode, signInWithEmailAndPassword } from 'firebase/auth';
+import { applyActionCode, onAuthStateChanged } from 'firebase/auth';
+import { createUserProfile, updateLastLogin } from '../services/userService';
 import './Styles/VerificationSuccessPage.css';
 
 function VerificationSuccessPage() {
@@ -19,21 +20,36 @@ function VerificationSuccessPage() {
         try {
           // Apply the email verification code
           await applyActionCode(auth, oobCode);
-          
+
           setStatus('success');
-          setMessage('✅ Email verified successfully!');
-          
+          setMessage('✅ Email verified successfully! Setting up your account...');
+
           // Clear any pending verification email from localStorage
           localStorage.removeItem('pendingVerificationEmail');
-          
-          // Redirect to login after 2 seconds
-          setTimeout(() => {
-            navigate('/login', { 
-              state: { 
-                message: 'Email verified! Please log in to access your account.' 
+
+          // Wait for auth state to update and then redirect to dashboard
+          const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user && user.emailVerified) {
+              try {
+                // Create user profile in database
+                await createUserProfile(user);
+                await updateLastLogin(user.uid);
+                console.log('✅ User profile created after verification');
+
+                // Redirect to dashboard
+                setTimeout(() => {
+                  navigate('/dashboard');
+                }, 1000);
+              } catch (error) {
+                console.error('Error creating user profile:', error);
+                // Still redirect to dashboard even if profile creation fails
+                setTimeout(() => {
+                  navigate('/dashboard');
+                }, 1000);
               }
-            });
-          }, 2000);
+              unsubscribe();
+            }
+          });
           
         } catch (error) {
           console.error('Email verification error:', error);
@@ -79,7 +95,7 @@ function VerificationSuccessPage() {
           
           {status === 'success' && (
             <div className="success-info">
-              <p>Redirecting to login page...</p>
+              <p>Redirecting to your dashboard...</p>
             </div>
           )}
           

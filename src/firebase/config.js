@@ -1,7 +1,8 @@
 // config.js
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDvG0eVhq1n_6vxh-IKp0_gL9kjyoLHKaY",
@@ -15,6 +16,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Export services
-export const auth = getAuth(app);
+// ✅ Create Auth Instance
+const auth = getAuth(app);
+
+// ✅ Set persistence AFTER defining auth
+setPersistence(auth, browserLocalPersistence);
+
+// ✅ Export Services
+export { auth };
 export const db = getFirestore(app);
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });

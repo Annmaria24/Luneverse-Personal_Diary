@@ -7,6 +7,12 @@ import Dashboard from "./pages/Dashboard";
 import SignUpPage from "./pages/SignupPage";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
 import VerificationSuccessPage from "./pages/VerificationSuccessPage";
+import SetPasswordPage from "./pages/SetPasswordPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import DiaryPage from "./pages/DiaryPage";
+import MoodTrackerPage from "./pages/MoodTrackerPage";
+import CycleTrackerPage from "./pages/CycleTrackerPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -16,8 +22,10 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
           <Route path="/verify-success" element={<VerificationSuccessPage />} />
+          <Route path="/set-password" element={<SetPasswordPage />} />
           <Route
             path="/dashboard"
             element={
@@ -26,6 +34,39 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/diary"
+            element={
+              <ProtectedRoute>
+                <DiaryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mood-tracker"
+            element={
+              <ProtectedRoute>
+                <MoodTrackerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cycle-tracker"
+            element={
+              <ProtectedRoute>
+                <CycleTrackerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
         </Routes>
       </Router>
     </AuthProvider>
