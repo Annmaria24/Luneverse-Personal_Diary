@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Styles/MoodTrackerPage.css';
+import { addMoodEntry, getMoodHistory } from "../services/moodService";
+import { auth } from "../firebase/config";
+
 
 function MoodTrackerPage() {
   const { currentUser } = useAuth();

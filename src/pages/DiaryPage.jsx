@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Styles/DiaryPage.css';
+import { addDiaryEntry, getDiaryEntries } from "../services/diaryService";
+import { auth } from "../firebase/config";
 
 function DiaryPage() {
   const { currentUser } = useAuth();

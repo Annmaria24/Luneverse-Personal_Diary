@@ -83,7 +83,22 @@ function Dashboard() {
       <header className="dashboard-header">
         <div className="header-content">
           <div className="header-left">
-            <h1 className="app-title">🌙 Luneverse</h1>
+            <div style={{
+              color: 'rgb(255, 255, 255)',
+              fontSize: '1.8rem',
+              fontWeight: '600',
+              margin: '0',
+              textShadow: 'none',
+              letterSpacing: '0.5px',
+              fontFamily: 'Arial, sans-serif',
+              filter: 'none',
+              opacity: '1',
+              background: 'transparent',
+              textDecoration: 'none',
+              WebkitFontSmoothing: 'antialiased'
+            }}>
+              🌙 Luneverse
+            </div>
             <p className="date-display">{formatDate(currentTime)}</p>
           </div>
           <div className="header-right">
@@ -213,15 +228,54 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Recent Activity */}
+        {/* Achievements */}
         <section className="activity-section">
           <div className="activity-card">
-            <h3>Recent Activity</h3>
-            <div className="activity-content">
-              <div className="empty-state">
-                <div className="empty-icon">🌙</div>
-                <p>Your wellness journey starts here</p>
-                <span>Begin by exploring the features above</span>
+            <h3>🏆 Achievements</h3>
+            <div className="achievements-grid">
+              <div className="achievement-item unlocked">
+                <div className="achievement-icon">🌟</div>
+                <div className="achievement-content">
+                  <h4>Welcome Warrior</h4>
+                  <p>Started your wellness journey</p>
+                  <span className="achievement-date">Today</span>
+                </div>
+              </div>
+
+              <div className="achievement-item locked">
+                <div className="achievement-icon">📝</div>
+                <div className="achievement-content">
+                  <h4>First Entry</h4>
+                  <p>Write your first diary entry</p>
+                  <span className="achievement-progress">0/1</span>
+                </div>
+              </div>
+
+              <div className="achievement-item locked">
+                <div className="achievement-icon">😊</div>
+                <div className="achievement-content">
+                  <h4>Mood Tracker</h4>
+                  <p>Log your mood for 3 days</p>
+                  <span className="achievement-progress">0/3</span>
+                </div>
+              </div>
+
+              <div className="achievement-item locked">
+                <div className="achievement-icon">🔥</div>
+                <div className="achievement-content">
+                  <h4>Week Warrior</h4>
+                  <p>Use the app for 7 consecutive days</p>
+                  <span className="achievement-progress">1/7</span>
+                </div>
+              </div>
+
+              <div className="achievement-item locked">
+                <div className="achievement-icon">💎</div>
+                <div className="achievement-content">
+                  <h4>Consistency Queen</h4>
+                  <p>Complete all daily activities for 30 days</p>
+                  <span className="achievement-progress">0/30</span>
+                </div>
               </div>
             </div>
           </div>

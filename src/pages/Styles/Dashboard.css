@@ -138,10 +138,13 @@
 
 /* Header */
 .dashboard-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(253, 242, 248, 0.95) 50%, rgba(243, 232, 255, 0.95) 100%);
+  background: linear-gradient(135deg,
+    rgba(113, 51, 214, 0.95) 0%,
+    rgba(200, 35, 115, 0.95) 50%,
+    rgba(161, 122, 214, 0.95) 100%);
   backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(200, 35, 115, 0.1);
-  box-shadow: 0 4px 20px rgba(113, 51, 214, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(113, 51, 214, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -149,7 +152,7 @@
 
 .header-content {
   width: 100%;
-  padding: var(--spacing-lg) var(--spacing-2xl);
+  padding: var(--spacing-sm) var(--spacing-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -164,16 +167,17 @@
 .app-title {
   font-size: 1.5rem;
   font-weight: var(--font-weight-bold);
-  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white !important;
   margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.5px;
 }
 
+
+
 .date-display {
-  font-size: 0.9rem;
-  color: var(--neutral-gray-600);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
@@ -191,7 +195,7 @@
 
 .user-greeting {
   font-size: 0.95rem;
-  color: var(--neutral-gray-700);
+  color: rgba(255, 255, 255, 0.95);
   font-weight: var(--font-weight-medium);
 }
 
@@ -540,10 +544,96 @@
   opacity: 0.8;
 }
 
+/* Achievements Styles */
+.achievements-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.achievement-item.unlocked {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.achievement-item.locked {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-color: #d1d5db;
+  opacity: 0.7;
+}
+
+.achievement-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+}
+
+.achievement-item.unlocked .achievement-icon {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.achievement-content {
+  flex: 1;
+}
+
+.achievement-content h4 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--neutral-gray-800);
+}
+
+.achievement-content p {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--neutral-gray-600);
+  font-size: 0.9rem;
+}
+
+.achievement-date {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.achievement-progress {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
@@ -606,6 +696,7 @@
 @media (max-width: 480px) {
   .app-title {
     font-size: 1.3rem;
+    color: white !important;
   }
 
   .user-avatar {
@@ -640,5 +731,24 @@
     font-size: 1.5rem;
     width: 40px;
     height: 40px;
+  }
+
+  .achievement-item {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .achievement-icon {
+    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+  }
+
+  .achievement-content h4 {
+    font-size: 1rem;
+  }
+
+  .achievement-content p {
+    font-size: 0.85rem;
   }
 }
