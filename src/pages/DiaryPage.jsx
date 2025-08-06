@@ -7,6 +7,7 @@ import { auth } from "../firebase/config";
 import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../firebase/config";
 import ProfileDropdown from '../components/ProfileDropdown';
+import RichTextEditor from '../components/RichTextEditor';
 
 
 function DiaryPage() {
@@ -373,16 +374,14 @@ function DiaryPage() {
             </div>
 
             <div className="entry-editor">
-              <textarea
+              <RichTextEditor
                 value={currentEntry}
-                onChange={(e) => setCurrentEntry(e.target.value)}
-                placeholder="Write about your day, your thoughts, your dreams..."
-                className="entry-textarea"
-                rows="8"
+                onChange={setCurrentEntry}
+                placeholder="Write about your day, your thoughts, your dreams... ✨"
               />
               <div className="entry-actions">
                 <div className="entry-stats">
-                  <span>{currentEntry.length} characters</span>
+                  <span>{currentEntry.replace(/<[^>]*>/g, '').length} characters</span>
                 </div>
                 <div className="entry-buttons">
                   {isEditing && (
@@ -504,7 +503,10 @@ function DiaryPage() {
                       </div>
                     </div>
                     <div className="entry-content">
-                      <p>{entry.content}</p>
+                      <div 
+                        className="entry-text"
+                        dangerouslySetInnerHTML={{ __html: entry.content }}
+                      />
                     </div>
                     <div className="entry-actions-bottom">
                       <button
