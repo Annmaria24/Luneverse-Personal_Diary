@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './Styles/MoodTrackerPage.css';
 import { addMoodEntry, getMoodHistory } from "../services/moodService";
 import { auth } from "../firebase/config";
+import ProfileDropdown from '../components/ProfileDropdown';
 
 
 function MoodTrackerPage() {
@@ -113,25 +114,28 @@ function MoodTrackerPage() {
           Dashboard
         </button>
         <h1>Mood Tracker</h1>
-        <div className="view-toggle">
-          <button
-            onClick={() => setViewMode('today')}
-            className={`view-btn ${viewMode === 'today' ? 'active' : ''}`}
-          >
-            Today
-          </button>
-          <button
-            onClick={() => setViewMode('week')}
-            className={`view-btn ${viewMode === 'week' ? 'active' : ''}`}
-          >
-            Week
-          </button>
-          <button
-            onClick={() => setViewMode('month')}
-            className={`view-btn ${viewMode === 'month' ? 'active' : ''}`}
-          >
-            Month
-          </button>
+        <div className="header-right">
+          <div className="view-toggle">
+            <button
+              onClick={() => setViewMode('today')}
+              className={`view-btn ${viewMode === 'today' ? 'active' : ''}`}
+            >
+              Today
+            </button>
+            <button
+              onClick={() => setViewMode('week')}
+              className={`view-btn ${viewMode === 'week' ? 'active' : ''}`}
+            >
+              Week
+            </button>
+            <button
+              onClick={() => setViewMode('month')}
+              className={`view-btn ${viewMode === 'month' ? 'active' : ''}`}
+            >
+              Month
+            </button>
+          </div>
+          <ProfileDropdown />
         </div>
       </header>
 

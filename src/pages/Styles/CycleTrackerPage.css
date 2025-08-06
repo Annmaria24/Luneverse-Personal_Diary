@@ -577,6 +577,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-xs);
+  color: var(--neutral-gray-700);
 }
 
 .flow-btn:hover {
@@ -805,6 +806,7 @@
   align-items: center;
   gap: var(--spacing-xs);
   font-family: var(--font-primary);
+  color: var(--neutral-gray-700);
 }
 
 .period-btn:hover {
@@ -827,6 +829,7 @@
 .period-name {
   font-size: 0.85rem;
   font-weight: var(--font-weight-medium);
+  color: var(--neutral-gray-800);
 }
 
 /* Calendar Period Status Indicators */

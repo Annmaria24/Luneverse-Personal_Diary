@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './Styles/CycleTrackerPage.css';
 import { addCycleEntry, getCycleData } from "../services/cycleService";
 import { auth } from "../firebase/config";
+import ProfileDropdown from '../components/ProfileDropdown';
 
 function CycleTrackerPage() {
   const { currentUser } = useAuth();
@@ -222,19 +223,22 @@ function CycleTrackerPage() {
           Dashboard
         </button>
         <h1>Cycle Tracker</h1>
-        <div className="view-toggle">
-          <button
-            onClick={() => setViewMode('calendar')}
-            className={`view-btn ${viewMode === 'calendar' ? 'active' : ''}`}
-          >
-            Calendar
-          </button>
-          <button
-            onClick={() => setViewMode('insights')}
-            className={`view-btn ${viewMode === 'insights' ? 'active' : ''}`}
-          >
-            Insights
-          </button>
+        <div className="header-right">
+          <div className="view-toggle">
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`view-btn ${viewMode === 'calendar' ? 'active' : ''}`}
+            >
+              Calendar
+            </button>
+            <button
+              onClick={() => setViewMode('insights')}
+              className={`view-btn ${viewMode === 'insights' ? 'active' : ''}`}
+            >
+              Insights
+            </button>
+          </div>
+          <ProfileDropdown />
         </div>
       </header>
 

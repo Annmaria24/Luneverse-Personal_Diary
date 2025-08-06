@@ -4,6 +4,9 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { useNavigate } from "react-router-dom";
 import "./Styles/Dashboard.css";
+import { getDiaryEntriesCountForMonth } from "../services/diaryService";
+import { getMoodEntriesCountForMonth } from "../services/moodService";
+import { getCycleEntriesCountForMonth } from "../services/cycleService";
 
 function Dashboard() {
   const { currentUser, userProfile } = useAuth();
@@ -11,6 +14,11 @@ function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // New state variables for counts
+  const [journalCount, setJournalCount] = useState(0);
+  const [moodCount, setMoodCount] = useState(0);
+  const [cycleCount, setCycleCount] = useState(0);
 
   useEffect(() => {
     // Update time every minute
@@ -44,6 +52,68 @@ function Dashboard() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  // Fetch counts for journal, mood, and cycle entries for current month
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth();
+
+    const fetchCounts = async () => {
+      try {
+        const [journalEntriesCount, moodEntriesCount, cycleEntriesCount] = await Promise.all([
+          getDiaryEntriesCountForMonth(currentUser.uid, year, month),
+          getMoodEntriesCountForMonth(currentUser.uid, year, month),
+          getCycleEntriesCountForMonth(currentUser.uid, year, month)
+        ]);
+        
+        setJournalCount(journalEntriesCount);
+        setMoodCount(moodEntriesCount);
+        setCycleCount(cycleEntriesCount);
+      } catch (error) {
+        console.error("Error fetching counts:", error);
+      }
+    };
+
+    fetchCounts();
+  }, [currentUser]);
+
+  // Add a function to refresh counts
+  const refreshCounts = async () => {
+    if (!currentUser) return;
+    
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth();
+    
+    try {
+      const [journalEntriesCount, moodEntriesCount, cycleEntriesCount] = await Promise.all([
+        getDiaryEntriesCountForMonth(currentUser.uid, year, month),
+        getMoodEntriesCountForMonth(currentUser.uid, year, month),
+        getCycleEntriesCountForMonth(currentUser.uid, year, month)
+      ]);
+      
+      setJournalCount(journalEntriesCount);
+      setMoodCount(moodEntriesCount);
+      setCycleCount(cycleEntriesCount);
+    } catch (error) {
+      console.error("Error refreshing counts:", error);
+    }
+  };
+
+  // Add event listener for data updates
+  useEffect(() => {
+    // Listen for custom event when data changes
+    const handleDataUpdate = () => {
+      refreshCounts();
+    };
+
+    window.addEventListener('dashboardDataUpdated', handleDataUpdate);
+    
+    return () => {
+      window.removeEventListener('dashboardDataUpdated', handleDataUpdate);
+    };
+  }, [currentUser]);
 
   const handleLogout = async () => {
     try {
@@ -158,7 +228,7 @@ function Dashboard() {
               <div className="stat-icon">📝</div>
               <div className="stat-content">
                 <h3>Journal Entries</h3>
-                <p className="stat-number">0</p>
+                <p className="stat-number">{journalCount}</p>
                 <span className="stat-label">This month</span>
               </div>
             </div>
@@ -166,7 +236,7 @@ function Dashboard() {
               <div className="stat-icon">📊</div>
               <div className="stat-content">
                 <h3>Mood Tracking</h3>
-                <p className="stat-number">0</p>
+                <p className="stat-number">{moodCount}</p>
                 <span className="stat-label">Days logged</span>
               </div>
             </div>
@@ -174,7 +244,7 @@ function Dashboard() {
               <div className="stat-icon">🌸</div>
               <div className="stat-content">
                 <h3>Cycle Insights</h3>
-                <p className="stat-number">-</p>
+                <p className="stat-number">{cycleCount > 0 ? cycleCount : '-'}</p>
                 <span className="stat-label">Next phase</span>
               </div>
             </div>

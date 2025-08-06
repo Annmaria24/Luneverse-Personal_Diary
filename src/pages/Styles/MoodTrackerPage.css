@@ -92,6 +92,12 @@
   transform: translateX(-2px);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
 .back-arrow {
   font-size: 1.2rem;
   font-weight: bold;
