@@ -1,0 +1,1624 @@
+loginpage :
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import "./Styles/LoginPage.css";
+import { auth } from "../firebase/config"; // adjust the path if needed
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { createUserProfile, updateLastLogin } from "../services/userService";
+
+function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check for success message from email verification
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      // Clear the message after 5 seconds
+      setTimeout(() => setSuccessMessage(""), 5000);
+    }
+  }, [location]);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // SECURITY CHECK: Verify email before allowing access
+    if (!user.emailVerified) {
+      alert("🔒 Please verify your email before logging in.\n\nCheck your inbox for the verification link.");
+      await signOut(auth); // Sign out unverified user immediately
+      return;
+    }
+
+    console.log("✅ User signed in with verified email:", user.email);
+
+    // ONLY NOW create/update user profile in Firestore (after email verification)
+    try {
+      await createUserProfile(user);
+      await updateLastLogin(user.uid);
+      console.log("✅ User profile created/updated in database");
+    } catch (dbError) {
+      console.error("❌ Database error:", dbError);
+      // Still allow login even if database update fails
+    }
+
+    // Redirect to dashboard
+    navigate("/dashboard");
+  } catch (error) {
+    console.error("Login error:", error.message);
+    alert("Login failed. Please check your email and password.");
+  }
+};
+
+  return (
+    <div className="login-page">
+      {/* Background Elements */}
+      <div className="login-background">
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+      </div>
+
+      {/* Main Content */}
+      <div className="login-container">
+        {/* Left Side - Welcome Back */}
+        <div className="login-welcome">
+          <div className="welcome-content">
+            <h1>Welcome Back</h1>
+            <p>Continue your wellness journey with Luneverse</p>
+            <div className="welcome-features">
+              <div className="feature-item">
+                <span className="feature-icon">📝</span>
+                <span>Private Journaling</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📊</span>
+                <span>Mood Tracking</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🌸</span>
+                <span>Cycle Insights</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Login Form */}
+        <div className="login-form-section">
+          <div className="form-header">
+            <Link to="/" className="back-to-home">
+              <span className="back-arrow">←</span>
+              Back to Home
+            </Link>
+            <h2>Sign In</h2>
+            <p>Enter your credentials to access your personal sanctuary</p>
+          </div>
+
+          {successMessage && (
+            <div className="success-message">
+              {successMessage}
+            </div>
+          )}
+
+          <form className="login-form" onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="password">Password</label>
+              <div className="password-input">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-options">
+              <label className="remember-me">
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+                Remember me
+              </label>
+              <Link to="/forgot-password" className="forgot-password">
+                Forgot password?
+              </Link>
+            </div>
+
+            <button type="submit" className="login-button">
+              Sign In to Luneverse
+            </button>
+          </form>
+
+          <div className="form-footer">
+            <p>
+              Don't have an account?{" "}
+              <Link to="/signup" className="signup-link">
+                Create one here
+              </Link>
+            </p>
+            <div className="privacy-note">
+              <span className="privacy-icon">🔒</span>
+              Your data is encrypted and completely private
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default LoginPage;
+
+
+loginpage.css:
+/** Professional Luneverse Login Page Styles **/
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CSS Custom Properties - Matching Landing Page */
+:root {
+  /* Primary Colors */
+  --primary-purple: #7133d6;
+  --primary-purple-light: #a17ad6;
+  --primary-purple-dark: #5a2bb3;
+
+  /* Secondary Colors */
+  --secondary-pink: #c82373;
+  --secondary-pink-light: #ffe5f0;
+  --secondary-pink-lighter: #fff7fb;
+
+  /* Neutral Colors */
+  --neutral-white: #ffffff;
+  --neutral-light: #fefefe;
+  --neutral-gray-100: #f9f9f9;
+  --neutral-gray-200: #f3f3f3;
+  --neutral-gray-300: #e5e5e5;
+  --neutral-gray-600: #666666;
+  --neutral-gray-700: #555555;
+  --neutral-gray-800: #444444;
+  --neutral-gray-900: #333333;
+
+  /* Accent Colors */
+  --accent-purple: #8b3a62;
+  --accent-purple-light: #fff0f5;
+
+  /* Typography */
+  --font-primary: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Page Layout */
+.login-page {
+  min-height: 100vh;
+  font-family: var(--font-primary);
+  background: linear-gradient(135deg, var(--secondary-pink-light) 0%, var(--secondary-pink-lighter) 50%, var(--accent-purple-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated Background Elements */
+.login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-element {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.6;
+  animation: float 6s ease-in-out infinite;
+}
+
+.element-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.element-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.element-3 {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 2s;
+}
+
+.element-4 {
+  bottom: 30%;
+  right: 10%;
+  animation-delay: 3s;
+}
+
+.element-5 {
+  top: 50%;
+  left: 5%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Main Container */
+.login-container {
+  display: flex;
+  max-width: 800px;
+  max-height: 90vh;
+  width: 100%;
+  background: var(--neutral-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+/* Welcome Section (Left Side) */
+.login-welcome {
+  flex: 1;
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.login-welcome::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.welcome-content {
+  text-align: center;
+  color: var(--neutral-white);
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-content h1 {
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-xs);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-content > p {
+  font-size: 1rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.welcome-features {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+  width: 100%;
+}
+
+.feature-item {
+  display: flex !important;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.95rem;
+  font-weight: var(--font-weight-medium);
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+/* Form Section (Right Side) */
+.login-form-section {
+  flex: 1;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.back-to-home {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--neutral-gray-600);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-md);
+  transition: color 0.3s ease;
+}
+
+.back-to-home:hover {
+  color: var(--primary-purple);
+}
+
+.back-arrow {
+  font-size: 1.2rem;
+}
+
+.form-header h2 {
+  font-size: 1.8rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--neutral-gray-900);
+  margin-bottom: var(--spacing-xs);
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.form-header p {
+  color: var(--neutral-gray-600);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Form Styles */
+.login-form {
+  margin-bottom: var(--spacing-md);
+}
+
+.input-group {
+  margin-bottom: var(--spacing-sm);
+}
+
+.input-group label {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-gray-800);
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.9rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1rem;
+  border: 2px solid var(--neutral-gray-300);
+  border-radius: var(--radius-md);
+  background: var(--neutral-white);
+  transition: all 0.3s ease;
+  font-family: var(--font-primary);
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px rgba(113, 51, 214, 0.1);
+}
+
+.input-group input::placeholder {
+  color: var(--neutral-gray-600);
+}
+
+/* Password Input with Toggle */
+.password-input {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--neutral-gray-600);
+  transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+  color: var(--primary-purple);
+}
+
+/* Form Options */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.9rem;
+  color: var(--neutral-gray-700);
+  cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.forgot-password {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: var(--primary-purple-dark);
+  text-decoration: underline;
+}
+
+/* Login Button */
+.login-button {
+  width: 100%;
+  padding: var(--spacing-md);
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
+  color: var(--neutral-white);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--primary-purple-dark) 0%, var(--secondary-pink) 100%);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+/* Form Footer */
+.form-footer {
+  text-align: center;
+}
+
+.form-footer p {
+  color: var(--neutral-gray-700);
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.signup-link {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+  color: var(--primary-purple-dark);
+  text-decoration: underline;
+}
+
+.privacy-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: 0.8rem;
+  color: var(--neutral-gray-600);
+  background: var(--neutral-gray-100);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
+}
+
+.privacy-icon {
+  font-size: 1rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .login-page {
+    padding: var(--spacing-sm);
+    min-height: 100vh;
+  }
+
+  .login-container {
+    flex-direction: column;
+    max-width: 400px;
+    max-height: none;
+  }
+
+  .login-welcome {
+    padding: var(--spacing-xl) var(--spacing-lg);
+    order: 2;
+  }
+
+  .welcome-content h1 {
+    font-size: 2rem;
+  }
+
+  .welcome-features {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .feature-item {
+    flex-direction: column;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  .login-form-section {
+    padding: var(--spacing-xl) var(--spacing-lg);
+    order: 1;
+  }
+
+  .form-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .form-options {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+  }
+
+  .floating-element {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: var(--spacing-xs);
+    min-height: 100vh;
+  }
+
+  .login-welcome {
+    padding: var(--spacing-lg);
+  }
+
+  .welcome-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .welcome-content > p {
+    font-size: 1rem;
+  }
+
+  .login-form-section {
+    padding: var(--spacing-lg);
+  }
+
+  .form-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .input-group input {
+    padding: var(--spacing-sm);
+  }
+
+  .login-button {
+    padding: var(--spacing-sm);
+    font-size: 1rem;
+  }
+
+  .floating-element {
+    font-size: 1.2rem;
+  }
+}
+
+/* Loading State (for future use) */
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-button.loading {
+  position: relative;
+  color: transparent;
+}
+
+.login-button.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--neutral-white);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Success Message */
+.success-message {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  color: #065F46;
+  border: 1px solid #10B981;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+signup page:
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import "./Styles/SignUpPage.css";
+import { auth } from "../firebase/config";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signOut
+} from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+
+function SignUpPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    // Enhanced password validation
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (!/(?=.*[0-9])/.test(password)) {
+      setError("Password must contain at least one number.");
+      return;
+    }
+
+    if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) {
+      setError("Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;':\",./<>?).");
+      return;
+    }
+
+    try {
+      // STEP 1: Create user account (this creates Firebase Auth user)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      console.log("🔐 Firebase Auth user created:", user.email);
+      console.log("📧 Email verified status:", user.emailVerified);
+
+      // STEP 2: Send email verification BEFORE allowing any database access
+      try {
+        console.log("📤 Sending verification email to:", user.email);
+
+        await sendEmailVerification(user, {
+          url: `${window.location.origin}/verify-success`,
+          handleCodeInApp: false
+        });
+
+        console.log("✅ Verification email sent successfully");
+
+        // IMPORTANT: Sign out the user immediately after creating account
+        // This prevents them from accessing the app until email is verified
+        await signOut(auth);
+        console.log("🚪 User signed out - must verify email first");
+
+        // Show success message without alert
+        console.log("✅ Account created and verification email sent to:", user.email);
+
+        // Store email for verification tracking
+        localStorage.setItem('pendingVerificationEmail', user.email);
+        navigate("/verify-email");
+
+      } catch (emailError) {
+        console.error("❌ Email verification failed:", emailError);
+
+        // If email verification fails, delete the created user account
+        try {
+          await user.delete();
+          console.log("🗑️ Deleted unverified user account");
+        } catch (deleteError) {
+          console.error("Failed to delete user:", deleteError);
+        }
+
+        setError("Failed to send verification email. Please try again.");
+      }
+
+    } catch (error) {
+      console.error("Signup error:", error);
+      setError("Signup failed: " + error.message);
+    }
+  };
+
+  return (
+    <div className="signup-page">
+      {/* Background Elements */}
+      <div className="signup-background">
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+      </div>
+
+      {/* Main Content */}
+      <div className="signup-container">
+        {/* Left Side - Signup Form */}
+        <div className="signup-form-section">
+          <div className="form-header">
+            <Link to="/" className="back-to-home">
+              <span className="back-arrow">←</span>
+              Back to Home
+            </Link>
+            <h2>Create Account</h2>
+            <p>Join thousands of women taking control of their wellness</p>
+          </div>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          <form className="signup-form" onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="password">Password</label>
+              <div className="password-input">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password (6+ chars, 1 number, 1 special char)"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <div className="password-input">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-agreement">
+              <label className="agreement-checkbox">
+                <input type="checkbox" required />
+                <span className="checkmark"></span>
+                I agree to the <Link to="/terms" className="terms-link">Terms of Service</Link> and <Link to="/privacy" className="privacy-link">Privacy Policy</Link>
+              </label>
+            </div>
+
+            <button type="submit" className="signup-button">
+              Create Your Luneverse Account
+            </button>
+          </form>
+
+          <div className="form-footer">
+            <p>
+              Already have an account?{" "}
+              <Link to="/login" className="login-link">
+                Sign in here
+              </Link>
+            </p>
+            <div className="privacy-note">
+              <span className="privacy-icon">🔒</span>
+              Your data is encrypted and completely private
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right Side - Welcome Message */}
+        <div className="signup-welcome">
+          <div className="welcome-content">
+            <h1>Welcome to Your Wellness Journey</h1>
+            <p>Join thousands of women discovering their inner strength</p>
+            <div className="welcome-features">
+              <div className="feature-item">
+                <span className="feature-icon">🌸</span>
+                <span>Track Your Cycle</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">💭</span>
+                <span>Journal Your Thoughts</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📈</span>
+                <span>Monitor Your Mood</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🌙</span>
+                <span>Find Your Balance</span>
+              </div>
+            </div>
+            <div className="welcome-quote">
+              <p>"Every journey begins with a single step towards self-discovery"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default SignUpPage;
+
+
+signpupage.css:
+/** Professional Luneverse Sign Up Page Styles **/
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CSS Custom Properties - Matching Login Page */
+:root {
+  /* Primary Colors */
+  --primary-purple: #7133d6;
+  --primary-purple-light: #a17ad6;
+  --primary-purple-dark: #5a2bb3;
+
+  /* Secondary Colors */
+  --secondary-pink: #c82373;
+  --secondary-pink-light: #ffe5f0;
+  --secondary-pink-lighter: #fff7fb;
+
+  /* Neutral Colors */
+  --neutral-white: #ffffff;
+  --neutral-light: #fefefe;
+  --neutral-gray-100: #f9f9f9;
+  --neutral-gray-200: #f3f3f3;
+  --neutral-gray-300: #e5e5e5;
+  --neutral-gray-600: #666666;
+  --neutral-gray-700: #555555;
+  --neutral-gray-800: #444444;
+  --neutral-gray-900: #333333;
+
+  /* Accent Colors */
+  --accent-purple: #8b3a62;
+  --accent-purple-light: #fff0f5;
+
+  /* Typography */
+  --font-primary: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Page Layout */
+.signup-page {
+  min-height: 100vh;
+  font-family: var(--font-primary);
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 30%, #f3e8ff 70%, #e0e7ff 100%);
+  background-image: url('/images/wellness-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated Background Elements */
+.signup-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-element {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.6;
+  animation: float 6s ease-in-out infinite;
+}
+
+.element-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.element-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.element-3 {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 2s;
+}
+
+.element-4 {
+  bottom: 30%;
+  right: 10%;
+  animation-delay: 3s;
+}
+
+.element-5 {
+  top: 50%;
+  left: 5%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Main Container */
+.signup-container {
+  display: flex;
+  max-width: 900px;
+  min-height: 600px;
+  max-height: 95vh;
+  width: 100%;
+  background: var(--neutral-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+/* Welcome Section (Right Side) */
+.signup-welcome {
+  flex: 1;
+  background: linear-gradient(135deg, #ec4899 0%, #f97316 50%, #eab308 100%);
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 320px;
+  order: 2;
+}
+
+.signup-welcome::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.welcome-content {
+  text-align: center;
+  color: var(--neutral-white);
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-content h1 {
+  font-size: 1.8rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-xs);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 1.2;
+}
+
+.welcome-content > p {
+  font-size: 0.95rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.welcome-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.feature-icon {
+  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-quote {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.welcome-quote p {
+  font-style: italic;
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+  opacity: 0.95;
+  line-height: 1.4;
+}
+
+/* Form Section (Left Side) */
+.signup-form-section {
+  flex: 1.2;
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  min-width: 0;
+  order: 1;
+  background: var(--neutral-white);
+}
+
+.form-header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.back-to-home {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--neutral-gray-600);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-sm);
+  transition: color 0.3s ease;
+}
+
+.back-to-home:hover {
+  color: var(--primary-purple);
+}
+
+.back-arrow {
+  font-size: 1rem;
+}
+
+.form-header h2 {
+  font-size: 1.6rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--neutral-gray-900);
+  margin-bottom: var(--spacing-xs);
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.form-header p {
+  color: var(--neutral-gray-600);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Error Message */
+.error-message {
+  background: #fee;
+  color: #c53030;
+  padding: 8px var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  margin-bottom: var(--spacing-sm);
+  border: 1px solid #fed7d7;
+  text-align: center;
+}
+
+/* Form Styles */
+.signup-form {
+  margin-bottom: var(--spacing-sm);
+}
+
+.input-group {
+  margin-bottom: var(--spacing-sm);
+}
+
+.input-group label {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-gray-800);
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px var(--spacing-sm);
+  font-size: 0.95rem;
+  border: 2px solid var(--neutral-gray-300);
+  border-radius: var(--radius-md);
+  background: var(--neutral-white);
+  color: var(--neutral-gray-800);
+  transition: all 0.3s ease;
+  font-family: var(--font-primary);
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px rgba(113, 51, 214, 0.1);
+}
+
+.input-group input::placeholder {
+  color: var(--neutral-gray-600);
+}
+
+/* Password Input with Toggle */
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 45px !important; /* Make space for the eye icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--neutral-gray-600);
+  transition: color 0.3s ease;
+  padding: 2px;
+  z-index: 10;
+}
+
+.password-toggle:hover {
+  color: var(--primary-purple);
+}
+
+/* Form Agreement */
+.form-agreement {
+  margin-bottom: var(--spacing-sm);
+}
+
+.agreement-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  font-size: 0.8rem;
+  color: var(--neutral-gray-700);
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.agreement-checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  margin-top: 2px;
+}
+
+.terms-link,
+.privacy-link {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color 0.3s ease;
+}
+
+.terms-link:hover,
+.privacy-link:hover {
+  color: var(--primary-purple-dark);
+  text-decoration: underline;
+}
+
+/* Signup Button */
+.signup-button {
+  width: 100%;
+  padding: 12px var(--spacing-md);
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
+  color: var(--neutral-white);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: var(--spacing-xs);
+}
+
+.signup-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--primary-purple-dark) 0%, var(--secondary-pink) 100%);
+}
+
+.signup-button:active {
+  transform: translateY(0);
+}
+
+/* Form Footer */
+.form-footer {
+  text-align: center;
+  margin-top: var(--spacing-sm);
+}
+
+.form-footer p {
+  color: var(--neutral-gray-700);
+  font-size: 0.85rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.login-link {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: var(--primary-purple-dark);
+  text-decoration: underline;
+}
+
+.privacy-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--neutral-gray-600);
+  background: var(--neutral-gray-100);
+  padding: 8px var(--spacing-sm);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-xs);
+}
+
+.privacy-icon {
+  font-size: 1rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .signup-page {
+    padding: var(--spacing-sm);
+    min-height: 100vh;
+  }
+
+  .signup-container {
+    flex-direction: column;
+    max-width: 400px;
+    max-height: none;
+  }
+
+  .signup-welcome {
+    padding: var(--spacing-xl) var(--spacing-lg);
+    order: 2;
+  }
+
+  .welcome-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .welcome-features {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+
+  .feature-item {
+    justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  .signup-form-section {
+    padding: var(--spacing-xl) var(--spacing-lg);
+    order: 1;
+  }
+
+  .welcome-quote {
+    margin-top: var(--spacing-sm);
+  }
+
+  .welcome-quote p {
+    font-size: 0.8rem;
+  }
+
+  .form-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .floating-element {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-page {
+    padding: var(--spacing-xs);
+    min-height: 100vh;
+  }
+
+  .signup-welcome {
+    padding: var(--spacing-lg);
+  }
+
+  .welcome-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .welcome-content > p {
+    font-size: 1rem;
+  }
+
+  .signup-form-section {
+    padding: var(--spacing-lg);
+  }
+
+  .form-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .input-group input {
+    padding: var(--spacing-sm);
+  }
+
+  .signup-button {
+    padding: var(--spacing-sm);
+    font-size: 1rem;
+  }
+
+  .floating-element {
+    font-size: 1.2rem;
+  }
+
+  .agreement-checkbox {
+    font-size: 0.85rem;
+  }
+}
+
+/* Loading State (for future use) */
+.signup-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.signup-button.loading {
+  position: relative;
+  color: transparent;
+}
+
+.signup-button.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--neutral-white);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
