@@ -1,0 +1,588 @@
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  border: 2px solid var(--neutral-gray-300, #e5e5e5);
+  border-radius: var(--radius-md, 12px);
+  background: white;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.rich-text-editor:focus-within {
+  border-color: var(--primary-purple, #7133d6);
+  box-shadow: 0 0 0 3px rgba(113, 51, 214, 0.1);
+}
+
+/* Toolbar */
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--neutral-gray-200, #f3f3f3);
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  position: relative;
+}
+
+.toolbar-group:not(:last-child)::after {
+  content: '';
+  width: 1px;
+  height: 20px;
+  background: var(--neutral-gray-300, #e5e5e5);
+  margin-left: 8px;
+}
+
+.toolbar-btn {
+  padding: 6px 10px;
+  border: 1px solid var(--neutral-gray-300, #e5e5e5);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral-gray-700, #555555);
+  transition: all 0.2s ease;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-btn:hover {
+  background: var(--primary-purple, #7133d6);
+  color: white;
+  border-color: var(--primary-purple, #7133d6);
+  transform: translateY(-1px);
+}
+
+.toolbar-btn:active {
+  transform: translateY(0);
+}
+
+.toolbar-btn.active {
+  background: var(--primary-purple, #7133d6);
+  color: white;
+  border-color: var(--primary-purple, #7133d6);
+  box-shadow: 0 2px 8px rgba(113, 51, 214, 0.3);
+}
+
+.toolbar-btn.active:hover {
+  background: var(--primary-purple-dark, #5a2bb3);
+  border-color: var(--primary-purple-dark, #5a2bb3);
+}
+
+/* Font Size Select */
+.font-size-select {
+  padding: 6px 8px;
+  border: 1px solid var(--neutral-gray-300, #e5e5e5);
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  color: var(--neutral-gray-700, #555555);
+  cursor: pointer;
+  min-width: 70px;
+}
+
+.font-size-select:focus {
+  outline: none;
+  border-color: var(--primary-purple, #7133d6);
+  box-shadow: 0 0 0 2px rgba(113, 51, 214, 0.1);
+}
+
+/* Color Picker */
+.color-picker-container {
+  position: relative;
+}
+
+.color-btn {
+  font-size: 16px;
+}
+
+.color-palette {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid var(--neutral-gray-300, #e5e5e5);
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  width: 180px;
+  margin-top: 4px;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--neutral-gray-300, #e5e5e5);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  border-color: var(--primary-purple, #7133d6);
+}
+
+/* Emoji Picker */
+.emoji-picker-container {
+  position: relative;
+}
+
+.emoji-btn {
+  font-size: 16px;
+}
+
+.emoji-picker {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid var(--neutral-gray-300, #e5e5e5);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  max-height: 350px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.emoji-search {
+  padding: 12px;
+  border-bottom: 1px solid var(--neutral-gray-200, #f3f3f3);
+  background: var(--neutral-gray-50, #f9f9f9);
+}
+
+.emoji-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--neutral-gray-300, #e5e5e5);
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.emoji-search-input:focus {
+  border-color: var(--primary-purple, #7133d6);
+  box-shadow: 0 0 0 2px rgba(113, 51, 214, 0.1);
+}
+
+.emoji-categories {
+  padding: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.emoji-category {
+  margin-bottom: 16px;
+}
+
+.emoji-category h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neutral-gray-600, #666666);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+
+.emoji-option {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.emoji-option:hover {
+  background: var(--neutral-gray-100, #f9f9f9);
+  transform: scale(1.1);
+}
+
+/* Editor Content */
+.editor-content {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+  font-family: var(--font-primary, 'Inter', sans-serif);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--neutral-gray-800, #444444);
+  outline: none;
+  word-wrap: break-word;
+  scroll-behavior: smooth;
+  /* Ensure proper scrolling to top */
+  scroll-padding-top: 0;
+}
+
+.editor-content:empty::before {
+  content: attr(data-placeholder);
+  color: var(--neutral-gray-500, #999999);
+  font-style: italic;
+}
+
+.editor-content:focus {
+  outline: none;
+}
+
+/* Content Styling */
+.editor-content h1, .editor-content h2, .editor-content h3 {
+  margin: 16px 0 8px 0;
+  color: var(--primary-purple, #7133d6);
+}
+
+.editor-content p {
+  margin: 8px 0;
+}
+
+.editor-content ul, .editor-content ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.editor-content li {
+  margin: 4px 0;
+}
+
+.editor-content a {
+  color: var(--primary-purple, #7133d6);
+  text-decoration: underline;
+}
+
+.editor-content a:hover {
+  color: var(--primary-purple-dark, #5a2bb3);
+}
+
+.editor-content blockquote {
+  border-left: 4px solid var(--primary-purple, #7133d6);
+  margin: 16px 0;
+  padding: 8px 16px;
+  background: var(--neutral-gray-100, #f9f9f9);
+  font-style: italic;
+}
+
+/* Ensure formatting works properly */
+.editor-content i, .editor-content em {
+  font-style: italic !important;
+}
+
+.editor-content b, .editor-content strong {
+  font-weight: bold !important;
+}
+
+.editor-content u {
+  text-decoration: underline !important;
+}
+
+.editor-content s, .editor-content strike {
+  text-decoration: line-through !important;
+}
+
+.editor-content sup {
+  vertical-align: super !important;
+  font-size: smaller !important;
+}
+
+.editor-content sub {
+  vertical-align: sub !important;
+  font-size: smaller !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    padding: 8px;
+    gap: 6px;
+  }
+  
+  .toolbar-btn {
+    padding: 4px 6px;
+    min-width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .font-size-select {
+    min-width: 60px;
+    font-size: 12px;
+  }
+  
+  .emoji-picker {
+    width: 280px;
+    right: -50px;
+  }
+  
+  .emoji-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  
+  .color-palette {
+    width: 150px;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .editor-content {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .toolbar-group {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .toolbar-group::after {
+    display: none;
+  }
+  
+  .emoji-picker {
+    width: 260px;
+    right: -80px;
+  }
+  
+  .emoji-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Dark Mode Styles */
+.rich-text-editor.dark-mode {
+  background: #1a1a1a;
+  border-color: #333333;
+}
+
+.rich-text-editor.dark-mode:focus-within {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+/* Dark Mode Toolbar */
+.dark-mode .editor-toolbar {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+  border-bottom-color: #333333;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.dark-mode .toolbar-btn {
+  background: #333333;
+  border-color: #555555;
+  color: #e5e5e5;
+}
+
+.dark-mode .toolbar-btn:hover {
+  background: #a78bfa;
+  border-color: #a78bfa;
+  color: white;
+}
+
+.dark-mode .toolbar-btn.active {
+  background: #a78bfa;
+  border-color: #a78bfa;
+  color: white;
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.3);
+}
+
+.dark-mode .toolbar-btn.active:hover {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+}
+
+/* Dark Mode Font Size Select */
+.dark-mode .font-size-select {
+  background: #333333;
+  border-color: #555555;
+  color: #e5e5e5;
+}
+
+.dark-mode .font-size-select:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.1);
+}
+
+/* Dark Mode Color Picker */
+.dark-mode .color-palette {
+  background: #2a2a2a;
+  border-color: #555555;
+}
+
+.dark-mode .color-option {
+  border-color: #555555;
+}
+
+.dark-mode .color-option:hover {
+  border-color: #a78bfa;
+}
+
+/* Dark Mode Emoji Picker */
+.dark-mode .emoji-picker {
+  background: #2a2a2a;
+  border-color: #555555;
+}
+
+.dark-mode .emoji-search {
+  background: #1f1f1f;
+  border-bottom-color: #333333;
+}
+
+.dark-mode .emoji-search-input {
+  background: #333333;
+  border-color: #555555;
+  color: #e5e5e5;
+}
+
+.dark-mode .emoji-search-input:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.1);
+}
+
+.dark-mode .emoji-search-input::placeholder {
+  color: #888888;
+}
+
+.dark-mode .emoji-category h4 {
+  color: #b0b0b0;
+}
+
+.dark-mode .emoji-option:hover {
+  background: #333333;
+}
+
+/* Dark Mode Editor Content */
+.dark-mode .editor-content {
+  background: #1a1a1a !important;
+  color: #e5e5e5 !important;
+}
+
+/* Force text color in dark mode */
+.dark-mode .editor-content * {
+  color: #e5e5e5 !important;
+}
+
+/* Override specific inline styles in dark mode */
+.dark-mode .editor-content [style*="color: black"],
+.dark-mode .editor-content [style*="color: #000000"],
+.dark-mode .editor-content [style*="color: #000"],
+.dark-mode .editor-content [style*="color:black"],
+.dark-mode .editor-content [style*="color:#000000"],
+.dark-mode .editor-content [style*="color:#000"] {
+  color: #e5e5e5 !important;
+}
+
+/* Override background colors in dark mode */
+.dark-mode .editor-content [style*="background-color: white"],
+.dark-mode .editor-content [style*="background-color: #ffffff"],
+.dark-mode .editor-content [style*="background-color: #fff"],
+.dark-mode .editor-content [style*="background-color:white"],
+.dark-mode .editor-content [style*="background-color:#ffffff"],
+.dark-mode .editor-content [style*="background-color:#fff"] {
+  background-color: transparent !important;
+}
+
+.dark-mode .editor-content:empty::before {
+  color: #888888;
+}
+
+.dark-mode .editor-content h1,
+.dark-mode .editor-content h2,
+.dark-mode .editor-content h3 {
+  color: #a78bfa;
+}
+
+.dark-mode .editor-content a {
+  color: #a78bfa;
+}
+
+.dark-mode .editor-content a:hover {
+  color: #8b5cf6;
+}
+
+.dark-mode .editor-content blockquote {
+  border-left-color: #a78bfa;
+  background: #2a2a2a;
+  color: #e5e5e5;
+}
+
+/* Dark Mode Scrollbar Styling */
+.dark-mode .emoji-picker::-webkit-scrollbar,
+.dark-mode .editor-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dark-mode .emoji-picker::-webkit-scrollbar-track,
+.dark-mode .editor-content::-webkit-scrollbar-track {
+  background: #333333;
+  border-radius: 3px;
+}
+
+.dark-mode .emoji-picker::-webkit-scrollbar-thumb,
+.dark-mode .editor-content::-webkit-scrollbar-thumb {
+  background: #666666;
+  border-radius: 3px;
+}
+
+.dark-mode .emoji-picker::-webkit-scrollbar-thumb:hover,
+.dark-mode .editor-content::-webkit-scrollbar-thumb:hover {
+  background: #a78bfa;
+}
+
+/* Light Mode Scrollbar Styling */
+.emoji-picker::-webkit-scrollbar,
+.editor-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.emoji-picker::-webkit-scrollbar-track,
+.editor-content::-webkit-scrollbar-track {
+  background: var(--neutral-gray-100, #f9f9f9);
+  border-radius: 3px;
+}
+
+.emoji-picker::-webkit-scrollbar-thumb,
+.editor-content::-webkit-scrollbar-thumb {
+  background: var(--neutral-gray-400, #999999);
+  border-radius: 3px;
+}
+
+.emoji-picker::-webkit-scrollbar-thumb:hover,
+.editor-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-purple, #7133d6);
+}

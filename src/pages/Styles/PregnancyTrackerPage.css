@@ -1,0 +1,856 @@
+.pregnancy-tracker-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(167, 139, 250, 0.06) 50%, rgba(196, 181, 253, 0.08) 100%);
+  font-family: 'Inter', sans-serif;
+  color: #1f2937;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border-radius: 8px;
+  user-select: none;
+}
+
+.day-header {
+  text-align: center;
+  font-weight: 600;
+  color: #fff;
+  padding: 8px 0;
+  font-size: 0.9rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  min-height: 60px;
+  max-height: 60px;
+}
+
+.calendar-day:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.calendar-day.today {
+  background: #7c3aed;
+  color: white;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.calendar-day.has-data {
+  background: #ede9fe;
+  border-radius: 6px;
+}
+
+.calendar-day.has-period-data {
+  background: #fce7f3;
+  border-radius: 6px;
+}
+
+.calendar-day.has-ovulation-data {
+  background: #d8b4fe;
+  border-radius: 6px;
+}
+
+.calendar-day.has-symptoms-only {
+  background: #f3e8ff;
+  border-radius: 6px;
+}
+
+.day-number {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.day-indicators {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+}
+
+.symptoms-indicator, .appointment-indicator, .notes-indicator {
+  font-size: 12px;
+  background: #7133d6;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appointment-indicator {
+  background: #f59e0b;
+}
+
+.symptoms-indicator {
+  background: #ec4899;
+}
+
+.notes-indicator {
+  background: #10b981;
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 40px;
+  margin: 20px auto;
+  max-width: 500px;
+  text-align: center;
+}
+
+.loading-spinner {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  background: #7133d6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 20px;
+}
+
+.retry-btn:hover {
+  background: #5a2a9d;
+}
+
+
+
+.view-btn {
+  background: transparent;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.view-btn.active {
+  background: #7133d6;
+  color: white;
+}
+
+.success-message {
+  background: #10b981;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.success-icon {
+  font-size: 20px;
+}
+
+.pregnancy-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* New date inputs section */
+.pregnancy-dates-section {
+  margin: 20px auto 30px;
+  max-width: 900px;
+}
+
+.date-inputs-container {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.date-input-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pregnancy-date-input {
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: white;
+  color: #1f2937 !important;
+  transition: border-color 0.3s ease;
+}
+
+.pregnancy-date-input:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* Enhanced calendar icon visibility */
+.pregnancy-date-input::-webkit-calendar-picker-indicator {
+  background-color: #6b7280;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 1;
+  padding: 2px;
+}
+
+.pregnancy-date-input::-webkit-calendar-picker-indicator:hover {
+  background-color: #4b5563;
+}
+
+/* Ensure all date text is visible */
+.pregnancy-date-input::-webkit-datetime-edit,
+.pregnancy-date-input::-webkit-datetime-edit-text,
+.pregnancy-date-input::-webkit-datetime-edit-month-field,
+.pregnancy-date-input::-webkit-datetime-edit-day-field,
+.pregnancy-date-input::-webkit-datetime-edit-year-field {
+  color: #1f2937 !important;
+}
+
+.pregnancy-overview {
+  margin-bottom: 15px;
+}
+
+.overview-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.overview-card h3 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.pregnancy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pregnancy-week {
+  font-size: 24px;
+  font-weight: 700;
+  color: #7133d6;
+}
+
+.pregnancy-trimester {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+
+
+.next-appointment {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointment-date {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.appointment-desc {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.calendar-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.nav-btn {
+  background: #7133d6;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: #5a2a9d;
+  transform: scale(1.05);
+}
+
+.current-month {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.calendar-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.day-header {
+  text-align: center;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 12px 0;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  min-height: 60px;
+  max-height: 60px;
+}
+
+.calendar-day:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.calendar-day.today {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.calendar-day.has-data {
+  background: #e0e7ff;
+  border-color: #7133d6;
+}
+
+.calendar-day.has-appointment-data {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.calendar-day.has-symptoms-data {
+  background: #fce7f3;
+  border-color: #ec4899;
+}
+
+.calendar-day.has-notes-data {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+.calendar-day.future-date {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.calendar-day.future-date:hover {
+  background: #f3f4f6;
+  border-color: transparent;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  cursor: default;
+}
+
+.day-number {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.day-indicators {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+}
+
+.symptoms-indicator, .appointment-indicator, .notes-indicator {
+  font-size: 12px;
+  background: #7133d6;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appointment-indicator {
+  background: #f59e0b;
+}
+
+.symptoms-indicator {
+  background: #ec4899;
+}
+
+.notes-indicator {
+  background: #10b981;
+}
+
+.calendar-legend {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-legend h3 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.legend-icon {
+  font-size: 16px;
+}
+
+.insights-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.insight-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.insight-card h3 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.growth-info p {
+  margin: 8px 0;
+  color: #4b5563;
+}
+
+.developments ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.developments li {
+  margin: 4px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.common-symptoms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.common-symptoms span {
+  background: #e0e7ff;
+  color: #7133d6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.advice-list p {
+  margin: 8px 0;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.symptom-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.symptoms-section h4,
+.notes-section h4,
+.appointments-section h4 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.symptoms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.symptom-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.symptom-btn:hover {
+  border-color: #7133d6;
+  background: #f9f7ff;
+}
+
+.symptom-btn.selected {
+  border-color: #7133d6;
+  background: #f3f0ff;
+}
+
+.symptom-icon {
+  font-size: 24px;
+}
+
+.symptom-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.notes-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.notes-input:focus {
+  outline: none;
+  border-color: #7133d6;
+}
+
+.appointment-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.appointment-date,
+.appointment-desc {
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.appointment-desc {
+  flex: 1;
+}
+
+.remove-appointment {
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-appointment:hover {
+  background: #dc2626;
+}
+
+.add-appointment-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+.add-appointment-btn:hover {
+  background: #059669;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+.save-btn {
+  background: #7133d6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+  background: #5a2a9d;
+}
+
+@media (max-width: 768px) {
+  .pregnancy-tracker-page {
+    padding: 10px;
+  }
+
+  .pregnancy-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-navigation {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .current-month {
+    font-size: 20px;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .symptoms-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .modal-content {
+    padding: 16px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}
