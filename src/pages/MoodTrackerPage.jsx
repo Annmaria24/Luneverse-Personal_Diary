@@ -10,8 +10,8 @@ import {
   deleteMoodEntry,
   hasTodayMoodEntry
 } from "../services/moodService";
-import ProfileDropdown from '../components/ProfileDropdown';
 import Navbar from '../components/Navbar';
+import DonutChart from '../components/charts/DonutChart';
 
 
 function MoodTrackerPage() {
@@ -190,7 +190,7 @@ function MoodTrackerPage() {
 
   return (
     <div className="mood-tracker-page">
-      <Navbar viewToggleProps={{viewMode, setViewMode}} />
+      <Navbar />
       {/* View Toggle moved to navbar */}
 
       <div className="mood-container">
@@ -202,6 +202,13 @@ function MoodTrackerPage() {
             <button onClick={() => setError('')} className="dismiss-error">×</button>
           </div>
         )}
+        {/* View Toggle (moved under navbar) */}
+        <div className="view-toggle" style={{margin:'12px 0', display:'inline-flex', background:'#f1f5f9', padding:'4px', borderRadius:'9999px', gap:'4px'}}>
+          <button onClick={() => setViewMode('today')} className={`view-btn ${viewMode==='today'?'active':''}`}>Today</button>
+          <button onClick={() => setViewMode('week')} className={`view-btn ${viewMode==='week'?'active':''}`}>Week</button>
+          <button onClick={() => setViewMode('month')} className={`view-btn ${viewMode==='month'?'active':''}`}>Month</button>
+        </div>
+
         {/* Stats Cards */}
         <div className="stats-grid">
           <div className="stat-card">
@@ -352,27 +359,44 @@ function MoodTrackerPage() {
           <h2>Insights</h2>
           <div className="insights-grid">
             <div className="insight-card">
-              <h3>Most Common Mood</h3>
-              <div className="insight-content">
-                <span className="insight-emoji">
-                  {stats.mostCommonMood ? 
-                    moods.find(m => m.name === stats.mostCommonMood)?.emoji || '😊' : 
-                    '📊'
-                  }
-                </span>
-                <span>{stats.mostCommonMood || 'No data yet'}</span>
-              </div>
+              <h3>Mood Distribution</h3>
+              <DonutChart
+                data={Object.entries(stats.moodDistribution || {}).map(([label, pct]) => ({
+                  label,
+                  value: parseFloat(pct),
+                  color: (moods.find(m => m.name === label) || {}).color || '#8b5cf6'
+                }))}
+                innerRadiusPct={62}
+                centerLabel={`n=${getTotalEntries()}`}
+              />
             </div>
             <div className="insight-card">
               <h3>Weekly Trend</h3>
-              <div className="insight-content">
-                <span className="insight-emoji">
-                  {stats.weeklyTrend > 0 ? '📈' : stats.weeklyTrend < 0 ? '📉' : '➡️'}
-                </span>
-                <span>
-                  {stats.weeklyTrend > 0 ? '+' : ''}{stats.weeklyTrend || 0}% this period
-                </span>
-              </div>
+              <svg className="insights-chart" viewBox="0 0 300 180" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="moodLine" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
+                  </linearGradient>
+                </defs>
+                {(() => {
+                  const points = (stats.weeklySeries || []).map((v, i) => {
+                    const x = (i / Math.max(1,(stats.weeklySeries.length - 1))) * 300;
+                    const y = 160 - (v / 5) * 140;
+                    return `${x},${y}`;
+                  }).join(' ');
+                  return (
+                    <>
+                      <polyline points={points} fill="none" stroke="url(#moodLine)" strokeWidth="3" />
+                      {(stats.weeklySeries || []).map((v, i) => {
+                        const x = (i / Math.max(1,(stats.weeklySeries.length - 1))) * 300;
+                        const y = 160 - (v / 5) * 140;
+                        return <circle key={i} cx={x} cy={y} r="3" fill="#8b5cf6" />;
+                      })}
+                    </>
+                  );
+                })()}
+              </svg>
             </div>
             <div className="insight-card">
               <h3>Mood Range</h3>

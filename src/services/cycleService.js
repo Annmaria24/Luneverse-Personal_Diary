@@ -205,6 +205,47 @@ export const getCycleStats = async (userId) => {
   }
 };
 
+// Build recent cycles timeline data for charts
+export const getRecentCycles = async (userId, count = 6) => {
+  const data = await getCycleData(userId);
+  const entries = Object.values(data)
+    .filter(e => e.periodStatus && ["start","ongoing","end"].includes(e.periodStatus))
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  // Find starts
+  const starts = entries.filter(e => e.periodStatus === 'start');
+  const cycles = [];
+  for (let i = 0; i < starts.length; i++) {
+    const start = starts[i];
+    const nextStart = starts[i+1];
+    const endDate = nextStart ? new Date(nextStart.date) : new Date(start.date);
+    const startDate = new Date(start.date);
+    const cycleLength = Math.max(1, Math.floor((endDate - startDate) / (1000*60*60*24)));
+    // period length: count entries from start until nextStart that are period type
+    const periodDays = entries.filter(e => {
+      const d = new Date(e.date);
+      return d >= startDate && (!nextStart || d < new Date(nextStart.date));
+    }).length;
+    // flow avg 1..3 based on flow field
+    const flowMap = { light:1, medium:2, heavy:3 };
+    const flows = entries
+      .filter(e => {
+        const d = new Date(e.date);
+        return d >= startDate && (!nextStart || d < new Date(nextStart.date));
+      })
+      .map(e => flowMap[e.flow] || 0)
+      .filter(v => v>0);
+    const flowAvg = flows.length ? (flows.reduce((a,b)=>a+b,0)/flows.length) : 0;
+    cycles.push({
+      label: start.date.slice(5),
+      cycleLength,
+      periodLength: periodDays,
+      flowAvg: parseFloat(flowAvg.toFixed(2))
+    });
+  }
+  return cycles.slice(-count);
+};
+
 // Get most common symptoms
 export const getCommonSymptoms = async (userId) => {
   try {

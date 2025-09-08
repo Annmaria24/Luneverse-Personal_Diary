@@ -75,62 +75,9 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
           </div>
         )}
 
-        {location.pathname === '/mood-tracker' && viewToggleProps && (
-          <div className="navbar-view-toggle" style={{ marginLeft: '2rem' }}>
-            <button
-              onClick={() => viewToggleProps.setViewMode('today')}
-              className={`view-btn ${viewToggleProps.viewMode === 'today' ? 'active' : ''}`}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => viewToggleProps.setViewMode('week')}
-              className={`view-btn ${viewToggleProps.viewMode === 'week' ? 'active' : ''}`}
-            >
-              Week
-            </button>
-            <button
-              onClick={() => viewToggleProps.setViewMode('month')}
-              className={`view-btn ${viewToggleProps.viewMode === 'month' ? 'active' : ''}`}
-            >
-              Month
-            </button>
-          </div>
-        )}
+        {/* Per-page controls removed from Navbar to keep it consistent */}
 
-        {location.pathname === '/cycle-tracker' && viewToggleProps && (
-          <div className="navbar-view-toggle" style={{ marginLeft: '2rem' }}>
-            <button
-              onClick={() => viewToggleProps.setViewMode('calendar')}
-              className={`view-btn ${viewToggleProps.viewMode === 'calendar' ? 'active' : ''}`}
-            >
-              Calendar
-            </button>
-            <button
-              onClick={() => viewToggleProps.setViewMode('insights')}
-              className={`view-btn ${viewToggleProps.viewMode === 'insights' ? 'active' : ''}`}
-            >
-              Insights
-            </button>
-          </div>
-        )}
 
-        {location.pathname === '/pregnancy-tracker' && viewToggleProps && (
-          <div className="navbar-view-toggle" style={{ marginLeft: '2rem' }}>
-            <button
-              onClick={() => viewToggleProps.setViewMode('calendar')}
-              className={`view-btn ${viewToggleProps.viewMode === 'calendar' ? 'active' : ''}`}
-            >
-              Calendar
-            </button>
-            <button
-              onClick={() => viewToggleProps.setViewMode('insights')}
-              className={`view-btn ${viewToggleProps.viewMode === 'insights' ? 'active' : ''}`}
-            >
-              Insights
-            </button>
-          </div>
-        )}
 
         {location.pathname === '/pregnancy-tracker' && viewToggleProps && viewToggleProps.pregnancyInfo && (
           <div className="navbar-pregnancy-info" style={{ marginLeft: '2rem' }}>

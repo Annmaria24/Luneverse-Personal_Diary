@@ -9,7 +9,9 @@ import {
   getCycleStats,
   getCommonSymptoms,
   deleteCycleEntry,
+  getRecentCycles,
 } from "../services/cycleService";
+import LineBarTimeline from '../components/charts/LineBarTimeline';
 
 
 import ProfileDropdown from '../components/ProfileDropdown';
@@ -39,6 +41,7 @@ function CycleTrackerPage() {
     currentPhase: 'Follicular'
   });
   const [commonSymptoms, setCommonSymptoms] = useState([]);
+  const [recentCycles, setRecentCycles] = useState([]);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   // Disable global auto-backfill by default to avoid unintended mass updates
@@ -158,6 +161,8 @@ function CycleTrackerPage() {
       // Load common symptoms
       const symptoms = await getCommonSymptoms(currentUser.uid);
       setCommonSymptoms(symptoms);
+      const timeline = await getRecentCycles(currentUser.uid, 6);
+      setRecentCycles(timeline);
       
     } catch (error) {
       console.error("Error loading cycle data:", error);
@@ -499,8 +504,14 @@ function CycleTrackerPage() {
   return (
     <>
       {/* Removed extra header to integrate with Navbar */}
-      <Navbar viewToggleProps={{ viewMode, setViewMode }} />
+      <Navbar />
       <div className="cycle-tracker-page">
+        {/* View Toggle (moved under navbar) */}
+        <div className="view-toggle" style={{margin:'12px 0', display:'inline-flex', background:'#f1f5f9', padding:'4px', borderRadius:'9999px', gap:'4px'}}>
+          <button onClick={() => setViewMode('calendar')} className={`view-btn ${viewMode==='calendar'?'active':''}`}>Calendar</button>
+          <button onClick={() => setViewMode('insights')} className={`view-btn ${viewMode==='insights'?'active':''}`}>Insights</button>
+        </div>
+
         {/* Header */}
         {/* Removed extra header to integrate with Navbar */}
         {/* <header className="cycle-header">
@@ -593,11 +604,12 @@ function CycleTrackerPage() {
             </div>
 
             {/* Month actions */}
-            <div className="month-actions" style={{ display: 'flex', justifyContent: 'flex-end', margin: '8px 0' }}>
+            {/* Removed Clear records button as per user request */}
+            {/* <div className="month-actions" style={{ display: 'flex', justifyContent: 'flex-end', margin: '8px 0' }}>
               <button onClick={() => setShowDeleteModal(true)} className="danger-btn" title="Delete all tracking entries for this month">
                 Clear records
               </button>
-            </div>
+            </div> */}
 
             {/* Calendar */}
             <div className="calendar-section">
@@ -653,6 +665,14 @@ function CycleTrackerPage() {
                 </div>
               </div>
             </div>
+            {/* Month selector for previous months */}
+            <div style={{display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'8px'}}>
+              <input type="month" onChange={(e)=>{
+                const [y,m] = e.target.value.split('-');
+                const d = new Date(parseInt(y), parseInt(m)-1, 1);
+                setCurrentDate(d);
+              }} />
+            </div>
           </>
         ) : (
           /* Insights View */
@@ -662,6 +682,10 @@ function CycleTrackerPage() {
                 <h3>Cycle Regularity</h3>
                 <div className="regularity-score">85%</div>
                 <p>Your cycles are fairly regular</p>
+              </div>
+              <div className="insight-card">
+                <h3>Cycle History</h3>
+                <LineBarTimeline data={recentCycles} height={160} />
               </div>
               <div className="insight-card">
                 <h3>Common Symptoms</h3>
@@ -674,6 +698,28 @@ function CycleTrackerPage() {
                     <span>No symptoms tracked yet</span>
                   )}
                 </div>
+                {/* Simple bar chart for symptom frequency */}
+                <svg viewBox="0 0 320 140" style={{ width: '100%', height: 140 }} preserveAspectRatio="none">
+                  {(() => {
+                    const items = commonSymptoms.slice(0, 6);
+                    const max = Math.max(1, ...items.map(i => i.count || 1));
+                    return items.map((i, idx) => {
+                      const barWidth = 40;
+                      const gap = 10;
+                      const x = idx * (barWidth + gap) + 10;
+                      const h = ((i.count || 1) / max) * 100 + 10;
+                      const y = 130 - h;
+                      return (
+                        <g key={idx}>
+                          <rect x={x} y={y} width={barWidth} height={h} rx="6" fill="#8b5cf6" opacity="0.85" />
+                          <text x={x + barWidth / 2} y={135} textAnchor="middle" fontSize="10" fill="#475569">
+                            {formatSymptomName(i.symptom).split(' ')[0]}
+                          </text>
+                        </g>
+                      );
+                    });
+                  })()}
+                </svg>
               </div>
               <div className="insight-card">
                 <h3>Cycle Statistics</h3>
@@ -691,7 +737,8 @@ function CycleTrackerPage() {
       </div>
 
       {/* Delete Month Confirmation Modal */}
-      {showDeleteModal && (
+      {/* Removed Clear records confirmation modal as per user request */}
+      {/* {showDeleteModal && (
         <div className="modal-overlay" onClick={() => !deleteModalBusy && setShowDeleteModal(false)}>
           <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -721,7 +768,7 @@ function CycleTrackerPage() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Symptom Modal */}
       {showSymptomModal && (

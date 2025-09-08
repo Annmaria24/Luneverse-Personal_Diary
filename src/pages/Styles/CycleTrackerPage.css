@@ -288,6 +288,11 @@
   transform: scale(1.05);
 }
 
+.nav-btn:focus-visible {
+  outline: 2px solid rgba(124, 58, 237, 0.45);
+  outline-offset: 3px;
+}
+
 .current-month {
   margin: 0;
   font-size: 1.3rem;
@@ -319,46 +324,49 @@
 .calendar-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
+  gap: 6px;
   margin-bottom: var(--spacing-sm);
-  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-pink) 100%);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  padding: 8px;
 }
 
 .day-header {
   padding: var(--spacing-sm);
   text-align: center;
   font-weight: var(--font-weight-bold);
-  color: var(--neutral-white);
+  color: var(--neutral-gray-900);
   font-size: 0.95rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  color: white;
+  border-radius: 8px;
 }
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0;
-  background: var(--neutral-white);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .calendar-day {
-  background: white;
-  border-radius: 8px;
-  padding: 4px 6px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 6px;
   text-align: center;
   cursor: pointer;
   user-select: none;
-  min-height: 40px;
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  border: 1px solid #e5e7eb;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  border: 1px solid rgba(15,23,42,0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.calendar-day:focus-visible {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.18);
 }
 
 .calendar-day:hover {
@@ -368,8 +376,8 @@
 
 .calendar-day.empty {
   cursor: default;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: transparent;
+  border: none;
 }
 
 .calendar-day.empty:hover {
@@ -461,6 +469,35 @@
   color: inherit;
   flex-shrink: 0;
 }
+
+/* Period status button redesign */
+.period-btn-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.period-btn-new {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  height: 56px;
+  border: 1.5px solid rgba(15,23,42,0.12);
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.period-btn-new:hover { box-shadow: 0 6px 16px rgba(124,58,237,0.12); }
+.period-btn-new.selected {
+  border-color: rgba(124,58,237,0.45);
+  box-shadow: 0 8px 20px rgba(124,58,237,0.16);
+}
+
+.period-icon-new { font-size: 1.1rem; }
+.period-name-new { font-weight: var(--font-weight-medium); color: var(--neutral-gray-900); }
 
 .day-indicators {
   display: flex;

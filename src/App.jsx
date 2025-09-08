@@ -16,6 +16,7 @@ import MoodTrackerPage from "./pages/MoodTrackerPage";
 import CycleTrackerPage from "./pages/CycleTrackerPage";
 import PregnancyTrackerPage from "./pages/PregnancyTrackerPage";
 import SettingsPage from "./pages/SettingsPage";
+import Insights from "./pages/Insights";
 
 function App() {
   return (
@@ -94,6 +95,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/export"
+            element={
+              <ProtectedRoute>
+                <Insights />
+              </ProtectedRoute>
+            }
+          />
+
 
         </Routes>
       </Router>

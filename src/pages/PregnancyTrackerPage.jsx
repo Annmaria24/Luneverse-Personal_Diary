@@ -40,6 +40,7 @@ function PregnancyTrackerPage() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [dueDate, setDueDate] = useState('');
   const [conceptionDate, setConceptionDate] = useState('');
+  const [showRemoveConceptionModal, setShowRemoveConceptionModal] = useState(false);
 
   // Calculate due date from conception date (conception + 266 days)
   const calculateDueDateFromConception = (conceptionDateStr) => {
@@ -207,11 +208,11 @@ function PregnancyTrackerPage() {
 
   const handleSaveData = async () => {
     try {
-      const week = dueDate ? calculatePregnancyWeek(dueDate) : 1;
-      const trimester = getTrimester(week);
-
-      // If conceptionDate is set, calculate week based on it instead
-      const effectiveWeek = conceptionDate ? calculatePregnancyWeek(conceptionDate, true) : week;
+      // Prefer conception date for week calculation; fallback to due date if not set
+      const effectiveWeek = conceptionDate
+        ? calculatePregnancyWeek(conceptionDate, true)
+        : (dueDate ? calculatePregnancyWeek(dueDate, false) : 1);
+      const trimester = getTrimester(effectiveWeek);
 
       const entryData = {
         pregnancyWeek: effectiveWeek,
@@ -219,7 +220,7 @@ function PregnancyTrackerPage() {
         symptoms: selectedSymptoms,
         notes: notes,
         doctorAppointments: doctorAppointments,
-        babyGrowthInfo: getBabyGrowthInfo(week).size
+        babyGrowthInfo: getBabyGrowthInfo(effectiveWeek).size
       };
 
       await savePregnancyEntry(currentUser.uid, selectedDate, entryData);
@@ -362,9 +363,12 @@ function PregnancyTrackerPage() {
     return days;
   };
 
-  const currentWeek = pregnancyStats.currentWeek;
-  const babyInfo = getBabyGrowthInfo(currentWeek);
-  const advice = getPregnancyAdvice(currentWeek, pregnancyStats.commonSymptoms.map(s => s.symptom));
+  // Compute header week/trimester from conception (preferred) or due date, fallback to stats
+  const headerWeek = conceptionDate
+    ? calculatePregnancyWeek(conceptionDate, true)
+    : (dueDate ? calculatePregnancyWeek(dueDate, false) : pregnancyStats.currentWeek);
+  const babyInfo = getBabyGrowthInfo(headerWeek);
+  const advice = getPregnancyAdvice(headerWeek, pregnancyStats.commonSymptoms.map(s => s.symptom));
 
   if (loading) {
     return (
@@ -393,16 +397,11 @@ function PregnancyTrackerPage() {
 
   return (
     <div className="pregnancy-tracker-page">
-      <Navbar 
-        viewToggleProps={{
-          viewMode,
-          setViewMode,
-          pregnancyInfo: {
-            currentWeek,
-            trimester: pregnancyStats.currentTrimester
-          }
-        }}
-      />
+      <Navbar />
+      <div style={{margin:'12px 0', display:'inline-flex', background:'#f1f5f9', padding:'4px', borderRadius:'9999px', gap:'4px'}}>
+        <button onClick={() => setViewMode('calendar')} className={`view-btn ${viewMode==='calendar'?'active':''}`}>Calendar</button>
+        <button onClick={() => setViewMode('insights')} className={`view-btn ${viewMode==='insights'?'active':''}`}>Insights</button>
+      </div>
 
       <div className="pregnancy-dates-section">
         <div className="date-inputs-container">
@@ -415,7 +414,7 @@ function PregnancyTrackerPage() {
               className="pregnancy-date-input"
             />
           </div>
-          
+
           <div className="date-input-group">
             <label>Due Date</label>
             <input
@@ -426,7 +425,50 @@ function PregnancyTrackerPage() {
             />
           </div>
         </div>
+
+        {conceptionDate && (
+          <div className="remove-conception-container">
+            <button
+              className="remove-conception-btn"
+              onClick={() => setShowRemoveConceptionModal(true)}
+            >
+              Remove Conception Details
+            </button>
+          </div>
+        )}
       </div>
+
+      {showRemoveConceptionModal && (
+        <div className="modal-overlay" onClick={() => setShowRemoveConceptionModal(false)}>
+          <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Confirm Remove Conception Details</h3>
+              <button onClick={() => setShowRemoveConceptionModal(false)} className="close-btn">×</button>
+            </div>
+            <div className="modal-content">
+              <p>Are you sure you want to remove conception and due date details? This action cannot be undone.</p>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowRemoveConceptionModal(false)} className="cancel-btn">Cancel</button>
+              <button
+                onClick={async () => {
+                  setShowRemoveConceptionModal(false);
+                  setConceptionDate('');
+                  setDueDate('');
+                  try {
+                    await saveUserSettings(currentUser.uid, { conceptionDate: '', dueDate: '' });
+                  } catch (error) {
+                    console.error("Failed to remove conception details:", error);
+                  }
+                }}
+                className="delete-btn"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {successMessage && (
         <div className="success-message">
@@ -558,14 +600,47 @@ function PregnancyTrackerPage() {
                 <h4>Symptoms</h4>
                 <div className="symptoms-grid">
                   {pregnancySymptoms.map((symptom) => (
+              <button
+                key={symptom.id}
+                onClick={() => toggleSymptom(symptom.id)}
+                className={`symptom-btn ${selectedSymptoms.includes(symptom.id) ? 'selected' : ''}`}
+              >
+                <span className="symptom-icon">{symptom.icon}</span>
+                <span className="symptom-name">{symptom.name}</span>
+              </button>
+            ))}
+
+            {/* Assuming flow content buttons here */}
+            {flowContents && flowContents.length > 0 && (
+              <>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                  {flowContents.slice(0, 2).map(flow => (
                     <button
-                      key={symptom.id}
-                      onClick={() => toggleSymptom(symptom.id)}
-                      className={`symptom-btn ${selectedSymptoms.includes(symptom.id) ? 'selected' : ''}`}
+                      key={flow.id}
+                      onClick={() => toggleFlow(flow.id)}
+                      className={`flow-btn ${selectedFlows.includes(flow.id) ? 'selected' : ''}`}
+                      style={{ flex: 1, maxWidth: '48%' }}
                     >
-                      <span className="symptom-icon">{symptom.icon}</span>
-                      <span className="symptom-name">{symptom.name}</span>
+                      <span className="flow-icon">{flow.icon}</span>
+                      <span className="flow-name">{flow.name}</span>
                     </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  {flowContents.slice(2).map(flow => (
+                    <button
+                      key={flow.id}
+                      onClick={() => toggleFlow(flow.id)}
+                      className={`flow-btn ${selectedFlows.includes(flow.id) ? 'selected' : ''}`}
+                      style={{ flex: 1, maxWidth: '48%' }}
+                    >
+                      <span className="flow-icon">{flow.icon}</span>
+                      <span className="flow-name">{flow.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
                   ))}
                 </div>
               </div>

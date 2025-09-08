@@ -5,6 +5,45 @@
   color: #1f2937;
 }
 
+.flow-btn {
+  background: var(--neutral-gray-100);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  color: var(--neutral-gray-700);
+  justify-content: flex-start;
+  text-align: left;
+  width: 48%;
+  margin-bottom: var(--spacing-sm);
+  box-sizing: border-box;
+}
+
+.flow-btn:hover {
+  background: var(--secondary-pink-lighter);
+  transform: translateY(-2px);
+}
+
+.flow-btn.selected {
+  border-color: var(--flow-color, var(--primary-purple));
+  background: var(--secondary-pink-lighter);
+  transform: translateY(-2px);
+}
+
+.flow-icon {
+  font-size: 1.2rem;
+}
+
+.flow-name {
+  font-size: 0.85rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-gray-700);
+}
+
 .calendar-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -660,15 +699,17 @@
 .symptom-btn {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px;
-  border: 2px solid #e5e7eb;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 24px;
+  border: 1px solid #d1d5db;
   border-radius: 12px;
-  background: white;
+  background: #f9fafb;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-align: center;
+  text-align: left;
+  font-size: 16px;
+  user-select: auto;
 }
 
 .symptom-btn:hover {

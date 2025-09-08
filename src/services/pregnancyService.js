@@ -208,16 +208,28 @@ export const getPregnancyAdvice = (week, symptoms = []) => {
   return advice;
 };
 
-// Calculate pregnancy week from due date
-export const calculatePregnancyWeek = (dueDate) => {
+// Calculate pregnancy week
+// If isFromConception is true, dateArg is a conception date; otherwise it's a due date
+export const calculatePregnancyWeek = (dateArg, isFromConception = false) => {
+  if (!dateArg) return 0;
   const today = new Date();
-  const due = new Date(dueDate);
-  const diffTime = due - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const totalPregnancyDays = 280; // 40 weeks
-  const daysElapsed = totalPregnancyDays - diffDays;
-  const week = Math.max(1, Math.min(40, Math.ceil(daysElapsed / 7)));
-  return week;
+  const reference = new Date(dateArg);
+  let week = 0;
+
+  if (isFromConception) {
+    // Count strictly from conception day (Day 1..7 => Week 1)
+    const elapsedDays = Math.max(0, Math.floor((today - reference) / (1000 * 60 * 60 * 24))) + 1;
+    week = Math.ceil(elapsedDays / 7);
+    if (week < 1) week = 0; // Early stage before week 1
+  } else {
+    // From due date – back-calculate weeks elapsed out of 280 days
+    const diffDays = Math.ceil((reference - today) / (1000 * 60 * 60 * 24));
+    const totalPregnancyDays = 280; // 40 weeks
+    const daysElapsed = totalPregnancyDays - diffDays;
+    week = Math.ceil(Math.max(0, daysElapsed) / 7);
+  }
+
+  return Math.max(0, Math.min(40, week));
 };
 
 // Get trimester from week

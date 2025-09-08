@@ -247,11 +247,18 @@ function Dashboard() {
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon">🌸</div>
+              <div className="stat-icon">{pregnancyTrackingEnabled ? '🤰' : '🌸'}</div>
               <div className="stat-content">
-                <h3>Cycle Insights</h3>
-                <p className="stat-number">{cycleStats.totalCycles > 0 ? cycleStats.currentPhase : ''}</p>
-                <span className="stat-label">Current phase</span>
+                <h3>{pregnancyTrackingEnabled ? 'Pregnancy Progress' : 'Cycle Insights'}</h3>
+                <p className="stat-number">
+                  {pregnancyTrackingEnabled
+                    ? (pregnancyStats.currentWeek > 0 ? `Week ${pregnancyStats.currentWeek}` : 'Early Stage')
+                    : (cycleStats.totalCycles > 0 ? cycleStats.currentPhase : '')
+                  }
+                </p>
+                <span className="stat-label">
+                  {pregnancyTrackingEnabled ? 'Current week' : 'Current phase'}
+                </span>
               </div>
             </div>
 
@@ -305,6 +312,43 @@ function Dashboard() {
               </button>
             </div>
 
+          {pregnancyTrackingEnabled ? (
+            <div className="feature-card pregnancy-card">
+              <div className="feature-header">
+                <div className="feature-icon">🤰</div>
+                <h3>Pregnancy Tracker</h3>
+              </div>
+              <p>Track your pregnancy journey with detailed insights and weekly updates.</p>
+              {pregnancyStats.currentWeek > 0 ? (
+                <>
+                  <div className="pregnancy-week-info">Week {pregnancyStats.currentWeek}</div>
+                  <div className="pregnancy-trimester-info">Trimester {pregnancyStats.currentTrimester}</div>
+                  <div className="pregnancy-progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${(pregnancyStats.currentWeek / 40) * 100}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="pregnancy-week-info">Early Stage</div>
+              )}
+              <button
+                className={`feature-button ${loadingStates.pregnancy ? 'loading' : ''}`}
+                onClick={() => handleNavigateWithLoading('/pregnancy-tracker', 'pregnancy')}
+                disabled={loadingStates.pregnancy}
+              >
+                {loadingStates.pregnancy ? (
+                  <>
+                    <span className="loading-spinner">⏳</span>
+                    Loading...
+                  </>
+                ) : (
+                  'Track Pregnancy'
+                )}
+              </button>
+            </div>
+          ) : (
             <div className="feature-card cycle-card">
               <div className="feature-header">
                 <div className="feature-icon">🌸</div>
@@ -326,32 +370,13 @@ function Dashboard() {
                 )}
               </button>
             </div>
+          )}
 
           </div>
         </section>
 
         {/* Pregnancy Tracker - Only show if enabled */}
-        {pregnancyTrackingEnabled && (
-          <section className="features-section">
-            <div className="feature-card pregnancy-feature">
-              <div className="feature-icon">🤰</div>
-              <div className="feature-content">
-                <h3>Pregnancy Tracker</h3>
-                <p>Track your pregnancy journey</p>
-                {pregnancyStats.currentWeek > 0 && (
-                  <div className="pregnancy-week-info">Week {pregnancyStats.currentWeek}</div>
-                )}
-              </div>
-              <button
-                className={`feature-btn ${loadingStates.pregnancy ? 'loading' : ''}`}
-                onClick={() => handleNavigateWithLoading('/pregnancy-tracker', 'pregnancy')}
-                disabled={loadingStates.pregnancy}
-              >
-                {loadingStates.pregnancy ? '⏳' : '→'}
-              </button>
-            </div>
-          </section>
-        )}
+        {/* Removed separate pregnancy tracker card section as it is now conditionally rendered inside features grid */}
 
         {/* Achievements */}
         <section className="activity-section">

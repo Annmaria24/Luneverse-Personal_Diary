@@ -75,6 +75,17 @@ const ProfileDropdown = () => {
           <div className="dropdown-divider"></div>
           <button
             onClick={() => {
+              navigate('/export');
+              setIsDropdownOpen(false);
+            }}
+            className="dropdown-item"
+          >
+            <span className="dropdown-icon">⬇️</span>
+            Export Data
+          </button>
+          <div className="dropdown-divider"></div>
+          <button
+            onClick={() => {
               handleLogout();
               setIsDropdownOpen(false);
             }}
