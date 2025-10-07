@@ -62,8 +62,73 @@
 /* Page Layout */
 .cycle-tracker-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 30%, #f3e8ff 70%, #e0e7ff 100%);
+  /* Use global background to avoid banding differences */
+  background: transparent;
   font-family: var(--font-primary);
+  position: relative;
+}
+
+/* Background Elements */
+.dashboard-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-element {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.6;
+  animation: float 6s ease-in-out infinite;
+}
+
+.element-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.element-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.element-3 {
+  top: 60%;
+  left: 20%;
+  animation-delay: 2s;
+}
+
+.element-4 {
+  top: 70%;
+  right: 10%;
+  animation-delay: 3s;
+}
+
+.element-5 {
+  top: 40%;
+  left: 70%;
+  animation-delay: 4s;
+}
+
+.element-6 {
+  top: 80%;
+  right: 20%;
+  animation-delay: 5s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 /* Header */
@@ -119,31 +184,88 @@
   background-clip: text;
 }
 
-.view-toggle {
+/* Deprecated generic toggle for cycle page (kept for backward compatibility) */
+.view-toggle { display: flex; gap: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4b0082, #c71585); box-shadow: 0 4px 6px -1px rgba(106, 13, 173, 0.7), 0 2px 4px -1px rgba(199, 21, 133, 0.6); }
+.view-btn { font-weight: 500; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; background: transparent; color: white; cursor: pointer; transition: all 0.3s ease; }
+.view-btn.active { background: white; color: #c71585; box-shadow: none; }
+.view-btn:hover:not(.active) { background: rgba(255, 255, 255, 0.15); color: white; }
+
+/* New cycle-specific segmented control (matches screenshot) */
+.cycle-view-toggle {
   display: inline-flex;
-  background: var(--neutral-gray-100);
-  border-radius: 9999px; /* pill group */
-  padding: 4px;
-  gap: 4px; /* space between buttons so borders don't overlap */
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 14px; /* rounded container */
+  background: linear-gradient(135deg, #4b0082, #c71585);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.08);
 }
 
-.view-btn {
-  background: none;
-  border: 2px solid transparent; /* avoid collapsing with active outline */
-  padding: 8px 14px; /* slightly larger target */
-  border-radius: 9999px; /* pill buttons */
-  font-size: 0.9rem;
-  font-weight: var(--font-weight-medium);
+.cycle-view-btn {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--neutral-gray-600);
-  box-shadow: none; /* ensure no extra outlines */
 }
 
-.view-btn.active {
-  background: var(--primary-purple);
-  color: var(--neutral-white);
-  border-color: rgba(0,0,0,0.1); /* subtle edge without double border */
+.cycle-view-btn.active {
+  background: #ffffff; /* white pill */
+  color: #c71585; /* pink text when active */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.cycle-view-btn:hover:not(.active) {
+  color: #ffe5f0; /* subtle light when hover */
+}
+
+@media (max-width: 480px) {
+  .cycle-view-toggle { gap: 0.5rem; padding: 0.4rem 0.6rem; }
+  .cycle-view-btn { padding: 0.35rem 0.7rem; font-size: 0.9rem; }
+}
+
+/* External periods/pregnancy segmented toggle (navbar-mounted) */
+.external-mode-toggle .view-toggle { background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.external-mode-toggle .view-btn { font-weight: 600; }
+.external-mode-toggle .view-btn.active { background: linear-gradient(135deg, #9333ea, #ec4899); color: #fff; box-shadow: 0 4px 10px rgba(147,51,234,0.35); }
+.external-mode-toggle .view-btn:hover:not(.active) { background: rgba(147,51,234,0.08); color: #6d28d9; }
+
+/* Compact buttons on small screens */
+@media (max-width: 480px) {
+  .view-btn { padding: 6px 12px; font-size: 0.85rem; }
+}
+
+/* Top toggles container: align left/right and center on small screens */
+.top-toggles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 16px auto 8px auto;
+  padding: 0 16px;
+}
+
+
+
+/* HealthCycle header */
+.hc-header { text-align: center; margin-top: 8px; }
+.hc-title { font-size: 1.6rem; font-weight: 800; color: #6d28d9; margin: 0; }
+.hc-subtitle { color: #64748b; margin: 2px 0 8px 0; }
+
+@media (max-width: 768px) {
+  .top-toggles {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 }
 
 .view-btn:hover:not(.active) {
@@ -170,7 +292,13 @@
 }
 
 .nav-link:hover { background: var(--neutral-gray-200); }
-.nav-link.active { background: var(--primary-purple); color: white; }
+.nav-link.active {
+  background: linear-gradient(135deg, #4b0082, #c71585);
+  color: white;
+  box-shadow:
+    0 4px 6px -1px rgba(106, 13, 173, 0.7),
+    0 2px 4px -1px rgba(199, 21, 133, 0.6);
+}
 
 /* Container */
 .cycle-container {
@@ -265,6 +393,23 @@
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+/* Month input styling to align nicely with navigation */
+.month-input {
+  border: 1px solid var(--neutral-gray-300);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  color: var(--neutral-gray-900);
+  background: var(--neutral-white);
+  margin-left: 12px; /* push it a bit outside the right purple arrow */
+}
+
+.month-input:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.45);
+  outline-offset: 2px;
 }
 
 .nav-btn {
@@ -555,6 +700,15 @@
   flex-shrink: 0;
 }
 
+/* Pregnancy dot indicator */
+.pregnancy-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  border: 1px solid rgba(16,185,129,0.3);
+}
+
 /* Calendar Legend */
 .calendar-legend {
   background: var(--neutral-white);
@@ -681,8 +835,77 @@
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--neutral-gray-200);
+}
+
+/* Minimal, consistent actions + buttons (match Pregnancy styles) */
+.modal-content { padding: 24px; }
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 24px;
+  border-top: 1px solid var(--neutral-gray-200);
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.cancel-btn:hover { background: #e5e7eb; }
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.delete-btn:hover { background: #dc2626; }
+
+.save-btn {
+  background: var(--primary-purple);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.save-btn:hover { background: var(--primary-purple-dark); }
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+.close-btn:hover { background: #f3f4f6; color: #1f2937; }
+
+@media (max-width: 768px) {
+  .modal-actions { flex-direction: column; }
+  .modal-actions button { width: 100%; }
 }

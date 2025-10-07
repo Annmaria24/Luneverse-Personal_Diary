@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -9,6 +10,8 @@ const ProfileDropdown = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  console.log('ProfileDropdown rendered, isDropdownOpen:', isDropdownOpen);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -40,13 +43,27 @@ const ProfileDropdown = () => {
     <div className="profile-dropdown">
       <div
         className="user-avatar"
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        onClick={() => {
+          console.log('Avatar clicked, dropdown state:', isDropdownOpen);
+          setIsDropdownOpen(!isDropdownOpen);
+        }}
         title={`${getFirstName(currentUser?.email)} - Click for options`}
       >
         {getFirstName(currentUser?.email).charAt(0).toUpperCase()}
       </div>
       {isDropdownOpen && (
-        <div className="dropdown-menu">
+        <div className="dropdown-menu" style={{ 
+          position: 'absolute', 
+          top: '50px', 
+          right: '0', 
+          zIndex: 99999,
+          background: 'white',
+          border: '2px solid red', // Debug border
+          minWidth: '220px',
+          padding: '16px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
           <div className="dropdown-header">
             <span className="user-name">{getFirstName(currentUser?.email)}</span>
             <span className="user-email">{currentUser?.email}</span>

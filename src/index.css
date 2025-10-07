@@ -7,6 +7,14 @@
   --surface: #ffffff;
   --surface-muted: #f8f7ff;
   --ring: rgba(139, 92, 246, 0.35);
+  
+  /* Theme variables - default to midnight */
+  --primary-bg: linear-gradient(135deg, #0b1020 0%, #1a1a2e 50%, #16213e 100%);
+  --primary-text: #e6e9f5;
+  --secondary-text: #a7b0d0;
+  --accent-color: #4b0082;
+  --card-bg: linear-gradient(135deg, #131a33 0%, #1e2a55 100%);
+  --border-color: rgba(124, 58, 237, 0.2);
 
   font-family: 'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
   line-height: 1.6;

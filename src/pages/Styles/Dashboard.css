@@ -71,6 +71,20 @@
   position: relative;
 }
 
+.dashboard::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(800px 500px at 10% -10%, rgba(124,58,237,0.05), transparent 60%),
+    radial-gradient(600px 400px at 110% 0%, rgba(236,72,153,0.03), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 
 
 /* Background Elements */

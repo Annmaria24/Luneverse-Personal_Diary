@@ -10,17 +10,15 @@ import {
   deleteMoodEntry,
   hasTodayMoodEntry
 } from "../services/moodService";
-import Navbar from '../components/Navbar';
 import DonutChart from '../components/charts/DonutChart';
 
 
-function MoodTrackerPage() {
+function MoodTrackerPage({ viewMode = 'today' }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState('');
   const [moodNote, setMoodNote] = useState('');
   const [moodHistory, setMoodHistory] = useState([]);
-  const [viewMode, setViewMode] = useState('today'); // 'today', 'week', 'month'
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isNavigating, setIsNavigating] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -177,7 +175,6 @@ function MoodTrackerPage() {
   if (loading) {
     return (
       <div className="mood-tracker-page">
-        <Navbar />
         <div className="mood-container">
           <div className="loading-state">
             <div className="loading-spinner">⏳</div>
@@ -190,7 +187,14 @@ function MoodTrackerPage() {
 
   return (
     <div className="mood-tracker-page">
-      <Navbar />
+      <div className="dashboard-background" style={{zIndex: 1}}>
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+        <div className="floating-element element-6">🌺</div>
+      </div>
       {/* View Toggle moved to navbar */}
 
       <div className="mood-container">
@@ -202,12 +206,7 @@ function MoodTrackerPage() {
             <button onClick={() => setError('')} className="dismiss-error">×</button>
           </div>
         )}
-        {/* View Toggle (moved under navbar) */}
-        <div className="view-toggle" style={{margin:'12px 0', display:'inline-flex', background:'#f1f5f9', padding:'4px', borderRadius:'9999px', gap:'4px'}}>
-          <button onClick={() => setViewMode('today')} className={`view-btn ${viewMode==='today'?'active':''}`}>Today</button>
-          <button onClick={() => setViewMode('week')} className={`view-btn ${viewMode==='week'?'active':''}`}>Week</button>
-          <button onClick={() => setViewMode('month')} className={`view-btn ${viewMode==='month'?'active':''}`}>Month</button>
-        </div>
+
 
         {/* Stats Cards */}
         <div className="stats-grid">
@@ -321,7 +320,7 @@ function MoodTrackerPage() {
                     <div className="history-details">
                       <h4>{entry.moodName}</h4>
                       <p className="history-date">
-                        {entry.timestamp.toLocaleDateString()} at{' '}
+                        {entry.timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at{' '}
                         {entry.timestamp.toLocaleTimeString('en-US', {
                           hour: '2-digit',
                           minute: '2-digit'
@@ -372,31 +371,41 @@ function MoodTrackerPage() {
             </div>
             <div className="insight-card">
               <h3>Weekly Trend</h3>
-              <svg className="insights-chart" viewBox="0 0 300 180" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="moodLine" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
-                  </linearGradient>
-                </defs>
-                {(() => {
-                  const points = (stats.weeklySeries || []).map((v, i) => {
-                    const x = (i / Math.max(1,(stats.weeklySeries.length - 1))) * 300;
-                    const y = 160 - (v / 5) * 140;
-                    return `${x},${y}`;
-                  }).join(' ');
+              {(() => {
+                const series = stats.weeklySeries || [];
+                const hasData = series.some(v => v > 0);
+                if (!hasData) {
                   return (
-                    <>
-                      <polyline points={points} fill="none" stroke="url(#moodLine)" strokeWidth="3" />
-                      {(stats.weeklySeries || []).map((v, i) => {
-                        const x = (i / Math.max(1,(stats.weeklySeries.length - 1))) * 300;
-                        const y = 160 - (v / 5) * 140;
-                        return <circle key={i} cx={x} cy={y} r="3" fill="#8b5cf6" />;
-                      })}
-                    </>
+                    <div className="no-data-chart">
+                      <div className="no-data-icon">📊</div>
+                      <p>No mood data this week</p>
+                      <p>Start tracking to see your trend!</p>
+                    </div>
                   );
-                })()}
-              </svg>
+                }
+                const points = series.map((v, i) => {
+                  const x = (i / Math.max(1, series.length - 1)) * 300;
+                  const y = 160 - (v / 5) * 120;
+                  return `${x},${y}`;
+                }).join(' ');
+                return (
+                  <svg className="insights-chart" viewBox="0 0 300 180" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="moodLine" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.9" />
+                        <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
+                      </linearGradient>
+                    </defs>
+                    <line x1="0" y1="160" x2="300" y2="160" stroke="#e5e7eb" strokeWidth="1" />
+                    <polyline points={points} fill="none" stroke="url(#moodLine)" strokeWidth="3" />
+                    {series.map((v, i) => {
+                      const x = (i / Math.max(1, series.length - 1)) * 300;
+                      const y = 160 - (v / 5) * 120;
+                      return <circle key={i} cx={x} cy={y} r="3" fill="#8b5cf6" />;
+                    })}
+                  </svg>
+                );
+              })()}
             </div>
             <div className="insight-card">
               <h3>Mood Range</h3>

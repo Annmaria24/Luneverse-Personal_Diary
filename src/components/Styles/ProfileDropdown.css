@@ -9,39 +9,56 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-purple, #7133d6) 0%, var(--secondary-pink, #e879f9) 100%);
+  background: linear-gradient(135deg, #5a1ea1 0%, #7c3aed 50%, #a855f7 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(113, 51, 214, 0.2);
-  border: 2px solid transparent;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
 .user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(113, 51, 214, 0.3);
-  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(113, 51, 214, 0.8);
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
+.user-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(113, 51, 214, 0.8);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Profile dropdown menu - ensure it overrides any conflicting rules */
 .dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  min-width: 220px;
-  z-index: 1000;
-  overflow: hidden;
-  animation: dropdownSlideIn 0.2s ease-out;
+  position: fixed !important;
+  top: 76px !important;
+  right: 24px !important;
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  min-width: 220px !important;
+  max-width: calc(100vw - 48px) !important;
+  max-height: calc(100vh - 120px) !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
+  animation: dropdownSlideIn 0.2s ease-out !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+  /* Portal-specific properties */
+  contain: layout style paint !important;
+  isolation: isolate !important;
+  /* Ensure it renders at document body level */
 }
-
 @keyframes dropdownSlideIn {
   from {
     opacity: 0;
@@ -123,7 +140,8 @@
   
   .dropdown-menu {
     min-width: 200px;
-    right: -8px;
+    right: 16px;
+    top: 72px;
   }
   
   .dropdown-header {
@@ -153,6 +171,147 @@
   
   .dropdown-menu {
     min-width: 180px;
-    right: -12px;
+    right: 12px;
+    top: 68px;
   }
+}
+
+/* Ensure dropdown appears above all page content */
+html {
+  position: relative;
+  z-index: 1;
+}
+
+body {
+  position: relative;
+  z-index: 1;
+}
+
+/* Override any page-level z-index conflicts */
+.my-journal-page,
+.my-cycle-page,
+.dashboard-page,
+[class*="page"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure dropdown container has proper stacking context */
+.profile-dropdown {
+  position: relative;
+  z-index: 1000;
+  isolation: isolate;
+}
+
+/* Force dropdown to appear above everything */
+.dropdown-menu {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Create a layer for the dropdown using CSS containment */
+.dropdown-menu {
+  /* Use CSS layers if supported */
+  @supports (container-type: inline-size) {
+    container-type: inline-size;
+  }
+}
+
+/* Ensure page elements don't interfere with portal dropdown */
+.my-journal-page .page-toolbar,
+.my-cycle-page .page-toolbar {
+  position: relative;
+  z-index: 10;
+}
+
+.my-journal-page .tab-buttons.floating,
+.my-cycle-page .tab-buttons.floating {
+  position: relative;
+  z-index: 15;
+}
+
+/* Don't interfere with floating elements positioning */
+.my-journal-page .floating-element,
+.my-cycle-page .floating-element {
+  position: absolute !important;
+  /* Preserve their animation and positioning */
+  animation: float 6s ease-in-out infinite !important;
+  /* Ensure they stay behind main content */
+  z-index: 0 !important;
+  /* Ensure they don't get overridden */
+  isolation: auto;
+}
+
+/* Ensure page content doesn't interfere with dropdown */
+body {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure main content appears above floating elements */
+.my-journal-page .tab-content,
+.my-cycle-page .tab-content {
+  position: relative;
+  z-index: 2 !important;
+  /* Ensure content isolation doesn't interfere */
+  isolation: auto;
+}
+
+/* Ensure floating elements container maintains proper positioning */
+.my-journal-page .dashboard-background,
+.my-cycle-page .my-cycle-background {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  /* Ensure proper stacking context */
+  isolation: auto;
+}
+
+/* Specific page containers - ensure they don't interfere with dropdown */
+.dashboard-page,
+.my-journal-page,
+.my-cycle-page,
+.settings-page,
+.landing-page,
+[class*="page"] {
+  position: relative;
+  /* Don't set z-index here to avoid conflicts */
+}
+
+/* Override specific page elements with appropriate z-index */
+.my-journal-page .page-toolbar,
+.my-cycle-page .page-toolbar {
+  z-index: 10 !important;
+  position: relative;
+}
+
+.my-journal-page .tab-buttons.floating,
+.my-cycle-page .tab-buttons.floating {
+  z-index: 15 !important;
+  position: relative;
+}
+
+.my-journal-page .dashboard-background,
+.my-cycle-page .my-cycle-background {
+  z-index: 0 !important;
+  position: fixed;
+}
+
+/* Only override specific elements that might interfere - ensure proper z-index hierarchy */
+.my-journal-page .page-toolbar,
+.my-cycle-page .page-toolbar {
+  z-index: 10 !important;
+  position: relative;
+}
+
+.my-journal-page .tab-buttons.floating,
+.my-cycle-page .tab-buttons.floating {
+  z-index: 15 !important;
+  position: relative;
 }

@@ -3,6 +3,7 @@ import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { createUserProfile, updateLastLogin } from '../services/userService';
 import Loader from '../pages/Loading';
+import { endSession, recordAggregates, startSession } from '../services/activityService';
 
 const AuthContext = createContext();
 
@@ -52,6 +53,47 @@ export const AuthProvider = ({ children }) => {
 
     return unsubscribe;
   }, []);
+
+  // Track activity session start/stop and aggregate minutes
+  useEffect(() => {
+    let sessionId = null;
+    let startTime = null;
+    const begin = async () => {
+      if (!currentUser) return;
+      startTime = Date.now();
+      sessionId = await startSession(currentUser.uid);
+    };
+    const finish = async () => {
+      if (!currentUser || !sessionId || !startTime) return;
+      const minutes = Math.max(1, Math.round((Date.now() - startTime) / 60000));
+      await endSession(sessionId);
+      await recordAggregates(currentUser.uid, minutes);
+      sessionId = null;
+      startTime = null;
+    };
+
+    if (currentUser) {
+      begin();
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        finish();
+      } else if (currentUser) {
+        begin();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('beforeunload', finish);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('beforeunload', finish);
+      // ensure end when component unmounts or user changes
+      finish();
+    };
+  }, [currentUser]);
 
   const value = {
     currentUser,

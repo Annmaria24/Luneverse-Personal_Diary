@@ -1,0 +1,28 @@
+Revert instructions for UI polish added on CycleTrackerPage.css
+
+Summary of change:
+- Added minimal, consistent modal actions and button styles to align with PregnancyTrackerPage.
+- The block starts at the comment:
+  /* Minimal, consistent actions + buttons (match Pregnancy styles) */
+- It ends after the closing mobile media query.
+
+To revert:
+1) Open d:\Luneverse\wellness-app\src\pages\Styles\CycleTrackerPage.css
+2) Delete the block from the line containing:
+   /* Minimal, consistent actions + buttons (match Pregnancy styles) */
+   through the end of this media query block:
+   @media (max-width: 768px) { ... }
+3) Save the file.
+
+Optional quick-undo with find/replace:
+- Find this exact starting line:
+  /* Minimal, consistent actions + buttons (match Pregnancy styles) */
+- Delete everything from that line down to and including:
+  }
+  (the final closing brace of the @media (max-width: 768px) block)
+
+Classes introduced (safe to remove on revert):
+- .modal-content, .modal-actions, .cancel-btn, .delete-btn, .save-btn, .close-btn
+
+Note:
+- No HTML/JSX changes were made; only CSS. Removing this block restores the previous look.

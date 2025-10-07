@@ -5,7 +5,7 @@ import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
  * ✅ Creates a user profile in Firestore
  */
 export const createUserProfile = async (user, isGoogleSignup = false) => {
-  if (!user) return;
+  if (!user) return null;
 
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
@@ -19,8 +19,13 @@ export const createUserProfile = async (user, isGoogleSignup = false) => {
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
       hasPassword: isGoogleSignup ? false : true, // ✅ Explicitly set based on signup method
+      isAdmin: false,
     });
+    const created = await getDoc(userRef);
+    return created.exists() ? created.data() : null;
   }
+
+  return snap.data();
 };
 
 

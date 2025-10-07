@@ -7,20 +7,30 @@ Luneverse is a comprehensive women's wellness application designed to provide a 
 ## Technology Stack
 
 - **Frontend**: React 18 with Vite
-- **Styling**: CSS3 with CSS Custom Properties
+- **Styling**: Tailwind CSS
 - **Authentication**: Firebase Authentication
 - **Database**: Firebase Firestore
 - **Routing**: React Router v6
 - **State Management**: React Context API
+- **AI/ML**: Hugging Face API for sentiment analysis
 - **Icons**: Emoji-based icons for accessibility
 
 ## Project Structure
 
 ```
 wellness-app/
+├── api/
+│   └── analyzeSentiment.js             # Sentiment analysis API endpoint
+├── functions/                          # Firebase Cloud Functions
 ├── src/
 │   ├── components/
-│   │   └── ProtectedRoute.jsx          # Route protection component
+│   │   ├── charts/                     # Chart components
+│   │   │   ├── DonutChart.jsx          # Donut chart for data visualization
+│   │   │   ├── LineBarTimeline.jsx     # Timeline chart
+│   │   │   └── ProgressDonut.jsx       # Progress donut chart
+│   │   ├── ProtectedRoute.jsx          # Route protection component
+│   │   ├── ConditionalPregnancyRoute.jsx # Conditional pregnancy route
+│   │   └── [other components...]       # UI components
 │   ├── context/
 │   │   └── AuthContext.jsx             # Authentication context
 │   ├── firebase/
@@ -33,14 +43,23 @@ wellness-app/
 │   │   ├── DiaryPage.jsx               # Digital journal
 │   │   ├── MoodTrackerPage.jsx         # Mood tracking
 │   │   ├── CycleTrackerPage.jsx        # Menstrual cycle tracking
+│   │   ├── PregnancyTrackerPage.jsx    # Pregnancy tracking
+│   │   ├── Insights.jsx                # Data insights and visualization
 │   │   ├── SettingsPage.jsx            # User settings
 │   │   ├── EmailVerificationPage.jsx   # Email verification
 │   │   ├── VerificationSuccessPage.jsx # Verification success
 │   │   ├── ForgotPasswordPage.jsx      # Password reset
 │   │   └── SetPasswordPage.jsx         # Password setting
 │   ├── services/
-│   │   └── userService.js              # User data services
+│   │   ├── userService.js              # User data services
+│   │   ├── diaryService.js             # Diary data services
+│   │   ├── moodService.js              # Mood data services
+│   │   ├── cycleService.js             # Cycle data services
+│   │   └── pregnancyService.js         # Pregnancy data services
 │   └── styles/                         # CSS files for each page
+├── firestore.rules                     # Firebase security rules
+├── firebase.json                       # Firebase configuration
+└── [other config files...]
 ```
 
 ## Core Features
@@ -76,7 +95,14 @@ wellness-app/
 - **Cycle Insights**: Analytics on cycle regularity and patterns
 - **Notes**: Add personal notes for each day
 
-### 5. Settings & Profile
+### 5. Pregnancy Tracker
+- **Progress Monitoring**: Track pregnancy week and trimester
+- **Symptom Logging**: Log common pregnancy symptoms with emoji icons
+- **Milestone Tracking**: Monitor key pregnancy milestones and advice
+- **Data Management**: Add, edit, or remove pregnancy entries
+- **Settings Toggle**: Enable or disable pregnancy tracking in user settings
+
+### 6. Settings & Profile
 - **Profile Management**: Update personal information
 - **Privacy Controls**: Manage data sharing preferences
 - **Notification Settings**: Customize reminder preferences
@@ -141,6 +167,60 @@ wellness-app/
   - Cycle predictions and insights
   - Visual indicators and legend
 
+### Pregnancy Tracker (`/pregnancy-tracker`)
+- **Purpose**: Pregnancy progress and symptom tracking
+- **Features**:
+  - Calendar/Insights view toggle
+  - Pregnancy overview (current week, trimester, due date)
+  - Interactive calendar for logging symptoms and notes
+  - Symptom selection from predefined list with emoji icons
+  - Weekly pregnancy advice and milestone tracking
+  - Progress visualization with trimester and week indicators
+  - Data entry management (add, edit, delete entries)
+  - Conditional access based on user settings
+
+### Insights (`/insights`)
+- **Purpose**: Data visualization and analytics dashboard
+- **Features**:
+  - Mood distribution chart (donut chart)
+  - Recent cycle timeline visualization
+  - Pregnancy progress indicator (progress donut)
+  - Interactive charts using custom components
+  - Real-time data from user services
+  - Responsive design for different screen sizes
+
+## Chart Components Implementation
+
+### DonutChart Component
+- **Technology**: Pure SVG with custom path calculations
+- **Implementation**:
+  - Calculates pie slice angles and converts to SVG path coordinates
+  - Uses `toXY()` function to convert polar coordinates to Cartesian
+  - Supports configurable inner radius for donut effect
+  - Displays center label with customizable text
+  - Handles empty data gracefully with fallback values
+- **Props**: `data` (array of {label, value, color}), `innerRadiusPct`, `size`, `centerLabel`
+
+### LineBarTimeline Component
+- **Technology**: SVG with rectangles and circles
+- **Implementation**:
+  - Renders vertical bars for cycle lengths using `<rect>` elements
+  - Adds circular markers for flow averages using `<circle>` elements
+  - Calculates bar heights proportionally to maximum cycle length
+  - Includes month labels below each data point
+  - Responsive SVG with `preserveAspectRatio="none"`
+- **Props**: `data` (array of cycle objects), `height`
+
+### ProgressDonut Component
+- **Technology**: SVG with stroke-dasharray for progress effect
+- **Implementation**:
+  - Uses two concentric circles: background and progress ring
+  - Applies `stroke-dasharray` to create partial ring fill
+  - Rotates SVG group -90 degrees to start from top
+  - Displays percentage and optional label in center
+  - Calculates dash length based on percentage value
+- **Props**: `valuePct`, `size`, `label`
+
 ### Settings Page (`/settings`)
 - **Purpose**: User preferences and account management
 - **Tabs**:
@@ -188,6 +268,8 @@ Dashboard (/dashboard)
 ├── Diary (/diary)
 ├── Mood Tracker (/mood-tracker)
 ├── Cycle Tracker (/cycle-tracker)
+├── Pregnancy Tracker (/pregnancy-tracker) [conditional]
+├── Insights (/insights)
 └── Settings (/settings)
 ```
 
@@ -209,6 +291,27 @@ Dashboard (/dashboard)
   - Desktop: > 1024px
 - **Touch Friendly**: Large touch targets and intuitive gestures
 - **Accessibility**: High contrast, readable fonts, semantic HTML
+
+## APIs
+
+### Sentiment Analysis API (`/api/analyzeSentiment`)
+- **Purpose**: Analyze text sentiment for journal entries or mood notes
+- **Method**: POST
+- **Input**: JSON with `text` field containing the text to analyze
+- **Output**: JSON with `label` (POSITIVE/NEGATIVE/NEUTRAL) and `score` (confidence level)
+- **Provider**: Hugging Face BERT model for multilingual sentiment analysis
+- **Usage**: Called from frontend services to provide sentiment insights
+
+## Security
+
+### Firebase Security Rules
+- **User Data Access**: Users can only read/write their own profile data
+- **Journal Entries**: Scoped to authenticated user ID
+- **Mood Entries**: Scoped to authenticated user ID
+- **Cycle Entries**: Scoped to authenticated user ID
+- **Pregnancy Entries**: Scoped to authenticated user ID
+- **Test Documents**: Scoped to authenticated user ID for debugging
+- **Authentication Required**: All operations require valid Firebase authentication
 
 ## Data Models
 
@@ -261,6 +364,18 @@ Dashboard (/dashboard)
   symptoms: array,
   notes: string,
   type: string, // 'period', 'ovulation', 'symptoms'
+  timestamp: timestamp
+}
+```
+
+### Pregnancy Entry
+```javascript
+{
+  id: string,
+  userId: string,
+  date: date,
+  symptoms: array,
+  notes: string,
   timestamp: timestamp
 }
 ```

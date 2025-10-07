@@ -38,6 +38,7 @@ function SettingsPage() {
 
   // Pregnancy tracking settings
   const [pregnancyTrackingEnabled, setPregnancyTrackingEnabled] = useState(false);
+  const [conceptionDate, setConceptionDate] = useState('');
 
   // Security settings
   const [currentPassword, setCurrentPassword] = useState('');
@@ -196,6 +197,15 @@ function SettingsPage() {
     <div className="settings-page">
       <Navbar />
 
+      <div className="dashboard-background">
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+        <div className="floating-element element-6">🌺</div>
+      </div>
+
       <div className="settings-container">
         {/* Sidebar */}
         <div className="settings-sidebar">
@@ -282,22 +292,23 @@ function SettingsPage() {
                 </div>
               </div>
 
+
               {/* Pregnancy Tracking Toggle */}
-              <div className="settings-list" style={{ marginTop: '20px' }}>
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h4>Pregnancy Tracking</h4>
-                    <p>Enable pregnancy tracking features when conception is marked in your cycle tracker</p>
-                  </div>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={pregnancyTrackingEnabled}
-                      onChange={(e) => setPregnancyTrackingEnabled(e.target.checked)}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
+              <div className="setting-item" style={{marginTop: '1rem', padding: '1rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(139, 92, 246, 0.1)'}}>
+                <div className="setting-info">
+                  <h4 style={{margin: 0, color: '#7c3aed'}}>🤰 Pregnancy Tracking</h4>
+                  <p style={{margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: '#64748b'}}>
+                    Enable pregnancy tracking features and insights
+                  </p>
                 </div>
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={pregnancyTrackingEnabled}
+                    onChange={(e) => setPregnancyTrackingEnabled(e.target.checked)}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
               </div>
 
               <button

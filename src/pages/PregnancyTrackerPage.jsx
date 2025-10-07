@@ -82,15 +82,33 @@ function PregnancyTrackerPage() {
   const handleConceptionDateChange = async (newConceptionDate) => {
     setConceptionDate(newConceptionDate);
     setError(null); // Clear any existing errors
-    
+
     if (newConceptionDate) {
+      const conception = new Date(newConceptionDate);
+      const today = new Date();
+      const elapsedDays = Math.floor((today - conception) / (1000 * 60 * 60 * 24));
+
+      // Validate that conception date is not more than 40 weeks ago
+      if (elapsedDays > 280) { // 40 weeks * 7 days
+        setError("Conception date seems too far in the past. Please verify the date is correct.");
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+
+      // Validate that conception date is not in the future
+      if (conception > today) {
+        setError("Conception date cannot be in the future.");
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+
       const calculatedDueDate = calculateDueDateFromConception(newConceptionDate);
       setDueDate(calculatedDueDate);
       // Save both dates
       try {
-        await saveUserSettings(currentUser.uid, { 
-          conceptionDate: newConceptionDate, 
-          dueDate: calculatedDueDate 
+        await saveUserSettings(currentUser.uid, {
+          conceptionDate: newConceptionDate,
+          dueDate: calculatedDueDate
         });
         setSuccessMessage("Conception date saved and due date calculated!");
         setTimeout(() => setSuccessMessage(null), 3000);
@@ -106,7 +124,28 @@ function PregnancyTrackerPage() {
   const handleDueDateChange = async (newDueDate) => {
     setDueDate(newDueDate);
     setError(null); // Clear any existing errors
-    
+
+    if (newDueDate) {
+      const due = new Date(newDueDate);
+      const today = new Date();
+
+      // Validate that due date is not in the past
+      if (due < today) {
+        setError("Due date cannot be in the past.");
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+
+      // Validate that due date is not more than 40 weeks from now
+      const maxDueDate = new Date(today);
+      maxDueDate.setDate(today.getDate() + 280); // 40 weeks
+      if (due > maxDueDate) {
+        setError("Due date seems too far in the future. Please verify the date is correct.");
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+    }
+
     try {
       await saveUserSettings(currentUser.uid, { dueDate: newDueDate });
       setSuccessMessage("Due date updated!");
@@ -188,22 +227,27 @@ function PregnancyTrackerPage() {
   };
 
   const handleDateClick = (day) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    try {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
 
-    setSelectedDate(date);
-    setShowSymptomModal(true);
+      setSelectedDate(date);
+      setShowSymptomModal(true);
 
-    const dateKey = formatDateKey(date);
-    const existingData = pregnancyData[dateKey];
-    if (existingData) {
-      setSelectedSymptoms(existingData.symptoms || []);
-      setNotes(existingData.notes || '');
-      setDoctorAppointments(existingData.doctorAppointments || []);
-    } else {
-      setSelectedSymptoms([]);
-      setNotes('');
-      setDoctorAppointments([]);
-    }
+      const dateKey = formatDateKey(date);
+      const existingData = pregnancyData[dateKey];
+      if (existingData) {
+        setSelectedSymptoms(existingData.symptoms || []);
+        setNotes(existingData.notes || '');
+        setDoctorAppointments(existingData.doctorAppointments || []);
+      } else {
+        setSelectedSymptoms([]);
+        setNotes('');
+        setDoctorAppointments([]);
+      }
+  } catch (error) {
+    console.error("Error handling date click:", error);
+    setError("Failed to open date tracker. Please try again.");
+  }
   };
 
   const handleSaveData = async () => {
@@ -397,11 +441,7 @@ function PregnancyTrackerPage() {
 
   return (
     <div className="pregnancy-tracker-page">
-      <Navbar />
-      <div style={{margin:'12px 0', display:'inline-flex', background:'#f1f5f9', padding:'4px', borderRadius:'9999px', gap:'4px'}}>
-        <button onClick={() => setViewMode('calendar')} className={`view-btn ${viewMode==='calendar'?'active':''}`}>Calendar</button>
-        <button onClick={() => setViewMode('insights')} className={`view-btn ${viewMode==='insights'?'active':''}`}>Insights</button>
-      </div>
+      {/* Removed Calendar/Insights toggle as requested */}
 
       <div className="pregnancy-dates-section">
         <div className="date-inputs-container">
@@ -573,7 +613,7 @@ function PregnancyTrackerPage() {
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Delete entry for {selectedDate.toLocaleDateString()}</h3>
+              <h3>Delete entry for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h3>
               <button onClick={() => setShowDeleteModal(false)} className="close-btn">×</button>
             </div>
             <div className="modal-content">
@@ -591,7 +631,7 @@ function PregnancyTrackerPage() {
         <div className="modal-overlay" onClick={() => setShowSymptomModal(false)}>
           <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Track for {selectedDate.toLocaleDateString()}</h3>
+              <h3>Track for {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</h3>
               <button onClick={() => setShowSymptomModal(false)} className="close-btn">×</button>
             </div>
 
@@ -610,38 +650,8 @@ function PregnancyTrackerPage() {
               </button>
             ))}
 
-            {/* Assuming flow content buttons here */}
-            {flowContents && flowContents.length > 0 && (
-              <>
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-                  {flowContents.slice(0, 2).map(flow => (
-                    <button
-                      key={flow.id}
-                      onClick={() => toggleFlow(flow.id)}
-                      className={`flow-btn ${selectedFlows.includes(flow.id) ? 'selected' : ''}`}
-                      style={{ flex: 1, maxWidth: '48%' }}
-                    >
-                      <span className="flow-icon">{flow.icon}</span>
-                      <span className="flow-name">{flow.name}</span>
-                    </button>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  {flowContents.slice(2).map(flow => (
-                    <button
-                      key={flow.id}
-                      onClick={() => toggleFlow(flow.id)}
-                      className={`flow-btn ${selectedFlows.includes(flow.id) ? 'selected' : ''}`}
-                      style={{ flex: 1, maxWidth: '48%' }}
-                    >
-                      <span className="flow-icon">{flow.icon}</span>
-                      <span className="flow-name">{flow.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-                  ))}
+
+                  
                 </div>
               </div>
 

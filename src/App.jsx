@@ -1,8 +1,12 @@
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { SiteNameProvider } from "./context/SiteNameContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import ConditionalPregnancyRoute from "./components/ConditionalPregnancyRoute";
+import AdminRoute from "./components/AdminRoute";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
@@ -13,101 +17,205 @@ import SetPasswordPage from "./pages/SetPasswordPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import DiaryPage from "./pages/DiaryPage";
 import MoodTrackerPage from "./pages/MoodTrackerPage";
-import CycleTrackerPage from "./pages/CycleTrackerPage";
-import PregnancyTrackerPage from "./pages/PregnancyTrackerPage";
+import MyJournal from "./pages/MyJournal";
+import MyCycle from "./pages/MyCycle";
 import SettingsPage from "./pages/SettingsPage";
+import RelaxMode from "./pages/RelaxMode";
+import RelaxBreathe from "./pages/RelaxBreathe";
+import RelaxSound from "./pages/RelaxSound";
+import RelaxMeditations from "./pages/RelaxMeditations";
+import RelaxVisuals from "./pages/RelaxVisuals";
 import Insights from "./pages/Insights";
+import EmotionalWellness from "./pages/EmotionalWellness";
+import AdminDashboard from "./pages/admin/AdminDashboardFixed";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminFeedback from "./pages/admin/AdminFeedbackSimple";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <PublicRoute>
-                <LandingPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <SignUpPage />
-              </PublicRoute>
-            }
-          />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route path="/verify-success" element={<VerificationSuccessPage />} />
-          <Route path="/set-password" element={<SetPasswordPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/diary"
-            element={
-              <ProtectedRoute>
-                <DiaryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mood-tracker"
-            element={
-              <ProtectedRoute>
-                <MoodTrackerPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cycle-tracker"
-            element={
-              <ProtectedRoute>
-                <CycleTrackerPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pregnancy-tracker"
-            element={<ConditionalPregnancyRoute />}
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/export"
-            element={
-              <ProtectedRoute>
-                <Insights />
-              </ProtectedRoute>
-            }
-          />
-
-
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <SiteNameProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <AdminUsers />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/feedback"
+                element={
+                  <AdminRoute>
+                    <AdminFeedback />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <AdminRoute>
+                    <AdminSettings />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/"
+                element={
+                  <PublicRoute>
+                    <LandingPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <LoginPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <PublicRoute>
+                    <SignUpPage />
+                  </PublicRoute>
+                }
+              />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/verify-email" element={<EmailVerificationPage />} />
+              <Route path="/verify-success" element={<VerificationSuccessPage />} />
+              <Route path="/set-password" element={<SetPasswordPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/emotional"
+                element={
+                  <ProtectedRoute>
+                    <EmotionalWellness />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/diary"
+                element={
+                  <ProtectedRoute>
+                    <DiaryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-journal"
+                element={
+                  <ProtectedRoute>
+                    <MyJournal />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mood-tracker"
+                element={
+                  <ProtectedRoute>
+                    <MoodTrackerPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-cycle"
+                element={
+                  <ProtectedRoute>
+                    <MyCycle />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax"
+                element={
+                  <ProtectedRoute>
+                    <RelaxMode />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/export"
+                element={
+                  <ProtectedRoute>
+                    <Insights />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax"
+                element={
+                  <ProtectedRoute>
+                    <RelaxMode />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/breathe"
+                element={
+                  <ProtectedRoute>
+                    <RelaxBreathe />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/sound"
+                element={
+                  <ProtectedRoute>
+                    <RelaxSound />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/meditations"
+                element={
+                  <ProtectedRoute>
+                    <RelaxMeditations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/visuals"
+                element={
+                  <ProtectedRoute>
+                    <RelaxVisuals />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </SiteNameProvider>
   );
 }
 

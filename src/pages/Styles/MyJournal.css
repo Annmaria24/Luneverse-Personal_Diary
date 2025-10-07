@@ -1,0 +1,171 @@
+/* ===========================
+   My Journal Page Layout
+=========================== */
+.my-journal-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #fdf2f8 0%,
+    #fce7f3 25%,
+    #f3e8ff 50%,
+    #e0e7ff 75%,
+    #dbeafe 100%
+  );
+  position: relative;
+}
+
+/* ===========================
+   Background Elements
+=========================== */
+.dashboard-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-element {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.6;
+  animation: float 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+.element-1 { top: 8%; left: 8%; animation-delay: 0s; }
+.element-2 { top: 15%; right: 12%; animation-delay: 1s; }
+.element-3 { top: 65%; left: 15%; animation-delay: 2s; }
+.element-4 { top: 75%; right: 8%; animation-delay: 3s; }
+.element-5 { top: 35%; left: 75%; animation-delay: 4s; }
+.element-6 { top: 85%; right: 18%; animation-delay: 5s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* ===========================
+   Unified Button Styles
+   (used by Today/Week/Month toggle)
+=========================== */
+.view-btn {
+  color: #ffffff; /* white when inactive */
+  font-weight: 600;
+  font-size: 15px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  border: 2px solid #4b5563;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+.view-btn.active {
+  background: #8b5cf6; /* vivid purple */
+  color: #ffffff;
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.view-btn:hover:not(.active) {
+  background: rgba(139, 92, 246, 0.1);
+  color: #4c1d95;
+  border-color: #4c1d95;
+  transform: translateY(-1px);
+}
+
+.view-btn:focus-visible {
+  outline: 2px solid #c4b5fd;
+  outline-offset: 2px;
+}
+
+/* ===========================
+   Toolbar Wrapper
+=========================== */
+.page-toolbar {
+  position: sticky;
+  /* Push below navbar height to avoid overlap on first render */
+  top: calc(var(--navbar-height, 88px) + 12px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 24px 0 24px;
+  z-index: 10;
+}
+
+/* ===========================
+   Calendar & Insights Buttons
+=========================== */
+.calendar-insights-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* ===========================
+   Tab Switch (Diary / Mood Tracker)
+   Styled same as Today/Week/Month
+=========================== */
+.tab-buttons {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 9999px;
+  background: #ffffff; /* white pill background */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tab-buttons .view-btn {
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: #ffffff; /* white when inactive */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-buttons .view-btn.active {
+  background: linear-gradient(135deg, #9333ea, #ec4899); /* violet → pink gradient */
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(147, 51, 234, 0.35);
+}
+
+.tab-buttons .view-btn:hover:not(.active) {
+  background: rgba(147, 51, 234, 0.08);
+  color: #6d28d9;
+}
+
+/* ===========================
+   Floating Placement for Tabs
+=========================== */
+.tab-buttons.floating {
+  position: sticky;
+  /* Keep tabs below the navbar so they don't overlap editor */
+  top: calc(var(--navbar-height, 88px) + 12px);
+  margin: 12px 24px 0 auto;
+  z-index: 5; /* below editor/toolbars but above background */
+  /* Ensure it doesn't get cut off */
+  box-sizing: border-box;
+  max-width: calc(100vw - 48px);
+}
+
+@media (min-width: 900px) {
+  .tab-buttons.floating {
+    top: 12px;
+    margin: 12px 24px 0 auto;
+  }
+}
+
+/* ===========================
+   Content Area
+=========================== */
+.tab-content {
+  position: relative;
+  z-index: 2;
+}

@@ -29,12 +29,14 @@ const ProtectedRoute = ({ children }) => {
   return <Navigate to="/login" replace />;
 }
 
-// ✅ This blocks dashboard access until password is set
-if (
-  userProfile &&
-  currentUser.providerData[0]?.providerId === "google.com" &&
-  !userProfile.hasPassword
-) {
+// If admin, keep them within admin area and skip user-only restrictions
+if (userProfile?.isAdmin) {
+  // If admin accidentally navigates to user pages, send to admin dashboard
+  return children.type?.name?.includes('Admin') ? children : <Navigate to="/admin" replace />;
+}
+
+// ✅ This blocks dashboard access until password is set (for normal users)
+if (userProfile && currentUser.providerData[0]?.providerId === "google.com" && !userProfile.hasPassword) {
   return <Navigate to="/set-password" replace />;
 }
 

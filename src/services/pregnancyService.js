@@ -98,17 +98,21 @@ export const deletePregnancyEntry = async (userId, date) => {
 // Get pregnancy statistics
 export const getPregnancyStats = async (userId) => {
   try {
+    // Import getUserSettings to get conception date
+    const { getUserSettings } = await import('./userService');
+
     const q = query(pregnancyRef, where("userId", "==", userId));
     const snapshot = await getDocs(q);
     const allEntries = snapshot.docs.map(doc => doc.data());
 
     const stats = {
       totalEntries: allEntries.length,
-      currentWeek: 1,
+      currentWeek: 0,
       currentTrimester: 1,
       commonSymptoms: [],
       lastEntry: null,
-      nextAppointment: null
+      nextAppointment: null,
+      conceptionDate: null
     };
 
     if (allEntries.length > 0) {
@@ -116,8 +120,21 @@ export const getPregnancyStats = async (userId) => {
       allEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       stats.lastEntry = allEntries[0].date;
-      stats.currentWeek = allEntries[0].pregnancyWeek || 1;
-      stats.currentTrimester = allEntries[0].trimester || 1;
+
+      // Get conception date from user settings
+      const userSettings = await getUserSettings(userId);
+      const conceptionDate = userSettings?.conceptionDate;
+
+      if (conceptionDate) {
+        // Calculate current week based on conception date
+        stats.currentWeek = calculatePregnancyWeek(conceptionDate, true);
+        stats.conceptionDate = conceptionDate;
+      } else {
+        // Fallback to manual entry week if no conception date
+        stats.currentWeek = allEntries[0].pregnancyWeek || 1;
+      }
+
+      stats.currentTrimester = getTrimester(stats.currentWeek);
 
       // Find next appointment
       const appointments = allEntries.flatMap(entry => entry.doctorAppointments || []);

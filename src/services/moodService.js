@@ -313,7 +313,8 @@ const calculateMoodStats = (entries) => {
       streak: 0,
       mostCommonMood: null,
       moodDistribution: {},
-      weeklyTrend: 0
+      weeklyTrend: 0,
+      weeklySeries: [0, 0, 0, 0, 0, 0, 0]
     };
   }
 
@@ -342,13 +343,17 @@ const calculateMoodStats = (entries) => {
   // Calculate weekly trend (simplified)
   const weeklyTrend = calculateWeeklyTrend(entries);
 
+  // Build weekly series for charts (7 values Sun..Sat for current week)
+  const weeklySeries = buildWeeklySeries(entries);
+
   return {
     averageMood: parseFloat(averageMood.toFixed(1)),
     totalEntries: entries.length,
     streak,
     mostCommonMood,
     moodDistribution,
-    weeklyTrend
+    weeklyTrend,
+    weeklySeries
   };
 };
 
@@ -379,18 +384,47 @@ const calculateStreak = (entries) => {
 
 // Helper function to calculate weekly trend
 const calculateWeeklyTrend = (entries) => {
-  if (entries.length < 7) return 0;
+  if (entries.length < 2) return 0;
 
-  const sortedEntries = entries.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-  const midPoint = Math.floor(sortedEntries.length / 2);
-  
-  const firstHalf = sortedEntries.slice(0, midPoint);
-  const secondHalf = sortedEntries.slice(midPoint);
+  const sortedEntries = [...entries].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  const half = Math.floor(sortedEntries.length / 2);
+  const firstHalf = sortedEntries.slice(0, half);
+  const secondHalf = sortedEntries.slice(half);
 
   if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
 
-  const firstHalfAvg = firstHalf.reduce((sum, entry) => sum + entry.value, 0) / firstHalf.length;
-  const secondHalfAvg = secondHalf.reduce((sum, entry) => sum + entry.value, 0) / secondHalf.length;
+  const avg = (arr) => arr.reduce((s, e) => s + (e.value || 0), 0) / arr.length;
+  const firstHalfAvg = avg(firstHalf);
+  const secondHalfAvg = avg(secondHalf);
+  if (firstHalfAvg === 0) return 0;
 
-  return parseFloat(((secondHalfAvg - firstHalfAvg) / firstHalfAvg * 100).toFixed(1));
+  return parseFloat((((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100).toFixed(1));
+};
+
+// Build 7-day weekly series for the current week (Sun..Sat). If no data for a day, carry last known or use 0.
+const buildWeeklySeries = (entries) => {
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(now.getDate() - now.getDay()); // Sunday
+  start.setHours(0,0,0,0);
+  const dayValues = Array(7).fill(null);
+
+  // Aggregate to last value per day in the current week
+  entries.forEach(e => {
+    const d = new Date(e.timestamp);
+    if (d >= start && d < new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7)) {
+      const idx = (d.getDay());
+      dayValues[idx] = e.value || 0; // keep last encountered value for that day
+    }
+  });
+
+  // Fill missing values: forward fill from previous, start at 0
+  let last = 0;
+  for (let i = 0; i < 7; i++) {
+    if (dayValues[i] == null) dayValues[i] = last;
+    else last = dayValues[i];
+  }
+
+  // Ensure within 1..5 range
+  return dayValues.map(v => Math.max(0, Math.min(5, v || 0)));
 };

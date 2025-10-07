@@ -12,12 +12,13 @@ import {
   getRecentCycles,
 } from "../services/cycleService";
 import LineBarTimeline from '../components/charts/LineBarTimeline';
+import { savePregnancyEntry, getPregnancyData, getPregnancyStats, deletePregnancyEntry, getTrimester, calculatePregnancyWeek } from "../services/pregnancyService";
+import { getUserSettings } from "../services/userService";
 
 
 import ProfileDropdown from '../components/ProfileDropdown';
-import Navbar from '../components/Navbar';
 
-function CycleTrackerPage() {
+function CycleTrackerPage({ hideTopToggle = false }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -46,6 +47,12 @@ function CycleTrackerPage() {
   const [successMessage, setSuccessMessage] = useState(null);
   // Disable global auto-backfill by default to avoid unintended mass updates
   const [backfilled, setBackfilled] = useState(true);
+
+  // Pregnancy integration
+  const [pregnancyTrackingEnabled, setPregnancyTrackingEnabled] = useState(false);
+  const [pregnancyData, setPregnancyData] = useState({});
+  const [pregnancyStats, setPregnancyStats] = useState({ currentWeek: 0, currentTrimester: 1 });
+  const [pregnancyWeek, setPregnancyWeek] = useState(0);
 
 
 
@@ -90,6 +97,16 @@ function CycleTrackerPage() {
       loadCycleData();
     }
   }, [currentUser]);
+
+  // Listen for external view mode toggle (from MyCycle toolbar)
+  useEffect(() => {
+    const handler = (e) => {
+      const next = e?.detail;
+      if (next === 'calendar' || next === 'insights') setViewMode(next);
+    };
+    window.addEventListener('cycle:setViewMode', handler);
+    return () => window.removeEventListener('cycle:setViewMode', handler);
+  }, []);
 
   // After data loads, backfill ongoing days between start and end into DB/UI
   useEffect(() => {
@@ -163,6 +180,17 @@ function CycleTrackerPage() {
       setCommonSymptoms(symptoms);
       const timeline = await getRecentCycles(currentUser.uid, 6);
       setRecentCycles(timeline);
+
+      // Pregnancy settings and data
+      const userSettings = await getUserSettings(currentUser.uid);
+      const enabled = !!userSettings?.pregnancyTrackingEnabled;
+      setPregnancyTrackingEnabled(enabled);
+      if (enabled) {
+        const pData = await getPregnancyData(currentUser.uid);
+        setPregnancyData(pData);
+        const pStats = await getPregnancyStats(currentUser.uid);
+        setPregnancyStats(pStats);
+      }
       
     } catch (error) {
       console.error("Error loading cycle data:", error);
@@ -225,12 +253,18 @@ function CycleTrackerPage() {
       setPeriodStatus('none');
     }
 
+    // Preload pregnancy entry if present
+
+
     // Removed consumption input reset as per user request
     // setShowConsumptionInput(false);
   };
 
   const handleSaveData = async () => {
     try {
+      // Pregnancy tracking is handled in PregnancyTrackerPage only
+      // Any pregnancy data entry from the cycle tracker is disabled intentionally.
+
       // Allow saving notes and reminders for future dates, but restrict period tracking to past/present dates
       if (isFutureDate(selectedDate) && (periodStatus === 'start' || periodStatus === 'ongoing' || periodStatus === 'end')) {
         setError("Cannot track period data for future dates. However, you can add notes and symptom reminders.");
@@ -370,10 +404,17 @@ function CycleTrackerPage() {
 
   const handleDeleteEntry = async () => {
     try {
-      await deleteCycleEntry(currentUser.uid, selectedDate);
+      const dateKey = formatDateKey(selectedDate);
+      // Delete both types if exist
+      if (cycleData[dateKey]) {
+        await deleteCycleEntry(currentUser.uid, selectedDate);
+      }
+      if (pregnancyTrackingEnabled && pregnancyData[dateKey]) {
+        await deletePregnancyEntry(currentUser.uid, selectedDate);
+        const p = { ...pregnancyData }; delete p[dateKey]; setPregnancyData(p);
+      }
       
       // Remove from local state
-      const dateKey = formatDateKey(selectedDate);
       const newData = { ...cycleData };
       delete newData[dateKey];
       setCycleData(newData);
@@ -436,6 +477,7 @@ function CycleTrackerPage() {
       }
     }
 
+      const hasPregnancy = pregnancyTrackingEnabled && pregnancyData[dateKey];
       days.push(
         <div
           key={day}
@@ -504,13 +546,16 @@ function CycleTrackerPage() {
   return (
     <>
       {/* Removed extra header to integrate with Navbar */}
-      <Navbar />
       <div className="cycle-tracker-page">
-        {/* View Toggle (moved under navbar) */}
-        <div className="view-toggle" style={{margin:'12px 0', display:'inline-flex', background:'#f1f5f9', padding:'4px', borderRadius:'9999px', gap:'4px'}}>
-          <button onClick={() => setViewMode('calendar')} className={`view-btn ${viewMode==='calendar'?'active':''}`}>Calendar</button>
-          <button onClick={() => setViewMode('insights')} className={`view-btn ${viewMode==='insights'?'active':''}`}>Insights</button>
-        </div>
+        {/* Top toggles bar (hidden when parent provides one) */}
+        {!hideTopToggle && (
+          <div className="top-toggles">
+            <div className="cycle-view-toggle">
+              <button onClick={() => setViewMode('calendar')} className={`cycle-view-btn ${viewMode==='calendar'?'active':''}`}>Calendar</button>
+              <button onClick={() => setViewMode('insights')} className={`cycle-view-btn ${viewMode==='insights'?'active':''}`}>Insights</button>
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         {/* Removed extra header to integrate with Navbar */}
@@ -575,7 +620,7 @@ function CycleTrackerPage() {
                 {Math.ceil((getPredictedNextPeriod() - new Date()) / (1000 * 60 * 60 * 24))} days
               </span>
               <span className="predicted-date">
-                {getPredictedNextPeriod().toLocaleDateString()}
+                {getPredictedNextPeriod().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>
           </div>
@@ -601,6 +646,16 @@ function CycleTrackerPage() {
               <button onClick={() => navigateMonth(1)} className="nav-btn">
                 <span>›</span>
               </button>
+              {/* <input
+                type="month"
+                className="month-input"
+                value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
+                onChange={(e) => {
+                  const [y, m] = e.target.value.split('-');
+                  const d = new Date(parseInt(y), parseInt(m) - 1, 1);
+                  setCurrentDate(d);
+                }}
+              /> */}
             </div>
 
             {/* Month actions */}
@@ -665,14 +720,7 @@ function CycleTrackerPage() {
                 </div>
               </div>
             </div>
-            {/* Month selector for previous months */}
-            <div style={{display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'8px'}}>
-              <input type="month" onChange={(e)=>{
-                const [y,m] = e.target.value.split('-');
-                const d = new Date(parseInt(y), parseInt(m)-1, 1);
-                setCurrentDate(d);
-              }} />
-            </div>
+
           </>
         ) : (
           /* Insights View */
@@ -727,7 +775,7 @@ function CycleTrackerPage() {
                   <p>📊 Total cycles tracked: {cycleStats.totalCycles}</p>
                   <p>📅 Average cycle: {cycleStats.averageCycleLength} days</p>
                   {cycleStats.lastPeriodStart && (
-                    <p>🩸 Last period: {new Date(cycleStats.lastPeriodStart).toLocaleDateString()}</p>
+                    <p>🩸 Last period: {new Date(cycleStats.lastPeriodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   )}
                 </div>
               </div>
@@ -775,11 +823,12 @@ function CycleTrackerPage() {
         <div className="modal-overlay" onClick={() => setShowSymptomModal(false)}>
           <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Track for {selectedDate.toLocaleDateString()}</h3>
+              <h3>Track for {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</h3>
               <button onClick={() => setShowSymptomModal(false)} className="close-btn">×</button>
             </div>
 
             <div className="modal-content">
+
               {/* Period Status Section */}
               <div className="period-section">
                 <h4>Period Status</h4>

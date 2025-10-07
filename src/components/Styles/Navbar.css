@@ -1,49 +1,131 @@
+
+:root {
+  /* Expose navbar height so pages can offset sticky elements */
+  --navbar-height: 88px;
+}
+
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, rgba(109, 40, 217, 0.18) 0%, rgba(147, 51, 234, 0.16) 50%, rgba(236, 72, 153, 0.14) 100%);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1), 0 2px 4px -1px rgba(139, 92, 246, 0.06);
-  position: sticky;
-  top: 0;
+  padding: 0.5rem 1.5rem; /* slightly more padding for breathing space */
+  background: linear-gradient(135deg, #4b0082, #c71585); /* keep the gradient */
+  backdrop-filter: blur(12px); /* softer blur for readability */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(75, 0, 130, 0.3), 0 2px 8px rgba(199, 21, 133, 0.2);
+  color: #ffffff; /* default text color */
+  font-family: 'Poppins', sans-serif;
+  position: relative;
   z-index: 1000;
-  transition: all 0.3s ease;
 }
 
-.navbar:hover {
-  background: linear-gradient(135deg, rgba(109, 40, 217, 0.24) 0%, rgba(147, 51, 234, 0.20) 50%, rgba(236, 72, 153, 0.18) 100%);
-  box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.15), 0 4px 6px -2px rgba(139, 92, 246, 0.08);
+@keyframes navbarGlow {
+  0% {
+    box-shadow:
+      0 4px 6px -1px rgba(124, 58, 237, 0.3),
+      0 2px 4px -1px rgba(124, 58, 237, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 20px 5px rgba(124, 58, 237, 0.6),
+      0 0 30px 10px rgba(124, 58, 237, 0.4);
+  }
 }
 
+/* ===== Left side ===== */
 .navbar-left {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
 }
 
-.navbar-logo {
-  font-size: 2rem;
-  font-weight: 800;
+/* Search box */
+.navbar-search {
+  margin-left: 0.5rem;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 180px;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 0.4rem 2.8rem 0.4rem 0.6rem;
+  border-radius: 0.5em;
+  background: white;
+  color: #1e293b;
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-45%);
   color: #8b5cf6;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  line-height: 1;
+  height: 1.2em;
+  width: 1.2em;
+}
+
+.clear-search-btn {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #a1a1aa;
+  padding: 0 0.25rem;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.clear-search-btn:hover:not(:disabled) {
+  color: #8b5cf6;
+}
+
+.clear-search-btn:disabled {
+  cursor: default;
+  color: #d4d4d8;
+}
+
+/* Logo */
+.navbar-logo {
+  font-size: 2.5rem; /* increased size for prominence */
+  font-weight: 800; /* bolder */
+  color: #ffffff; /* bright white */
   text-decoration: none;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   text-shadow:
-    0 2px 4px rgba(139, 92, 246, 0.3),
-    0 0 20px rgba(167, 139, 250, 0.2);
-  letter-spacing: 1px;
-  filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.3));
+    0 2px 6px rgba(139, 92, 246, 0.5),
+    0 0 30px rgba(167, 139, 250, 0.8);
+  letter-spacing: 1.5px;
+  filter: drop-shadow(0 6px 12px rgba(139, 92, 246, 0.5));
 }
 
 .navbar-logo:hover {
-  text-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+  color: #ffffff;
+  text-shadow:
+    0 0 8px #facc15,
+    0 0 16px #facc15,
+    0 0 24px #facc15,
+    0 0 32px #facc15;
 }
 
 .navbar-logo:focus-visible {
@@ -52,6 +134,16 @@
   border-radius: 8px;
 }
 
+/* Date */
+.navbar-date {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #e0e0e0;
+  margin-top: 2px;
+  text-shadow: none; /* no glow */
+}
+
+/* ===== Center links ===== */
 .navbar-center {
   display: flex;
   align-items: center;
@@ -62,7 +154,7 @@
 }
 
 .nav-link {
-  color: #64748b;
+  color: #ffffff !important; /* pure white for non-selected - !important to override global styles */
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
@@ -75,96 +167,64 @@
 }
 
 .nav-link:hover {
-  color: #1e293b;
-  background: rgba(99, 102, 241, 0.1);
+  color: #fbbf24; /* bright amber/gold for better visibility */
+  background: rgba(251, 191, 36, 0.15); /* subtle amber background */
 }
 
 .nav-link:focus-visible {
-  outline: 2px solid rgba(124, 58, 237, 0.45);
+  outline: 2px solid rgb(255, 255, 255);
   outline-offset: 2px;
-  background: rgba(99, 102, 241, 0.12);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .nav-link.active {
-  color: #6366f1;
-  background: rgba(99, 102, 241, 0.15);
+  color: #ffea00; /* bright yellow/gold for active */
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  background: rgba(255, 255, 255, 0.35); /* stronger subtle background */
+  box-shadow: 0 0 12px rgba(255, 234, 0, 0.7); /* subtle glow */
+  border-bottom: none; /* no underline */
 }
 
+/* Feedback button styling */
+.feedback-button {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.feedback-button:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #fbbf24 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+/* ===== Right side ===== */
 .navbar-right {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: white;
+  position: relative;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .navbar-center {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .nav-link {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .navbar-logo {
-    font-size: 1.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar-center {
-    gap: 0.5rem;
-  }
-
-  .nav-link {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.85rem;
-  }
-
-  .navbar-logo {
-    font-size: 1.6rem;
-  }
-}
-
-
-
-/* Glass morphism effect */
-.navbar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(167, 139, 250, 0.03) 50%, rgba(196, 181, 253, 0.05) 100%);
-  backdrop-filter: blur(20px);
-  z-index: -1;
-  border-radius: inherit;
-}
-
-/* Subtle glow effect */
-.navbar {
-  box-shadow:
-    0 4px 6px -1px rgba(139, 92, 246, 0.1),
-    0 2px 4px -1px rgba(139, 92, 246, 0.06),
-    0 0 0 1px rgba(139, 92, 246, 0.1);
-}
-
-/* Pregnancy info in navbar */
+/* ===== Pregnancy info ===== */
 .navbar-pregnancy-info {
   display: flex;
   align-items: center;
@@ -188,4 +248,60 @@
   padding: 2px 6px;
   border-radius: 10px;
   font-weight: 500;
+}
+
+/* Removed floating moon pseudo-element from navbar */
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-3px) rotate(-1deg);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.5rem 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .navbar-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .nav-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  .navbar-logo {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-center {
+    gap: 0.5rem;
+  }
+  .nav-link {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .navbar-logo {
+    font-size: 1.4rem;
+  }
+  .navbar-date {
+    font-size: 0.75rem;
+  }
 }

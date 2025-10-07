@@ -4,12 +4,18 @@ import { useAuth } from '../context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import ProfileDropdown from './ProfileDropdown';
+import UserFeedbackModal from './UserFeedbackModalSimple';
 import './Styles/Navbar.css';
 
 const Navbar = ({ searchProps, viewToggleProps }) => {
   const location = useLocation();
   const { currentUser } = useAuth();
   const [showPregnancyTracker, setShowPregnancyTracker] = useState(false);
+  const [currentDate, setCurrentDate] = useState('');
+  const [greeting, setGreeting] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [siteName, setSiteName] = useState('Luneverse');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   useEffect(() => {
     const checkPregnancyTrackerVisibility = async () => {
@@ -27,7 +33,8 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
           const hasConceptionDate = data.conceptionDate;
           const pregnancyTrackingEnabled = data.pregnancyTrackingEnabled;
 
-          setShowPregnancyTracker(hasConceptionDate && pregnancyTrackingEnabled);
+          // Show Pregnancy Tracker link when pregnancy tracking is enabled
+          setShowPregnancyTracker(pregnancyTrackingEnabled || false);
         } else {
           setShowPregnancyTracker(false);
         }
@@ -40,17 +47,47 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
     checkPregnancyTrackerVisibility();
   }, [currentUser]);
 
+  useEffect(() => {
+    const load = async () => {
+      if (currentUser) {
+        const snap = await getDoc(doc(db, 'users', currentUser.uid));
+        setIsAdmin(snap.exists() ? !!snap.data().isAdmin : false);
+      } else {
+        setIsAdmin(false);
+      }
+      const cfg = await getDoc(doc(db, 'config', 'app'));
+      if (cfg.exists()) setSiteName(cfg.data().siteName || 'Luneverse');
+    };
+    load();
+  }, [currentUser]);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
+  useEffect(() => {
+    const now = new Date();
+    const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    setCurrentDate(now.toLocaleDateString(undefined, options));
+    setGreeting(getGreeting());
+  }, []);
+
   return (
     <nav className="navbar">
       <div className="navbar-left">
         <NavLink to="/dashboard" className="navbar-logo" title="Luneverse Dashboard">
-        🌙 Luneverse
+          <div className="navbar-logo-text">
+            <span>🌙 {siteName}</span>
+            <div className="navbar-date">{currentDate}</div>
+          </div>
         </NavLink>
         {/* Moved search bar and view toggle here for better layout */}
-        {location.pathname === '/diary' && searchProps && (
-          <div className="navbar-search" style={{ marginLeft: '2rem' }}>
+        {(location.pathname === '/diary' || location.pathname === '/my-journal') && searchProps && (
+          <div className="navbar-search" style={{ marginLeft: '0.5rem' }}>
             <div className="search-input-wrapper">
-              <span className="search-icon">🔍</span>
               <input
                 type="text"
                 placeholder="Search entries..."
@@ -77,8 +114,6 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
 
         {/* Per-page controls removed from Navbar to keep it consistent */}
 
-
-
         {location.pathname === '/pregnancy-tracker' && viewToggleProps && viewToggleProps.pregnancyInfo && (
           <div className="navbar-pregnancy-info" style={{ marginLeft: '2rem' }}>
             <span className="navbar-week-info">🤰 Week {viewToggleProps.pregnancyInfo.currentWeek}</span>
@@ -94,37 +129,54 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
           Dashboard
         </NavLink>
         <NavLink
-          to="/diary"
+          to="/my-journal"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          Diary
+          My Journal
         </NavLink>
         <NavLink
-          to="/mood-tracker"
+          to="/my-cycle"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          Mood Tracker
+          My Cycle
         </NavLink>
         <NavLink
-          to="/cycle-tracker"
+          to="/relax"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          Cycle Tracker
+          Relax
         </NavLink>
-        {showPregnancyTracker && (
+        {currentUser && currentUser.emailVerified && (
+          <button
+            onClick={() => setShowFeedbackModal(true)}
+            className="nav-link feedback-button"
+            title="Share your feedback"
+          >
+            💬 Feedback
+          </button>
+        )}
+        {isAdmin && (
           <NavLink
-            to="/pregnancy-tracker"
+            to="/admin"
             className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
           >
-            Pregnancy Tracker
+            Admin
           </NavLink>
         )}
       </div>
       <div className="navbar-right">
+        <div className="navbar-greeting">{greeting}, {currentUser?.displayName || currentUser?.email || 'User'}</div>
         <ProfileDropdown />
       </div>
+
+      <UserFeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        currentUser={currentUser}
+      />
     </nav>
   );
 };
 
 export default Navbar;
+

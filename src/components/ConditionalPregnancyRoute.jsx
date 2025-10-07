@@ -73,8 +73,9 @@ const ConditionalPregnancyRoute = () => {
         </p>
         <ul style={{ textAlign: 'left', marginBottom: '20px' }}>
           <li>Enable pregnancy tracking in your Settings</li>
+          <li>Set your conception date (you can do this once you access the page)</li>
         </ul>
-        <p>Go to Settings and enable the Pregnancy Tracking feature to access this page.</p>
+        <p>Go to Settings → Profile tab and enable the Pregnancy Tracking feature.</p>
       </div>
     );
   }

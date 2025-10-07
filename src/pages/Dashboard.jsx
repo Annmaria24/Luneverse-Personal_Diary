@@ -16,7 +16,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
 
   // New state variables for counts
   const [journalCount, setJournalCount] = useState(0);
@@ -62,19 +62,7 @@ function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isDropdownOpen && !event.target.closest('.profile-dropdown')) {
-        setIsDropdownOpen(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDropdownOpen]);
 
   // Fetch counts for journal, mood, and cycle entries for current month
   useEffect(() => {
@@ -206,7 +194,6 @@ function Dashboard() {
     <div className="dashboard">
       {/* Background Elements */}
       <div className="dashboard-background">
-        <div className="floating-element element-1">🌙</div>
         <div className="floating-element element-2">✨</div>
         <div className="floating-element element-3">🌸</div>
         <div className="floating-element element-4">💜</div>
@@ -250,12 +237,14 @@ function Dashboard() {
               <div className="stat-icon">{pregnancyTrackingEnabled ? '🤰' : '🌸'}</div>
               <div className="stat-content">
                 <h3>{pregnancyTrackingEnabled ? 'Pregnancy Progress' : 'Cycle Insights'}</h3>
-                <p className="stat-number">
-                  {pregnancyTrackingEnabled
-                    ? (pregnancyStats.currentWeek > 0 ? `Week ${pregnancyStats.currentWeek}` : 'Early Stage')
-                    : (cycleStats.totalCycles > 0 ? cycleStats.currentPhase : '')
-                  }
-                </p>
+        <p className="stat-number">
+          {pregnancyTrackingEnabled
+            ? (pregnancyStats.conceptionDate
+                ? `Week ${pregnancyStats.currentWeek}`
+                : (pregnancyStats.currentWeek > 0 ? `Week ${pregnancyStats.currentWeek}` : 'Early Stage'))
+            : (cycleStats.totalCycles > 0 ? cycleStats.currentPhase : '')
+          }
+        </p>
                 <span className="stat-label">
                   {pregnancyTrackingEnabled ? 'Current week' : 'Current phase'}
                 </span>
@@ -312,65 +301,41 @@ function Dashboard() {
               </button>
             </div>
 
-          {pregnancyTrackingEnabled ? (
-            <div className="feature-card pregnancy-card">
-              <div className="feature-header">
-                <div className="feature-icon">🤰</div>
-                <h3>Pregnancy Tracker</h3>
-              </div>
-              <p>Track your pregnancy journey with detailed insights and weekly updates.</p>
-              {pregnancyStats.currentWeek > 0 ? (
+          <div className="feature-card health-cycle-card">
+            <div className="feature-header">
+              <div className="feature-icon">{pregnancyTrackingEnabled ? '🤰' : '🌸'}</div>
+              <h3>Health Cycle</h3>
+            </div>
+            <p>{pregnancyTrackingEnabled ? 'Track your pregnancy journey with detailed insights and weekly updates.' : 'Keep track of your menstrual cycle with privacy and personalized insights.'}</p>
+            {pregnancyTrackingEnabled && pregnancyStats.currentWeek > 0 ? (
+              <>
+                <div className="pregnancy-week-info">Week {pregnancyStats.currentWeek}</div>
+                <div className="pregnancy-trimester-info">Trimester {pregnancyStats.currentTrimester}</div>
+                <div className="pregnancy-progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${(pregnancyStats.currentWeek / 40) * 100}%` }}
+                  />
+                </div>
+              </>
+            ) : pregnancyTrackingEnabled ? (
+              <div className="pregnancy-week-info">Early Stage</div>
+            ) : null}
+            <button
+              className={`feature-button ${loadingStates.cycle ? 'loading' : ''}`}
+              onClick={() => handleNavigateWithLoading('/my-cycle', 'cycle')}
+              disabled={loadingStates.cycle}
+            >
+              {loadingStates.cycle ? (
                 <>
-                  <div className="pregnancy-week-info">Week {pregnancyStats.currentWeek}</div>
-                  <div className="pregnancy-trimester-info">Trimester {pregnancyStats.currentTrimester}</div>
-                  <div className="pregnancy-progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${(pregnancyStats.currentWeek / 40) * 100}%` }}
-                    />
-                  </div>
+                  <span className="loading-spinner">⏳</span>
+                  Loading...
                 </>
               ) : (
-                <div className="pregnancy-week-info">Early Stage</div>
+                pregnancyTrackingEnabled ? 'Track Pregnancy' : 'Log Cycle'
               )}
-              <button
-                className={`feature-button ${loadingStates.pregnancy ? 'loading' : ''}`}
-                onClick={() => handleNavigateWithLoading('/pregnancy-tracker', 'pregnancy')}
-                disabled={loadingStates.pregnancy}
-              >
-                {loadingStates.pregnancy ? (
-                  <>
-                    <span className="loading-spinner">⏳</span>
-                    Loading...
-                  </>
-                ) : (
-                  'Track Pregnancy'
-                )}
-              </button>
-            </div>
-          ) : (
-            <div className="feature-card cycle-card">
-              <div className="feature-header">
-                <div className="feature-icon">🌸</div>
-                <h3>Cycle Tracker</h3>
-              </div>
-              <p>Keep track of your menstrual cycle with privacy and personalized insights.</p>
-              <button
-                className={`feature-button ${loadingStates.cycle ? 'loading' : ''}`}
-                onClick={() => handleNavigateWithLoading('/cycle-tracker', 'cycle')}
-                disabled={loadingStates.cycle}
-              >
-                {loadingStates.cycle ? (
-                  <>
-                    <span className="loading-spinner">⏳</span>
-                    Loading...
-                  </>
-                ) : (
-                  'Log Cycle'
-                )}
-              </button>
-            </div>
-          )}
+            </button>
+          </div>
 
           </div>
         </section>

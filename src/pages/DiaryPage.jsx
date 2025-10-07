@@ -11,8 +11,6 @@ import RichTextEditor from '../components/RichTextEditor';
 import FullScreenEditor from '../components/FullScreenEditor';
 import CustomModal from '../components/CustomModal';
 import { useCustomModal } from '../hooks/useCustomModal';
-import Navbar from '../components/Navbar';
-
 
 function DiaryPage() {
   const { currentUser } = useAuth();
@@ -454,8 +452,14 @@ function DiaryPage() {
 
   return (
     <div className="diary-page">
-      <Navbar searchProps={{searchTerm, setSearchTerm, handleSearch, clearSearch, loading}} />
-
+      <div className="dashboard-background">
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+        <div className="floating-element element-6">🌺</div>
+      </div>
       <div className="diary-container">
         {/* Search */}
         {/* Removed search section here as it's moved to navbar */}
@@ -517,7 +521,7 @@ function DiaryPage() {
                     <span className="quick-date-icon">📝</span>
                     <div className="quick-date-text">
                       <span className="quick-date-title">Today</span>
-                      <span className="quick-date-subtitle">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <span className="quick-date-subtitle">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                   </button>
                   <button 
@@ -527,7 +531,7 @@ function DiaryPage() {
                     <span className="quick-date-icon">📖</span>
                     <div className="quick-date-text">
                       <span className="quick-date-title">Yesterday</span>
-                      <span className="quick-date-subtitle">{new Date(Date.now() - 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <span className="quick-date-subtitle">{new Date(Date.now() - 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                   </button>
                   <button 
@@ -537,7 +541,7 @@ function DiaryPage() {
                     <span className="quick-date-icon">📚</span>
                     <div className="quick-date-text">
                       <span className="quick-date-title">1 Week Ago</span>
-                      <span className="quick-date-subtitle">{new Date(Date.now() - 7 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <span className="quick-date-subtitle">{new Date(Date.now() - 7 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                   </button>
                 </div>

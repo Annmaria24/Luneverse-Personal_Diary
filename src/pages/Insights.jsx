@@ -43,6 +43,14 @@ const Insights = () => {
 
   return (
     <div className="dashboard">
+      <div className="dashboard-background">
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+        <div className="floating-element element-6">🌺</div>
+      </div>
       <Navbar />
       <div className="dashboard-main">
         <div className="features-grid">
@@ -73,6 +81,18 @@ const Insights = () => {
 };
 
 export default Insights;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
