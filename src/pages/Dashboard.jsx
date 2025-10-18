@@ -12,7 +12,7 @@ import { getPregnancyEntriesCountForMonth, getPregnancyStats } from '../services
 import { getUserSettings } from '../services/userService';
 
 function Dashboard() {
-  const { currentUser, userProfile } = useAuth();
+  const { currentUser, userProfile, modulePreferences } = useAuth();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState("");
@@ -40,7 +40,8 @@ function Dashboard() {
     diary: false,
     mood: false,
     cycle: false,
-    pregnancy: false
+    pregnancy: false,
+    affirmations: false
   });
 
   useEffect(() => {
@@ -61,6 +62,52 @@ function Dashboard() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Daily affirmations notification - trigger when dashboard loads
+  useEffect(() => {
+    const getTodayKey = () => {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const remindDaily = localStorage.getItem('affirmations_remind_daily');
+    if (remindDaily === 'false') return;
+
+    const todayKey = getTodayKey();
+    const last = localStorage.getItem('affirmations_last_notify');
+    if (last === todayKey) return;
+
+    const show = () => {
+      try {
+        const n = new Notification('Daily Affirmations', {
+          body: 'Take 1 minute to review your affirmations ✨',
+        });
+        n.onclick = () => {
+          window.focus();
+          navigate('/relax?section=affirmations');
+          n.close();
+        };
+        localStorage.setItem('affirmations_last_notify', todayKey);
+      } catch (e) {
+        // Fallback toast-like alert
+        alert('Daily Affirmations: Take 1 minute to review your affirmations ✨');
+        localStorage.setItem('affirmations_last_notify', todayKey);
+      }
+    };
+
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        show();
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((perm) => {
+          if (perm === 'granted') show();
+        });
+      }
+    }
+  }, [navigate]);
 
 
 
@@ -204,6 +251,19 @@ function Dashboard() {
       {/* Header */}
       <Navbar />
 
+      {/* Quick Actions - Outside main content to avoid positioning conflicts */}
+      {modulePreferences.relaxMode && (
+        <div className="quick-actions">
+          <button
+            className={`affirmations-quick-btn ${loadingStates.affirmations ? 'loading' : ''}`}
+            onClick={() => handleNavigateWithLoading('/relax?section=affirmations', 'affirmations')}
+            disabled={loadingStates.affirmations}
+          >
+            ✨ Daily Affirmations
+          </button>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="dashboard-main">
         {/* Welcome Section */}
@@ -217,91 +277,101 @@ function Dashboard() {
         {/* Quick Stats */}
         <section className="stats-section">
           <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon">📝</div>
-              <div className="stat-content">
-                <h3>Journal Entries</h3>
-                <p className="stat-number">{journalCount}</p>
-                <span className="stat-label">This month</span>
+            {modulePreferences.journal && (
+              <div className="stat-card">
+                <div className="stat-icon">📝</div>
+                <div className="stat-content">
+                  <h3>Journal Entries</h3>
+                  <p className="stat-number">{journalCount}</p>
+                  <span className="stat-label">This month</span>
+                </div>
               </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">📊</div>
-              <div className="stat-content">
-                <h3>Mood Tracking</h3>
-                <p className="stat-number">{moodCount}</p>
-                <span className="stat-label">Days logged</span>
+            )}
+            {modulePreferences.moodTracker && (
+              <div className="stat-card">
+                <div className="stat-icon">📊</div>
+                <div className="stat-content">
+                  <h3>Mood Tracking</h3>
+                  <p className="stat-number">{moodCount}</p>
+                  <span className="stat-label">Days logged</span>
+                </div>
               </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">{pregnancyTrackingEnabled ? '🤰' : '🌸'}</div>
-              <div className="stat-content">
-                <h3>{pregnancyTrackingEnabled ? 'Pregnancy Progress' : 'Cycle Insights'}</h3>
-        <p className="stat-number">
-          {pregnancyTrackingEnabled
-            ? (pregnancyStats.conceptionDate
-                ? `Week ${pregnancyStats.currentWeek}`
-                : (pregnancyStats.currentWeek > 0 ? `Week ${pregnancyStats.currentWeek}` : 'Early Stage'))
-            : (cycleStats.totalCycles > 0 ? cycleStats.currentPhase : '')
-          }
-        </p>
-                <span className="stat-label">
-                  {pregnancyTrackingEnabled ? 'Current week' : 'Current phase'}
-                </span>
+            )}
+            {(modulePreferences.cycleTracker || modulePreferences.pregnancyTracker) && (
+              <div className="stat-card">
+                <div className="stat-icon">{pregnancyTrackingEnabled ? '🤰' : '🌸'}</div>
+                <div className="stat-content">
+                  <h3>{pregnancyTrackingEnabled ? 'Pregnancy Progress' : 'Cycle Insights'}</h3>
+                  <p className="stat-number">
+                    {pregnancyTrackingEnabled
+                      ? (pregnancyStats.conceptionDate
+                          ? `Week ${pregnancyStats.currentWeek}`
+                          : (pregnancyStats.currentWeek > 0 ? `Week ${pregnancyStats.currentWeek}` : 'Early Stage'))
+                      : (cycleStats.totalCycles > 0 ? cycleStats.currentPhase : '')
+                    }
+                  </p>
+                  <span className="stat-label">
+                    {pregnancyTrackingEnabled ? 'Current week' : 'Current phase'}
+                  </span>
+                </div>
               </div>
-            </div>
-
+            )}
           </div>
         </section>
 
         {/* Main Features */}
         <section className="features-section">
           <div className="features-grid">
-            <div className="feature-card diary-card">
-              <div className="feature-header">
-                <div className="feature-icon">📝</div>
-                <h3>Digital Diary</h3>
+            {modulePreferences.journal && (
+              <div className="feature-card diary-card">
+                <div className="feature-header">
+                  <div className="feature-icon">📝</div>
+                  <h3>Digital Diary</h3>
+                </div>
+                <p>Capture your thoughts, feelings, and daily reflections in your private digital space.</p>
+                <button
+                  className={`feature-button ${loadingStates.diary ? 'loading' : ''}`}
+                  onClick={() => handleNavigateWithLoading('/diary', 'diary')}
+                  disabled={loadingStates.diary}
+                >
+                  {loadingStates.diary ? (
+                    <>
+                      <span className="loading-spinner">⏳</span>
+                      Loading...
+                    </>
+                  ) : (
+                    'Start Writing'
+                  )}
+                </button>
               </div>
-              <p>Capture your thoughts, feelings, and daily reflections in your private digital space.</p>
-              <button
-                className={`feature-button ${loadingStates.diary ? 'loading' : ''}`}
-                onClick={() => handleNavigateWithLoading('/diary', 'diary')}
-                disabled={loadingStates.diary}
-              >
-                {loadingStates.diary ? (
-                  <>
-                    <span className="loading-spinner">⏳</span>
-                    Loading...
-                  </>
-                ) : (
-                  'Start Writing'
-                )}
-              </button>
-            </div>
+            )}
 
-            <div className="feature-card mood-card">
-              <div className="feature-header">
-                <div className="feature-icon">📊</div>
-                <h3>Mood Tracker</h3>
+            {modulePreferences.moodTracker && (
+              <div className="feature-card mood-card">
+                <div className="feature-header">
+                  <div className="feature-icon">📊</div>
+                  <h3>Mood Tracker</h3>
+                </div>
+                <p>Monitor your emotional patterns and discover insights about your mental wellness.</p>
+                <button
+                  className={`feature-button ${loadingStates.mood ? 'loading' : ''}`}
+                  onClick={() => handleNavigateWithLoading('/mood-tracker', 'mood')}
+                  disabled={loadingStates.mood}
+                >
+                  {loadingStates.mood ? (
+                    <>
+                      <span className="loading-spinner">⏳</span>
+                      Loading...
+                    </>
+                  ) : (
+                    'Track Mood'
+                  )}
+                </button>
               </div>
-              <p>Monitor your emotional patterns and discover insights about your mental wellness.</p>
-              <button
-                className={`feature-button ${loadingStates.mood ? 'loading' : ''}`}
-                onClick={() => handleNavigateWithLoading('/mood-tracker', 'mood')}
-                disabled={loadingStates.mood}
-              >
-                {loadingStates.mood ? (
-                  <>
-                    <span className="loading-spinner">⏳</span>
-                    Loading...
-                  </>
-                ) : (
-                  'Track Mood'
-                )}
-              </button>
-            </div>
+            )}
 
-          <div className="feature-card health-cycle-card">
+            {(modulePreferences.cycleTracker || modulePreferences.pregnancyTracker) && (
+              <div className="feature-card health-cycle-card">
             <div className="feature-header">
               <div className="feature-icon">{pregnancyTrackingEnabled ? '🤰' : '🌸'}</div>
               <h3>Health Cycle</h3>
@@ -335,10 +405,13 @@ function Dashboard() {
                 pregnancyTrackingEnabled ? 'Track Pregnancy' : 'Log Cycle'
               )}
             </button>
-          </div>
+              </div>
+            )}
 
           </div>
         </section>
+
+        
 
         {/* Pregnancy Tracker - Only show if enabled */}
         {/* Removed separate pregnancy tracker card section as it is now conditionally rendered inside features grid */}

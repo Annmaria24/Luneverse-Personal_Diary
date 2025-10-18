@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -7,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import ConditionalPregnancyRoute from "./components/ConditionalPregnancyRoute";
 import AdminRoute from "./components/AdminRoute";
+import ModuleGuard from "./components/ModuleGuard";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
@@ -23,6 +23,7 @@ import SettingsPage from "./pages/SettingsPage";
 import RelaxMode from "./pages/RelaxMode";
 import RelaxBreathe from "./pages/RelaxBreathe";
 import RelaxSound from "./pages/RelaxSound";
+import RelaxQuotes from "./pages/RelaxQuotes";
 import RelaxMeditations from "./pages/RelaxMeditations";
 import RelaxVisuals from "./pages/RelaxVisuals";
 import Insights from "./pages/Insights";
@@ -31,6 +32,9 @@ import AdminDashboard from "./pages/admin/AdminDashboardFixed";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminFeedback from "./pages/admin/AdminFeedbackSimple";
 import AdminSettings from "./pages/admin/AdminSettings";
+import RelaxFlow from "./pages/RelaxFlow";
+import Reflect from "./pages/Reflect";
+import RelaxAffirmations from "./pages/RelaxAffirmations";
 
 function App() {
   return (
@@ -119,7 +123,9 @@ function App() {
                 path="/diary"
                 element={
                   <ProtectedRoute>
-                    <DiaryPage />
+                    <ModuleGuard requiredModule="journal">
+                      <DiaryPage />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -127,7 +133,9 @@ function App() {
                 path="/my-journal"
                 element={
                   <ProtectedRoute>
-                    <MyJournal />
+                    <ModuleGuard requiredModule="journal">
+                      <MyJournal />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -135,7 +143,9 @@ function App() {
                 path="/mood-tracker"
                 element={
                   <ProtectedRoute>
-                    <MoodTrackerPage />
+                    <ModuleGuard requiredModule="moodTracker">
+                      <MoodTrackerPage />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -143,7 +153,9 @@ function App() {
                 path="/my-cycle"
                 element={
                   <ProtectedRoute>
-                    <MyCycle />
+                    <ModuleGuard requiredModule="cycleTracker">
+                      <MyCycle />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -159,7 +171,9 @@ function App() {
                 path="/relax"
                 element={
                   <ProtectedRoute>
-                    <RelaxMode />
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxMode />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -172,18 +186,12 @@ function App() {
                 }
               />
               <Route
-                path="/relax"
-                element={
-                  <ProtectedRoute>
-                    <RelaxMode />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/relax/breathe"
                 element={
                   <ProtectedRoute>
-                    <RelaxBreathe />
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxBreathe />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -191,7 +199,9 @@ function App() {
                 path="/relax/sound"
                 element={
                   <ProtectedRoute>
-                    <RelaxSound />
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxSound />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -199,7 +209,19 @@ function App() {
                 path="/relax/meditations"
                 element={
                   <ProtectedRoute>
-                    <RelaxMeditations />
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxMeditations />
+                    </ModuleGuard>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/quotes"
+                element={
+                  <ProtectedRoute>
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxQuotes />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />
@@ -207,7 +229,39 @@ function App() {
                 path="/relax/visuals"
                 element={
                   <ProtectedRoute>
-                    <RelaxVisuals />
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxVisuals />
+                    </ModuleGuard>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/flow"
+                element={
+                  <ProtectedRoute>
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxFlow />
+                    </ModuleGuard>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/reflect"
+                element={
+                  <ProtectedRoute>
+                    <ModuleGuard requiredModule="relaxMode">
+                      <Reflect />
+                    </ModuleGuard>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/relax/affirmations"
+                element={
+                  <ProtectedRoute>
+                    <ModuleGuard requiredModule="relaxMode">
+                      <RelaxAffirmations />
+                    </ModuleGuard>
                   </ProtectedRoute>
                 }
               />

@@ -22,6 +22,9 @@ const AdminSettings = () => {
   const user = auth.currentUser;
   const { theme, changeTheme } = useTheme();
   const { siteName, updateSiteName } = useSiteName();
+  
+  // Track if we need to refresh the user
+  const [needsRefresh, setNeedsRefresh] = useState(false);
 
   useEffect(() => {
     // Get current user email from auth
@@ -32,6 +35,24 @@ const AdminSettings = () => {
       console.log('No current user found');
     }
   }, [user]);
+  
+  // Effect to refresh user when needed
+  useEffect(() => {
+    if (needsRefresh) {
+      const refreshUser = async () => {
+        await auth.currentUser.reload();
+        setNeedsRefresh(false);
+        // Reset the form fields after successful update
+        setCurrentPassword('');
+        if (activeTab === 'email') {
+          setNewPassword('');
+        } else {
+          setPassword('');
+        }
+      };
+      refreshUser();
+    }
+  }, [needsRefresh, activeTab]);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,6 +66,15 @@ const AdminSettings = () => {
   const clearMessages = () => {
     setErrors({});
     setSuccess({});
+  };
+  
+  const clearFormFields = (tab) => {
+    setCurrentPassword('');
+    if (tab === 'email') {
+      setNewPassword('');
+    } else {
+      setPassword('');
+    }
   };
 
   const saveConfig = async (e) => {
@@ -88,26 +118,31 @@ const AdminSettings = () => {
       // Validation
       if (!email.trim()) {
         setErrors({ email: 'Email is required' });
+        setSaving(false);
         return;
       }
       
       if (!validateEmail(email)) {
         setErrors({ email: 'Please enter a valid email address' });
+        setSaving(false);
         return;
       }
       
       if (!newPassword.trim()) {
         setErrors({ email: 'New password is required to change email' });
+        setSaving(false);
         return;
       }
       
       if (!validatePassword(newPassword)) {
         setErrors({ email: 'New password must be at least 6 characters long' });
+        setSaving(false);
         return;
       }
       
       if (!currentPassword.trim()) {
         setErrors({ email: 'Current password is required to change email' });
+        setSaving(false);
         return;
       }
       
@@ -127,9 +162,7 @@ const AdminSettings = () => {
       console.log('Password update successful');
       
       setSuccess({ email: 'Email and password updated successfully!' });
-      setCurrentPassword('');
-      setNewPassword('');
-      setEmail(email.trim()); // Update the displayed email
+      setNeedsRefresh(true);
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess({}), 3000);
@@ -166,16 +199,19 @@ const AdminSettings = () => {
       // Validation
       if (!password.trim()) {
         setErrors({ password: 'New password is required' });
+        setSaving(false);
         return;
       }
       
       if (!validatePassword(password)) {
         setErrors({ password: 'Password must be at least 6 characters long' });
+        setSaving(false);
         return;
       }
       
       if (!currentPassword.trim()) {
         setErrors({ password: 'Current password is required to change password' });
+        setSaving(false);
         return;
       }
       
@@ -186,8 +222,7 @@ const AdminSettings = () => {
       // Update password
       await updatePassword(user, password);
       setSuccess({ password: 'Password updated successfully!' });
-      setPassword('');
-      setCurrentPassword('');
+      setNeedsRefresh(true);
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess({}), 3000);

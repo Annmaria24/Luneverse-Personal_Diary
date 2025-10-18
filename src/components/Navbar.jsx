@@ -9,7 +9,7 @@ import './Styles/Navbar.css';
 
 const Navbar = ({ searchProps, viewToggleProps }) => {
   const location = useLocation();
-  const { currentUser } = useAuth();
+  const { currentUser, modulePreferences } = useAuth();
   const [showPregnancyTracker, setShowPregnancyTracker] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [greeting, setGreeting] = useState('');
@@ -128,24 +128,30 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
         >
           Dashboard
         </NavLink>
-        <NavLink
-          to="/my-journal"
-          className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
-        >
-          My Journal
-        </NavLink>
-        <NavLink
-          to="/my-cycle"
-          className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
-        >
-          My Cycle
-        </NavLink>
-        <NavLink
-          to="/relax"
-          className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
-        >
-          Relax
-        </NavLink>
+        {modulePreferences.journal && (
+          <NavLink
+            to="/my-journal"
+            className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+          >
+            My Journal
+          </NavLink>
+        )}
+        {(modulePreferences.cycleTracker || modulePreferences.pregnancyTracker) && (
+          <NavLink
+            to="/my-cycle"
+            className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+          >
+            My Cycle
+          </NavLink>
+        )}
+        {modulePreferences.relaxMode && (
+          <NavLink
+            to="/relax"
+            className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+          >
+            Relax
+          </NavLink>
+        )}
         {currentUser && currentUser.emailVerified && (
           <button
             onClick={() => setShowFeedbackModal(true)}

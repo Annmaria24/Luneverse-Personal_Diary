@@ -323,6 +323,56 @@ body::after {
   z-index: 2;
 }
 
+/* Quick Actions Row */
+.quick-actions {
+  position: fixed !important; /* force fixed positioning */
+  top: 130px; /* move further down for better positioning */
+  right: 20px; /* near the right edge */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0; /* no layout shift */
+  z-index: 999; /* very high z-index to ensure it stays on top */
+}
+
+.affirmations-quick-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 0.9rem; /* comfortable touch target */
+  box-shadow: 0 6px 18px rgba(124,58,237,0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  margin: 0;
+}
+
+.affirmations-quick-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(124,58,237,0.35);
+}
+
+.affirmations-quick-btn.loading {
+  opacity: 0.85;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .quick-actions {
+    position: fixed; /* make it a FAB on small screens */
+    bottom: 16px;
+    right: 16px;
+  }
+  .affirmations-quick-btn {
+    border-radius: var(--radius-full);
+    padding: 0.9rem 1rem;
+  }
+}
+
 /* Welcome Section */
 .welcome-section {
   margin-bottom: var(--spacing-lg);

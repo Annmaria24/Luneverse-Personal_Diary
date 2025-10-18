@@ -5,6 +5,7 @@ import { signOut, updatePassword, updateEmail, getAuth, updateProfile } from 'fi
 import { auth, db } from '../firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import CustomModal from '../components/CustomModal';
+import ModulePreferences from '../components/ModulePreferences';
 import { useModal } from '../hooks/useModal';
 import './Styles/SettingsPage.css';
 import Navbar from '../components/Navbar';
@@ -187,6 +188,7 @@ function SettingsPage() {
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: '👤' },
+    { id: 'modules', name: 'Manage Modules', icon: '⚙️' },
     { id: 'privacy', name: 'Privacy', icon: '🔒' },
     { id: 'notifications', name: 'Notifications', icon: '🔔' },
     { id: 'security', name: 'Security', icon: '🛡️' },
@@ -318,6 +320,12 @@ function SettingsPage() {
               >
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </button>
+            </div>
+          )}
+
+          {activeTab === 'modules' && (
+            <div className="settings-section">
+              <ModulePreferences />
             </div>
           )}
 
