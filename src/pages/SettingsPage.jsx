@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { signOut, updatePassword, updateEmail, getAuth, updateProfile } from 'firebase/auth';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { signOut, updatePassword, updateEmail, getAuth, updateProfile, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import CustomModal from '../components/CustomModal';
@@ -13,6 +13,7 @@ import Navbar from '../components/Navbar';
 function SettingsPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -47,6 +48,11 @@ function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isNavigating, setIsNavigating] = useState(false);
 
+  // Email change modal state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForReauth, setPasswordForReauth] = useState('');
+  const [pendingEmailChange, setPendingEmailChange] = useState(null);
+
   useEffect(() => {
     if (currentUser) {
       setDisplayName(currentUser.displayName || '');
@@ -55,6 +61,14 @@ function SettingsPage() {
       loadPregnancyTrackingSetting();
     }
   }, [currentUser]);
+
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'privacy', 'notifications', 'security', 'modules'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const loadPregnancyTrackingSetting = async () => {
     try {
@@ -97,15 +111,31 @@ function SettingsPage() {
     setMessage('');
 
     try {
-      // Update Firebase Auth profile if displayName or email changed
+      // Update Firebase Auth profile if displayName changed
       const authInstance = getAuth();
       if (currentUser.displayName !== displayName) {
         await updateProfile(authInstance.currentUser, { displayName });
       }
+
+      // Check if email changed and handle reauthentication
       if (currentUser.email !== email) {
-        await updateEmail(authInstance.currentUser, email);
+        setPendingEmailChange(email);
+        setShowPasswordModal(true);
+        setIsLoading(false);
+        return; // Exit early, will continue after password confirmation
       }
 
+      // If no email change, proceed with Firestore update
+      await updateFirestoreProfile();
+      
+    } catch (error) {
+      setError('Failed to update profile: ' + error.message);
+      setIsLoading(false);
+    }
+  };
+
+  const updateFirestoreProfile = async () => {
+    try {
       // Update Firestore user document
       const userDocRef = doc(db, 'users', currentUser.uid);
       await setDoc(userDocRef, {
@@ -123,8 +153,10 @@ function SettingsPage() {
       }, { merge: true });
 
       setMessage('Profile updated successfully!');
-      // Refresh page after successful save
-      window.location.reload();
+      // Clean state refresh instead of page reload
+      setPasswordForReauth('');
+      setPendingEmailChange(null);
+      setShowPasswordModal(false);
     } catch (error) {
       setError('Failed to update profile: ' + error.message);
     } finally {
@@ -132,33 +164,129 @@ function SettingsPage() {
     }
   };
 
-  const handleChangePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+  const handlePasswordConfirm = async () => {
+    if (!passwordForReauth.trim()) {
+      setError('Password is required for email change');
       return;
     }
 
     setIsLoading(true);
     setError('');
-    setMessage('');
 
     try {
-      await updatePassword(currentUser, newPassword);
-      setMessage('Password updated successfully!');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      // Re-authenticate user with current password
+      const credential = EmailAuthProvider.credential(currentUser.email, passwordForReauth);
+      await reauthenticateWithCredential(currentUser, credential);
+
+      // Now update the email
+      await updateEmail(currentUser, pendingEmailChange);
+
+      // Update Firestore with new email
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await setDoc(userDocRef, {
+        email: pendingEmailChange,
+        dateOfBirth,
+        location,
+        dataSharing,
+        analytics,
+        notifications,
+        publicProfile,
+        periodReminders,
+        moodReminders,
+        journalReminders,
+        weeklyReports,
+        pregnancyTrackingEnabled
+      }, { merge: true });
+
+      setMessage('Email updated successfully! Please check your new email for verification.');
+      
+      // Clean up modal state
+      setPasswordForReauth('');
+      setPendingEmailChange(null);
+      setShowPasswordModal(false);
+      
+      // Update local email state
+      setEmail(pendingEmailChange);
+      
     } catch (error) {
-      setError('Failed to update password: ' + error.message);
+      console.error('Error updating email:', error);
+      
+      if (error.code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again.');
+      } else if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already in use by another account.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (error.code === 'auth/requires-recent-login') {
+        setError('Please log out and log back in, then try again.');
+      } else {
+        setError('Failed to update email: ' + error.message);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handlePasswordModalClose = () => {
+    setShowPasswordModal(false);
+    setPasswordForReauth('');
+    setPendingEmailChange(null);
+    setError('');
+    // Revert email to original value if user cancels
+    if (currentUser?.email) {
+      setEmail(currentUser.email);
+    }
+  };
+
+  const handleChangePassword = async () => {
+  if (!currentPassword.trim()) {
+    setError('Please enter your current password.');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setError('Passwords do not match.');
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    setError('Password must be at least 6 characters.');
+    return;
+  }
+
+  setIsLoading(true);
+  setError('');
+  setMessage('');
+
+  try {
+    // Re-authenticate user with current password
+    const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+    await reauthenticateWithCredential(currentUser, credential);
+
+    // Update password
+    await updatePassword(currentUser, newPassword);
+
+    setMessage('Password updated successfully!');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  } catch (error) {
+    console.error('Error updating password:', error);
+
+    if (error.code === 'auth/wrong-password') {
+      setError('Incorrect current password. Please try again.');
+    } else if (error.code === 'auth/weak-password') {
+      setError('New password is too weak. Please choose a stronger password.');
+    } else if (error.code === 'auth/requires-recent-login') {
+      setError('Please log out and log back in, then try again.');
+    } else {
+      setError('Failed to update password: ' + error.message);
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleSignOut = async () => {
     try {
@@ -188,7 +316,7 @@ function SettingsPage() {
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: '👤' },
-    { id: 'modules', name: 'Manage Modules', icon: '⚙️' },
+    { id: 'modules', name: 'Manage Features', icon: '⚙️' },
     { id: 'privacy', name: 'Privacy', icon: '🔒' },
     { id: 'notifications', name: 'Notifications', icon: '🔔' },
     { id: 'security', name: 'Security', icon: '🛡️' },
@@ -199,14 +327,6 @@ function SettingsPage() {
     <div className="settings-page">
       <Navbar />
 
-      <div className="dashboard-background">
-        <div className="floating-element element-1">🌙</div>
-        <div className="floating-element element-2">✨</div>
-        <div className="floating-element element-3">🌸</div>
-        <div className="floating-element element-4">💜</div>
-        <div className="floating-element element-5">🦋</div>
-        <div className="floating-element element-6">🌺</div>
-      </div>
 
       <div className="settings-container">
         {/* Sidebar */}
@@ -295,23 +415,7 @@ function SettingsPage() {
               </div>
 
 
-              {/* Pregnancy Tracking Toggle */}
-              <div className="setting-item" style={{marginTop: '1rem', padding: '1rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(139, 92, 246, 0.1)'}}>
-                <div className="setting-info">
-                  <h4 style={{margin: 0, color: '#7c3aed'}}>🤰 Pregnancy Tracking</h4>
-                  <p style={{margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: '#64748b'}}>
-                    Enable pregnancy tracking features and insights
-                  </p>
-                </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={pregnancyTrackingEnabled}
-                    onChange={(e) => setPregnancyTrackingEnabled(e.target.checked)}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
+              {/* Note: Pregnancy tracking is now managed in the "Manage Modules" tab */}
 
               <button
                 onClick={handleSaveProfile}
@@ -546,6 +650,46 @@ function SettingsPage() {
         confirmText={modalState.confirmText}
         cancelText={modalState.cancelText}
         showCancel={modalState.showCancel}
+      />
+
+      {/* Password Confirmation Modal for Email Change */}
+      <CustomModal
+        isOpen={showPasswordModal}
+        onClose={handlePasswordModalClose}
+        title="Confirm Password"
+        message={
+          <div style={{ textAlign: 'left' }}>
+            <p>To change your email address, please enter your current password:</p>
+            <div style={{ marginTop: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                Current Password:
+              </label>
+              <input
+                type="password"
+                value={passwordForReauth}
+                onChange={(e) => setPasswordForReauth(e.target.value)}
+                placeholder="Enter your current password"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                autoFocus
+              />
+            </div>
+          </div>
+        }
+        type="confirm"
+        onConfirm={handlePasswordConfirm}
+        confirmText={isLoading ? 'Verifying...' : 'Confirm'}
+        cancelText="Cancel"
+        showCancel={true}
       />
     </div>
   );

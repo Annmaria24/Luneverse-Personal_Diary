@@ -53,7 +53,13 @@ function RelaxAffirmations({ embedded }) {
   };
 
   const restoreTemplate = () => {
-    setAffirmations(DEFAULT_AFFIRMATIONS);
+    // Merge template items with existing ones without deleting user-added items
+    setAffirmations((list) => {
+      const seen = new Set(list.map((t) => t.trim()));
+      const toAdd = DEFAULT_AFFIRMATIONS.filter((t) => !seen.has(t.trim()));
+      // Show templates first, then existing user affirmations
+      return [...toAdd, ...list];
+    });
   };
 
   return (

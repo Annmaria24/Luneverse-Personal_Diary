@@ -41,7 +41,7 @@ AI/ML: Hugging Face API for sentiment analysis
 
 Animation: Framer Motion for smooth transitions
 
-Deployment: [Add once deployed]
+Deployment: Firebase Hosting (https://luneverse.web.app)
 
 🔒 Privacy First
 

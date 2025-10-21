@@ -378,24 +378,46 @@ body, html {
 .btn-primary.large-btn {
   padding: var(--spacing-md) var(--spacing-xl);
   font-size: 1.1rem;
-  font-weight: var(--font-weight-semibold);
-  background-color: var(--neutral-white);
-  color: var(--primary-purple);
-  border: none;
-  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 50%, #ff6b6b 100%);
+  color: var(--neutral-white);
+  border: 2px solid transparent;
+  border-radius: 50px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-lg);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
   position: relative;
   z-index: 1;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  overflow: hidden;
+}
+
+.btn-primary.large-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
 }
 
 .btn-primary.large-btn:hover {
-  background-color: var(--neutral-light);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-xl);
+  background: linear-gradient(135deg, #ff5252 0%, #ff7043 50%, #ff5252 100%);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary.large-btn:hover::before {
+  left: 100%;
+}
+
+.btn-primary.large-btn:active {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
 }
 
 /* About Section */

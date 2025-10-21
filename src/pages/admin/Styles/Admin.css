@@ -101,19 +101,48 @@
 
 .filters { display: flex; gap: 8px; margin-bottom: 10px; }
 .input, .select, .button {
-  background: var(--surface, #ffffff); 
-  color: var(--text-main, #0f172a); 
-  border: 1px solid var(--border-color, rgba(124, 58, 237, 0.3)); 
+  background: rgba(19, 26, 51, 0.8); 
+  color: #ffffff; 
+  border: 1px solid rgba(124, 58, 237, 0.4); 
   border-radius: 8px; 
   padding: 10px 12px;
   transition: all 0.3s ease;
   font-size: 14px;
 }
 
+.input:hover, .select:hover {
+  border-color: rgba(124, 58, 237, 0.6);
+  background: rgba(19, 26, 51, 0.9);
+  color: #ffffff;
+}
+
 .input:focus, .select:focus {
   outline: none;
-  border-color: #4b0082;
-  box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.1);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  background: rgba(19, 26, 51, 0.9);
+  color: #ffffff;
+}
+
+.input::placeholder {
+  color: #a7b0d0;
+  opacity: 1;
+}
+
+.input:focus::placeholder {
+  color: #cbd5e1;
+}
+
+/* Ensure consistent input styling across all form elements */
+.form-label .input {
+  margin: 0; /* Remove any default margins */
+}
+
+.form-label span {
+  font-weight: 600;
+  color: #e6e9f5; /* Light color for better visibility in dark theme */
+  font-size: 14px;
+  margin-bottom: 4px;
 }
 
 /* Enhanced select dropdown styling */
@@ -125,24 +154,44 @@
   background-size: 16px;
   padding-right: 40px;
   cursor: pointer;
-  color: var(--text-main, #0f172a) !important;
-}
-
-.select option {
-  color: var(--text-main, #0f172a);
-  background: var(--surface, #ffffff);
+  color: #ffffff !important;
+  background: rgba(19, 26, 51, 0.8) !important;
+  font-weight: 500;
+  border: 1px solid rgba(124, 58, 237, 0.4) !important;
 }
 
 .select:hover {
-  border-color: #4b0082;
-  background-color: rgba(75, 0, 130, 0.05);
+  color: #ffffff !important;
+  background: rgba(19, 26, 51, 0.9) !important;
+  border-color: rgba(124, 58, 237, 0.6) !important;
 }
+
+.select:focus {
+  color: #ffffff !important;
+  background: rgba(19, 26, 51, 0.9) !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
+}
+
+.select option {
+  color: #0f172a !important;
+  background: #ffffff !important;
+  padding: 8px 12px;
+  font-weight: 500;
+}
+
+.select option:checked {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
 
 .select:focus {
   border-color: #4b0082;
   box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.1);
 }
-.input, .select { width: 100%; }
+.input, .select { width: 100%; max-width: 400px; }
 .button { cursor: pointer; transition: opacity .15s ease; }
 .button:hover { opacity: .9; }
 .button.primary { 
@@ -161,6 +210,53 @@
   color: white;
 }
 
+.button.active {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+  color: white;
+  font-weight: 600;
+}
+
+.button.active.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #10b981;
+}
+
+.button.active.primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-color: #3b82f6;
+}
+
+.button.active.danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-color: #dc2626;
+}
+
+/* Feedback List Styles */
+.feedback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feedback-item {
+  transition: all 0.2s ease;
+}
+
+.feedback-item.unread {
+  border-left: 4px solid #3b82f6 !important;
+  background-color: #f8fafc !important;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 @media (max-width: 1024px) {
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
   .two-col { grid-template-columns: 1fr; }
@@ -174,6 +270,17 @@
   .panel { padding: 16px; }
   .table { font-size: 12px; }
   .th, .td { padding: 8px 10px; }
+  
+  .feedback-tabs {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .tab-button {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 40px;
+  }
 }
 
 /* Feedback tabs styling */
@@ -181,15 +288,17 @@
   display: flex;
   gap: 0;
   margin-bottom: 24px;
-  background: rgba(19, 26, 51, 0.5);
+  background: rgba(19, 26, 51, 0.6);
   border-radius: 12px;
-  padding: 4px;
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  padding: 6px;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
 }
 
 .tab-button {
   flex: 1;
-  padding: 12px 24px;
+  padding: 14px 20px;
   border: none;
   background: transparent;
   color: #a7b0d0;
@@ -199,18 +308,31 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  text-align: center;
+  white-space: nowrap;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab-button:hover {
   color: #e6e9f5;
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.15);
+  transform: translateY(-1px);
 }
 
 .tab-button.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
   font-weight: 600;
+  transform: translateY(-1px);
+}
+
+.tab-button.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
 }
 
 .feedback-type {
@@ -279,20 +401,40 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 28px; /* Increased gap for less congestion */
+  gap: 24px; /* Consistent spacing */
+  max-width: 500px; /* Limit form width for better alignment */
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Ensure all form labels have consistent styling */
+.form-group .form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .form-label {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Increased gap for better spacing */
+  gap: 8px; /* Consistent gap between label and input */
 }
 
 .input {
-  height: 42px; /* Increased height for better usability */
-  font-size: 16px; /* Slightly larger font for readability */
-  padding: 12px 16px;
-  border-radius: 10px;
+  height: 42px !important; /* Consistent height for all inputs */
+  font-size: 16px !important; /* Consistent font size */
+  padding: 12px 16px !important;
+  border-radius: 10px !important;
+  width: 100% !important;
+  background: rgba(19, 26, 51, 0.8) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(124, 58, 237, 0.4) !important;
+  transition: all 0.3s ease;
+  box-sizing: border-box !important;
+  margin: 0 !important;
 }
 
 .form-label {
@@ -318,16 +460,28 @@
 
 /* Error and Success Messages */
 .error-message {
-  color: #7f1d1d; /* Even darker red for stronger contrast */
-  background-color: #fef2f2; /* Slightly lighter background for better contrast */
-  padding: 10px 14px;
+  color: #dc2626 !important; /* Dark red for better contrast */
+  background-color: #fef2f2 !important; /* Light red background */
+  padding: 12px 16px;
   border-radius: 8px;
-  font-size: 15px;
-  margin-top: 10px;
+  font-size: 14px;
+  margin-top: 8px;
   display: block;
-  font-weight: 700;
-  text-shadow: 0 0 2px rgba(0,0,0,0.2);
+  font-weight: 600;
   border: 1px solid #f87171;
+  position: relative;
+  z-index: 9999 !important; /* Very high z-index to ensure it's on top */
+  line-height: 1.4;
+  word-wrap: break-word;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Remove any potential blue highlight */
+  background-image: none !important;
+  text-shadow: none !important;
+  /* Ensure no browser selection styles interfere */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 .success-message {
@@ -335,6 +489,23 @@
   font-size: 12px;
   margin-top: 4px;
   display: block;
+}
+
+/* Prevent any blue highlight or selection overlay on error messages */
+.error-message::selection {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.error-message::-moz-selection {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+/* Override any potential browser highlighting */
+.error-message * {
+  background-color: transparent !important;
+  color: inherit !important;
 }
 
 .input.error {
@@ -352,30 +523,73 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .password-input-container .input {
-  padding-right: 40px;
+  padding-right: 48px; /* More space for the button */
   width: 100%;
+  height: 42px; /* Match other inputs */
+  font-size: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(19, 26, 51, 0.8) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(124, 58, 237, 0.4) !important;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.password-input-container .input:focus {
+  outline: none !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
+  background: rgba(19, 26, 51, 0.9) !important;
+  color: #ffffff !important;
+}
+
+/* Override any conflicting styles for password input */
+.form-group .password-input-container .input {
+  background: rgba(19, 26, 51, 0.8) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(124, 58, 237, 0.4) !important;
+  height: 42px !important;
+  font-size: 16px !important;
+  padding: 12px 16px !important;
+  border-radius: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .password-toggle {
   position: absolute;
-  right: 8px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
-  border: none;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   cursor: pointer;
   font-size: 16px;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   z-index: 1;
+  color: #8b5cf6;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .password-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+  transform: translateY(-50%) scale(1.05);
 }
 
 .password-toggle:focus {

@@ -61,10 +61,10 @@ export const getMoodHistory = async (userId, options = {}) => {
     let q;
     
     if (viewMode === 'all') {
+      // Use simpler query to avoid index issues
       q = query(
         moodRef, 
-        where("userId", "==", userId), 
-        orderBy("timestamp", "desc")
+        where("userId", "==", userId)
       );
     } else {
       // For filtered views, use simpler query first
@@ -92,6 +92,9 @@ export const getMoodHistory = async (userId, options = {}) => {
       createdAt: doc.data().createdAt?.toDate() || new Date()
     }));
     
+    // Always sort by timestamp descending (client-side)
+    results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
     // Apply client-side filtering for date ranges if needed
     if (viewMode !== 'all') {
       const { startDate, endDate } = getDateRange(viewMode, selectedDate);
@@ -99,9 +102,6 @@ export const getMoodHistory = async (userId, options = {}) => {
         const entryDate = new Date(entry.timestamp);
         return entryDate >= startDate && entryDate <= endDate;
       });
-      
-      // Sort by timestamp descending
-      results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
     
     // Apply limit

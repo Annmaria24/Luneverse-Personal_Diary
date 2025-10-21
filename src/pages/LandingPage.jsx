@@ -36,14 +36,6 @@ function LandingPage() {
         </div>
       </main>
 
-      {/* Daily Affirmations CTA */}
-      <section className="cta-section" style={{marginTop: '0.5rem'}}>
-        <Link to="/relax?section=affirmations">
-          <button className="btn-primary large-btn" style={{background: 'linear-gradient(135deg, #7c3aed, #ec4899)'}}>
-            ✨ Daily Affirmations
-          </button>
-        </Link>
-      </section>
 
       
       {/* Testimonials Section */}

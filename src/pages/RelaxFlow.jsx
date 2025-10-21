@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
 import './Styles/RelaxMode.css';
 
 function FlowMode({ embedded = false }) {
@@ -8,6 +10,7 @@ function FlowMode({ embedded = false }) {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const { toasts, showSuccess, removeToast } = useToast();
   const [color, setColor] = useState('#000000');
   const [brushSize, setBrushSize] = useState(5);
   const [tool, setTool] = useState('pen'); // 'pen' | 'brush' | 'eraser'
@@ -103,7 +106,7 @@ function FlowMode({ embedded = false }) {
     setSavedPaintings(updated);
     localStorage.setItem('paintings', JSON.stringify(updated));
 
-    alert('🎨 Painting saved!');
+    showSuccess('🎨 Painting saved!');
   };
 
   const buildEraserCursor = (size = 20) => {
@@ -459,6 +462,7 @@ function FlowMode({ embedded = false }) {
     <div className="relax-mode-page">
       <Navbar />
       <main className="relax-main">{Content}</main>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

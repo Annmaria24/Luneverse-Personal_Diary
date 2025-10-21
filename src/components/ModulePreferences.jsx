@@ -43,11 +43,16 @@ function ModulePreferences() {
 
     try {
       setSaving(true);
+      
+      // Update module preferences (includes pregnancy tracking sync)
       const success = await updateModulePreferences(currentUser.uid, preferences);
       
       if (success) {
         setMessage('Preferences saved successfully! ✨');
         setTimeout(() => setMessage(''), 3000);
+        
+        // Refresh the page to update the context
+        window.location.reload();
       } else {
         setMessage('Error saving preferences. Please try again.');
       }
@@ -144,4 +149,3 @@ function ModulePreferences() {
 }
 
 export default ModulePreferences;
-

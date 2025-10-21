@@ -1,8 +1,721 @@
 .pregnancy-tracker-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(167, 139, 250, 0.06) 50%, rgba(196, 181, 253, 0.08) 100%);
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   font-family: 'Inter', sans-serif;
   color: #1f2937;
+  background-attachment: fixed; /* ensure consistent background */
+}
+
+
+/* Insights Section */
+.insights-section {
+  padding: 20px 0 !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  margin-top: 60px !important; /* Add space below toggle buttons */
+}
+
+.insights-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 20px !important;
+}
+
+.insight-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.insight-card h3 {
+  color: #8b5cf6;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.progress-item:last-child {
+  border-bottom: none;
+}
+
+.progress-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progress-value {
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.appointment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #8b5cf6;
+}
+
+.appointment-date {
+  font-weight: 600;
+  color: #8b5cf6;
+  font-size: 14px;
+}
+
+.appointment-desc {
+  color: #374151;
+  font-size: 14px;
+}
+
+.appointment-days {
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.weekly-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.milestones ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.milestones li {
+  margin-bottom: 4px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+/* Enhanced Insight Cards */
+.growth-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+.symptoms-card {
+  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%) !important;
+  border-left: 4px solid #ec4899 !important;
+}
+
+.progress-card {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+.timeline-card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  border-left: 4px solid #22c55e !important;
+}
+
+/* Baby Growth Visual */
+.growth-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.growth-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.baby-size-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.size-circle {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3) !important;
+  transition: all 0.3s ease !important;
+  animation: pulse 2s infinite !important;
+}
+
+.week-number {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.size-labels {
+  text-align: center;
+}
+
+.current-size, .current-weight {
+  display: block;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.growth-context {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 8px;
+  text-align: center;
+  padding: 4px 8px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #8b5cf6;
+}
+
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border-left: 3px solid #f59e0b;
+}
+
+.milestone-icon {
+  font-size: 16px;
+}
+
+.milestone-text {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Symptoms Chart */
+.symptoms-visual {
+  padding: 10px 0;
+}
+
+.symptoms-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.symptom-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.symptom-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.symptom-icon {
+  font-size: 16px;
+}
+
+.symptom-name {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.symptom-intensity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.intensity-bar {
+  height: 8px;
+  background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.intensity-count {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+  min-width: 20px;
+}
+
+.no-symptoms {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+}
+
+.no-symptoms-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+/* Progress Circle */
+.progress-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  padding: 10px;
+  min-height: 200px;
+}
+
+.week-progress {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.progress-circle {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 20px 0 !important;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.3));
+}
+
+.progress-ring-fill {
+  transition: stroke-dasharray 0.8s ease;
+  filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.4));
+}
+
+.progress-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+}
+
+.week-number {
+  display: block !important;
+  font-size: 36px !important;
+  font-weight: bold !important;
+  color: #8b5cf6 !important;
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.3) !important;
+  margin-bottom: 4px !important;
+}
+
+.week-label {
+  font-size: 14px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.progress-stats {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  flex: 1;
+  max-width: 150px;
+}
+
+.stat-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #8b5cf6;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Timeline Chart */
+.timeline-visual {
+  padding: 20px 0;
+}
+
+.timeline-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-line {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 20px;
+}
+
+.timeline-line::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: #e5e7eb;
+  z-index: 1;
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.marker-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7eb;
+  color: #6b7280;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.timeline-marker.active .marker-circle {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.timeline-marker.completed .marker-circle {
+  background: #22c55e;
+  color: white;
+}
+
+.marker-label {
+  text-align: center;
+}
+
+.trimester-name {
+  display: block;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.trimester-weeks {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.timeline-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6 0%, #ec4899 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Force pregnancy insights layout */
+.pregnancy-tracker-page .insights-section {
+  padding: 20px 0 !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  margin-top: 60px !important; /* Add space below toggle buttons */
+}
+
+.pregnancy-tracker-page .insights-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 20px !important;
+}
+
+.pregnancy-tracker-page .growth-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+.pregnancy-tracker-page .progress-card {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+.pregnancy-tracker-page .size-circle {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3) !important;
+  animation: pulse 2s infinite !important;
+}
+
+.pregnancy-tracker-page .week-number {
+  font-size: 36px !important;
+  font-weight: bold !important;
+  color: #8b5cf6 !important;
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Ultra-specific overrides to force changes */
+div.pregnancy-tracker-page div.insights-section div.insights-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 20px !important;
+}
+
+div.pregnancy-tracker-page div.insights-section {
+  padding: 20px 0 !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  margin-top: 60px !important; /* Add space below toggle buttons */
+}
+
+div.pregnancy-tracker-page .growth-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+div.pregnancy-tracker-page .progress-card {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+div.pregnancy-tracker-page .size-circle {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3) !important;
+  animation: pulse 2s infinite !important;
+}
+
+div.pregnancy-tracker-page .week-number {
+  font-size: 36px !important;
+  font-weight: bold !important;
+  color: #8b5cf6 !important;
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Specific fixes for progress card visibility */
+div.pregnancy-tracker-page .progress-card {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border-left: 4px solid #3b82f6 !important;
+  min-height: 300px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+div.pregnancy-tracker-page .progress-visual {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  align-items: center !important;
+  padding: 10px !important;
+  min-height: 200px !important;
+  flex: 1 !important;
+}
+
+div.pregnancy-tracker-page .progress-stats {
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  margin-top: 16px !important;
+  width: 100% !important;
+}
+
+div.pregnancy-tracker-page .stat-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 12px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  min-width: 120px !important;
+  flex: 1 !important;
+  max-width: 150px !important;
+}
+
+div.pregnancy-tracker-page .stat-label {
+  font-size: 10px !important;
+  color: #6b7280 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 1024px) {
+  .insights-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .insights-section {
+    margin-top: 40px !important; /* Reduce spacing on mobile */
+  }
+  
+  .insights-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 10px;
+  }
+  
+  .insight-card {
+    padding: 16px;
+  }
+  
+  .progress-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .timeline-line {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .timeline-line::before {
+    display: none;
+  }
+  
+  .week-number {
+    font-size: 28px;
+  }
+  
+  .size-circle {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  div.pregnancy-tracker-page .progress-card {
+    min-height: 250px !important;
+  }
+  
+  div.pregnancy-tracker-page .progress-stats {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  div.pregnancy-tracker-page .stat-item {
+    min-width: 100px !important;
+    max-width: none !important;
+  }
 }
 
 /* Flow section/layout */
@@ -431,7 +1144,7 @@
 }
 
 .calendar-section {
-  background: rgba(255, 255, 255, 0.95);
+  /* background: rgba(255, 255, 255, 0.95); */ /* Removed to maintain consistent page background */
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
@@ -590,7 +1303,7 @@
 }
 
 .insights-section {
-  background: rgba(255, 255, 255, 0.95);
+  /* background: rgba(255, 255, 255, 0.95); */ /* Removed to maintain consistent page background */
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -785,32 +1498,72 @@
 
 .appointment-item {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 12px;
-  background: #f9fafb;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border-left: 4px solid #8b5cf6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  align-items: stretch;
+}
+
+.appointment-date {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
-}
-
-.appointment-date,
-.appointment-desc {
-  padding: 8px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
   font-size: 14px;
+  background: white;
+  color: #1f2937;
+  width: 100%;
+  box-sizing: border-box;
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.appointment-date:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .appointment-desc {
-  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #1f2937;
+  width: 100%;
+  box-sizing: border-box;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  resize: none;
+}
+
+.appointment-desc:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.appointment-desc::placeholder {
+  color: #9ca3af;
 }
 
 .remove-appointment {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   background: #ef4444;
   color: white;
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 16px;
@@ -824,19 +1577,94 @@
 }
 
 .add-appointment-btn {
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  margin-top: 12px;
+  font-weight: 600;
+  margin-top: 16px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
 }
 
-.add-appointment-btn:hover {
-  background: #059669;
+.add-appointment-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.add-appointment-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.add-appointment-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+
+.appointments-section {
+  margin-top: 20px;
+}
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.appointment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border-left: 3px solid #8b5cf6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-date {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.appointment-desc {
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.appointment-days {
+  font-size: 12px;
+  color: #8b5cf6;
+  font-weight: 500;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  align-self: flex-start;
+}
+
+.appointments-section h4 {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .modal-actions {

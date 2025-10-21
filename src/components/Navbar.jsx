@@ -141,7 +141,7 @@ const Navbar = ({ searchProps, viewToggleProps }) => {
             to="/my-cycle"
             className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
           >
-            My Cycle
+            Cycle
           </NavLink>
         )}
         {modulePreferences.relaxMode && (

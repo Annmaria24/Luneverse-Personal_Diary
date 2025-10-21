@@ -323,31 +323,42 @@ body::after {
   z-index: 2;
 }
 
-/* Quick Actions Row */
-.quick-actions {
-  position: fixed !important; /* force fixed positioning */
-  top: 130px; /* move further down for better positioning */
-  right: 20px; /* near the right edge */
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0; /* no layout shift */
-  z-index: 999; /* very high z-index to ensure it stays on top */
+/* Quick Actions - Fixed positioning like Personal Sanctuary */
+.quick-actions-sticky {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  justify-content: flex-end;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
 }
 
 .affirmations-quick-btn {
-  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-  color: white;
-  border: none;
-  border-radius: var(--radius-lg);
-  padding: 0.75rem 0.9rem; /* comfortable touch target */
-  box-shadow: 0 6px 18px rgba(124,58,237,0.25);
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  font-size: 0.9rem;
-  font-weight: var(--font-weight-medium);
-  white-space: nowrap;
-  margin: 0;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 0.75rem 0.9rem !important;
+  box-shadow: 0 6px 18px rgba(124,58,237,0.25) !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  font-size: 0.9rem !important;
+  font-weight: var(--font-weight-medium) !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 10000 !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
 }
 
 .affirmations-quick-btn:hover {
@@ -408,9 +419,23 @@ body::after {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
 }
+
+/* Wellness Insights Card */
+.wellness-insights-card {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.wellness-insights-card .feature-icon {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+/* Both grids now use consistent 3-column layout */
 
 .stat-card {
   background: rgba(255, 255, 255, 0.9);
@@ -468,9 +493,11 @@ body::after {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-xl);
   align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .feature-card {
@@ -583,6 +610,25 @@ body::after {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.feature-button.settings-redirect {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.feature-button.settings-redirect:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(107, 114, 128, 0.4);
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
 }
 
 .coming-soon {
@@ -890,4 +936,165 @@ body::after {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   border-radius: var(--radius-full);
   transition: width 0.3s ease;
+}
+
+/* Force fixed positioning - override any inherited styles */
+body .quick-actions-sticky {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  isolation: isolate !important;
+}
+
+/* Additional override for any potential scrolling issues */
+body > div[style*="position: fixed"] {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  isolation: isolate !important;
+}
+
+/* Specific class for affirmations container */
+.affirmations-fixed-container {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
+}
+
+/* Ultra-aggressive CSS override for affirmations button */
+#daily-affirmations-fixed {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 999 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  vertical-align: baseline !important;
+  box-sizing: border-box !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+*[style*="position: fixed"] {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 999 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  vertical-align: baseline !important;
+  box-sizing: border-box !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+/* ID-based selectors for maximum specificity */
+#affirmations-button-container {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 999999 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  vertical-align: baseline !important;
+  box-sizing: border-box !important;
+}
+
+#affirmations-button {
+  position: relative !important;
+  display: inline-block !important;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 6px 18px rgba(124,58,237,0.25) !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  outline: none !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  #daily-affirmations-fixed {
+    top: 100px !important;
+    right: 10px !important;
+  }
+  
+  body .quick-actions-sticky {
+    top: 100px !important;
+    right: 10px !important;
+  }
+  
+  .affirmations-fixed-container {
+    top: 100px !important;
+    right: 10px !important;
+  }
+  
+  #affirmations-button-container {
+    top: 100px !important;
+    right: 10px !important;
+  }
+  
+  .affirmations-quick-btn {
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  #affirmations-button {
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.8rem !important;
+  }
 }

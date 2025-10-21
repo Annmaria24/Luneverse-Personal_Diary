@@ -88,13 +88,23 @@
 =========================== */
 .page-toolbar {
   position: sticky;
-  /* Push below navbar height to avoid overlap on first render */
   top: calc(var(--navbar-height, 88px) + 12px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 24px 0 24px;
-  z-index: 10;
+  gap: 16px;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+/* Position toggle buttons on the right side only when Diary tab is active */
+.my-journal-page .page-toolbar:has(.tab-buttons .view-btn[data-tab="diary"].active) {
+  justify-content: flex-end;
+}
+
+.my-journal-page .page-toolbar:has(.tab-buttons .view-btn[data-tab="diary"].active) .tab-buttons {
+  order: 1;
 }
 
 /* ===========================
@@ -116,6 +126,8 @@
   border-radius: 9999px;
   background: #ffffff; /* white pill background */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 50;
 }
 
 .tab-buttons .view-btn {
@@ -149,10 +161,12 @@
   /* Keep tabs below the navbar so they don't overlap editor */
   top: calc(var(--navbar-height, 88px) + 12px);
   margin: 12px 24px 0 auto;
-  z-index: 5; /* below editor/toolbars but above background */
+  /* Ensure these remain below the fullscreen editor and editor toolbar */
+  z-index: 100; /* well below editor overlay/toolbar */
   /* Ensure it doesn't get cut off */
   box-sizing: border-box;
   max-width: calc(100vw - 48px);
+  pointer-events: auto;
 }
 
 @media (min-width: 900px) {

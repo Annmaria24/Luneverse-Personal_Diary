@@ -164,11 +164,15 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  position: relative;
+  z-index: 1;
 }
 
 .nav-link:hover {
-  color: #fbbf24; /* bright amber/gold for better visibility */
-  background: rgba(251, 191, 36, 0.15); /* subtle amber background */
+  color: #1e293b !important; /* dark text for better visibility */
+  background: rgba(255, 255, 255, 0.8) !important; /* strong white background on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
 
 .nav-link:focus-visible {

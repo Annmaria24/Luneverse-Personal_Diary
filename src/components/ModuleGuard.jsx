@@ -5,7 +5,15 @@ import { useAuth } from '../context/AuthContext';
 const ModuleGuard = ({ children, requiredModule }) => {
   const { modulePreferences } = useAuth();
 
-  // If the required module is not enabled, redirect to dashboard
+  // Special case for health module - allow if either cycle or pregnancy is enabled
+  if (requiredModule === 'cycleTracker') {
+    if (!modulePreferences.cycleTracker && !modulePreferences.pregnancyTracker) {
+      return <Navigate to="/dashboard" replace />;
+    }
+    return children;
+  }
+
+  // For other modules, check the specific module
   if (!modulePreferences[requiredModule]) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -14,4 +22,3 @@ const ModuleGuard = ({ children, requiredModule }) => {
 };
 
 export default ModuleGuard;
-

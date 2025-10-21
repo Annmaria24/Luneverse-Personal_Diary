@@ -101,20 +101,32 @@
 
 .feedback-form {
   padding: 24px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   font-weight: 600;
   color: #1f2937;
   font-size: 14px;
   text-shadow: none;
   opacity: 1;
+  text-align: left;
 }
 
 .feedback-types {
@@ -169,6 +181,22 @@ textarea {
   font-size: 14px;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Override textarea specific styling to match rating container */
+textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 input[type="text"]:focus,
@@ -180,31 +208,39 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
-textarea {
-  resize: vertical;
-  min-height: 100px;
-  font-family: inherit;
-}
 
 .rating-container {
   background: rgba(255, 255, 255, 0.8);
   padding: 16px;
   border-radius: 12px;
   border: 2px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 120px;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 .rating-container label {
-  margin-bottom: 12px;
+  margin-bottom: 0;
   color: #1f2937;
   font-weight: 600;
   font-size: 14px;
   text-shadow: none;
   opacity: 1;
+  text-align: left;
 }
 
 .stars {
   display: flex;
   gap: 8px;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .star {
@@ -251,13 +287,16 @@ textarea {
 
 .form-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: flex-end;
-  margin-top: 32px;
+  margin-top: 24px;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .cancel-button {
-  padding: 12px 24px;
+  padding: 14px 28px;
   border: 2px solid #d1d5db;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.9);
@@ -265,15 +304,19 @@ textarea {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
+  min-width: 120px;
+  text-align: center;
+  font-size: 14px;
 }
 
 .cancel-button:hover {
   border-color: #9ca3af;
   background: #f9fafb;
+  transform: translateY(-1px);
 }
 
 .submit-button {
-  padding: 12px 24px;
+  padding: 14px 28px;
   border: none;
   border-radius: 12px;
   background: linear-gradient(135deg, #8b5cf6, #ec4899);
@@ -282,6 +325,9 @@ textarea {
   font-weight: 600;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  min-width: 160px;
+  text-align: center;
+  font-size: 14px;
 }
 
 .submit-button:hover:not(:disabled) {
@@ -300,6 +346,7 @@ textarea {
   .feedback-modal {
     width: 95%;
     margin: 16px;
+    max-height: 95vh;
   }
 
   .feedback-modal-header,
@@ -313,11 +360,29 @@ textarea {
 
   .form-actions {
     flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
   }
 
   .cancel-button,
   .submit-button {
     width: 100%;
+    min-width: auto;
+    padding: 12px 24px;
+  }
+
+  .stars {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .rating-container {
+    text-align: center;
+    min-height: 100px;
+  }
+
+  textarea {
+    min-height: 100px;
   }
 }
 

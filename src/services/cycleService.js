@@ -155,16 +155,59 @@ export const getCycleStats = async (userId) => {
     };
     
     if (periodEntries.length > 0) {
+      console.log('🔍 All Period Entries:', periodEntries.map(e => ({
+        date: e.date,
+        periodStatus: e.periodStatus,
+        flow: e.flow
+      })));
+      
       // Find period starts to calculate cycles
-      const periodStarts = periodEntries
-        .filter(entry => entry.periodStatus === 'start')
+      // Look for entries marked as 'start' OR first period entry in a sequence
+      const periodStarts = [];
+      
+      // First, get all entries marked as 'start'
+      const explicitStarts = periodEntries.filter(entry => entry.periodStatus === 'start');
+      periodStarts.push(...explicitStarts);
+      
+      // Also look for the first period entry in each month (might be marked as 'ongoing' but is actually a start)
+      const monthlyFirstPeriods = [];
+      const entriesByMonth = {};
+      
+      periodEntries.forEach(entry => {
+        const monthKey = entry.date.substring(0, 7); // YYYY-MM
+        if (!entriesByMonth[monthKey]) {
+          entriesByMonth[monthKey] = [];
+        }
+        entriesByMonth[monthKey].push(entry);
+      });
+      
+      // For each month, find the earliest period entry
+      Object.values(entriesByMonth).forEach(monthEntries => {
+        const sortedMonthEntries = monthEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const firstEntry = sortedMonthEntries[0];
+        
+        // If this is a period entry and we don't already have a start for this month
+        if (firstEntry && !periodStarts.some(p => p.date === firstEntry.date)) {
+          monthlyFirstPeriods.push(firstEntry);
+        }
+      });
+      
+      periodStarts.push(...monthlyFirstPeriods);
+      
+      // Sort all period starts by date
+      const allPeriodStarts = periodStarts
         .sort((a, b) => new Date(b.date) - new Date(a.date));
       
-      if (periodStarts.length > 0) {
-        stats.lastPeriodStart = periodStarts[0].date;
+      console.log('🔍 All Period Starts Found:', allPeriodStarts.map(s => ({
+        date: s.date,
+        periodStatus: s.periodStatus
+      })));
+      
+      if (allPeriodStarts.length > 0) {
+        stats.lastPeriodStart = allPeriodStarts[0].date;
         
         // Calculate current cycle day
-        const lastStart = new Date(periodStarts[0].date);
+        const lastStart = new Date(allPeriodStarts[0].date);
         const today = new Date();
         stats.currentCycleDay = Math.floor((today - lastStart) / (1000 * 60 * 60 * 24)) + 1;
         
@@ -186,15 +229,45 @@ export const getCycleStats = async (userId) => {
       }
       
       // Calculate average cycle length if we have multiple cycles
-      if (periodStarts.length > 1) {
+      if (allPeriodStarts.length > 1) {
+        // Sort period starts chronologically (oldest first)
+        const sortedStarts = [...allPeriodStarts].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
         let totalDays = 0;
-        for (let i = 0; i < periodStarts.length - 1; i++) {
-          const current = new Date(periodStarts[i].date);
-          const previous = new Date(periodStarts[i + 1].date);
-          totalDays += Math.floor((current - previous) / (1000 * 60 * 60 * 24));
+        let cycleCount = 0;
+        
+        // Calculate cycle lengths between consecutive period starts
+        console.log('🔍 Cycle Calculation Debug:', {
+          totalPeriodStarts: sortedStarts.length,
+          periodDates: sortedStarts.map(s => s.date)
+        });
+        
+        for (let i = 1; i < sortedStarts.length; i++) {
+          const current = new Date(sortedStarts[i].date);
+          const previous = new Date(sortedStarts[i - 1].date);
+          const cycleLength = Math.floor((current - previous) / (1000 * 60 * 60 * 24));
+          
+          console.log(`Cycle ${i}: ${previous.toDateString()} → ${current.toDateString()} = ${cycleLength} days`);
+          
+          // Only include reasonable cycle lengths (14-60 days)
+          if (cycleLength >= 14 && cycleLength <= 60) {
+            totalDays += cycleLength;
+            cycleCount++;
+          } else {
+            console.log(`⚠️ Excluded cycle ${i}: ${cycleLength} days (outside 14-60 range)`);
+          }
         }
-        stats.averageCycleLength = Math.round(totalDays / (periodStarts.length - 1));
-        stats.totalCycles = periodStarts.length - 1;
+        
+        if (cycleCount > 0) {
+          stats.averageCycleLength = Math.round(totalDays / cycleCount);
+          stats.totalCycles = cycleCount;
+          console.log(`✅ Final calculation: ${totalDays} total days ÷ ${cycleCount} cycles = ${stats.averageCycleLength} days average`);
+        } else {
+          // Fallback to default if no valid cycles found
+          stats.averageCycleLength = 28;
+          stats.totalCycles = 0;
+          console.log('⚠️ No valid cycles found, using default 28 days');
+        }
       }
     }
     

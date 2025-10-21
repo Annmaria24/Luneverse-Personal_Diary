@@ -50,6 +50,7 @@ function MyJournal() {
               type="button"
               className={`view-btn ${activeTab === 'diary' ? 'active' : ''}`}
               onClick={() => setActiveTab('diary')}
+              data-tab="diary"
             >
               Diary
             </button>
@@ -58,6 +59,7 @@ function MyJournal() {
               type="button"
               className={`view-btn ${activeTab === 'mood' ? 'active' : ''}`}
               onClick={() => setActiveTab('mood')}
+              data-tab="mood"
             >
               Mood Tracker
             </button>

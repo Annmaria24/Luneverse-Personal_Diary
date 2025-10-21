@@ -4,15 +4,16 @@
   background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
+  background-attachment: fixed; /* ensure consistent background */
 }
 
 /* Top toolbar wrapper: aligns toggle/tabs to the right under navbar */
 .page-toolbar {
   position: sticky;
-  top: 12px; /* changed from 76px to 12px to sit below sticky Navbar */
+  top: 8px; /* match the updated top position for perfect alignment */
   display: flex;
   justify-content: space-between; /* tabs left, view toggle right (if present) */
-  align-items: center;
+  align-items: flex-start; /* align to top to match both toggles */
   gap: 12px;
   padding: 8px 24px 0 24px;
   z-index: 25;
@@ -160,25 +161,35 @@
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 20px rgba(75, 0, 130, 0.3), 0 4px 8px rgba(199, 21, 133, 0.2);
+  background-attachment: fixed; /* ensure consistent background */
 }
 
 /* floating placement inside the page */
 .tab-buttons.floating {
   position: sticky; /* dock near the top-right below the navbar */
-  top: 44px; /* changed from 12px to 44px to avoid overlap with toolbar */
-  margin: 12px 24px 0 auto; /* align to right inside flow */
+  top: 8px; /* move up to align with left toggle */
+  margin: 0; /* remove margin to align with left toggle */
   left: auto;
   right: auto;
   transform: none;
   z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #4b0082, #c71585); /* match left toggle gradient */
+  backdrop-filter: blur(10px);
+  border-radius: 14px; /* match left toggle border radius */
+  padding: 6px; /* match left toggle padding */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.08); /* match left toggle shadow */
 }
 
 /* On larger screens, keep it within layout (no fixed overlap) */
 @media (min-width: 900px) {
   .tab-buttons.floating {
     position: sticky;
-    top: 12px;
-    margin: 12px 24px 0 auto;
+    top: 8px; /* match the updated top position */
+    margin: 0; /* keep margin 0 for alignment */
     transform: none;
   }
 }
@@ -186,30 +197,34 @@
 /* Buttons - Enhanced gradient theme */
 .tab-buttons button {
   flex: 1 1 auto;
-  padding: 10px 18px;
+  padding: 0.45rem 0.9rem; /* match left toggle button padding */
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.9); /* high-contrast text */
+  color: #ffffff; /* match left toggle text color */
   font-weight: 600;
-  border-radius: 9999px;
+  border-radius: 10px; /* match left toggle border radius */
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 15px;
+  transition: all 0.2s ease; /* match left toggle transition */
+  font-size: 0.95rem; /* match left toggle font size */
   position: relative;
   overflow: hidden;
+  height: auto; /* let it size naturally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: top; /* ensure proper alignment */
 }
 
 .tab-buttons button.active {
-  background: #ffffff; /* White background for active state */
-  color: #c71585; /* Pink text to match gradient */
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4), 0 2px 6px rgba(199, 21, 133, 0.3);
-  transform: translateY(-1px);
+  background: #ffffff; /* match left toggle active background */
+  color: #c71585; /* match left toggle active text color */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12); /* match left toggle active shadow */
+  transform: none; /* remove transform to match left toggle */
 }
 
 .tab-buttons button:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.15); /* subtle white overlay on hover */
-  color: #ffffff;
-  transform: translateY(-1px);
+  color: #ffe5f0; /* match left toggle hover color */
+  transform: none; /* remove transform to match left toggle */
 }
 
 .tab-buttons button:focus-visible {

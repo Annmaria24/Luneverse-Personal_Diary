@@ -59,7 +59,8 @@
   font-family: var(--font-primary);
   position: relative;
   padding-top: var(--navbar-height); /* Add space for navbar */
-  z-index: 10; /* Ensure diary page is above navbar */
+  /* Ensure the diary content can layer above navbar/tabs when needed */
+  z-index: 2000;
 }
 
 /* Background Elements */
@@ -191,7 +192,8 @@
   margin: 0 auto;
   padding: var(--spacing-lg);
   position: relative;
-  z-index: 20; /* Higher z-index to ensure content is above navbar */
+  /* Keep content above floating tab buttons */
+  z-index: 2001;
 }
 
 /* Date Navigation */

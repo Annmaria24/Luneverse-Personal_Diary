@@ -21,12 +21,20 @@ export const getModulePreferences = async (userId) => {
     
     if (userDoc.exists()) {
       const userData = userDoc.data();
+      const modulePrefs = userData.modulePreferences || {};
+      
+      // Sync pregnancy tracking setting with module preferences
+      if (userData.pregnancyTrackingEnabled !== undefined) {
+        modulePrefs.pregnancyTracker = userData.pregnancyTrackingEnabled;
+      }
+      
       // Merge with defaults to ensure all modules are defined
-      return { ...DEFAULT_MODULE_PREFERENCES, ...userData.modulePreferences };
+      return { ...DEFAULT_MODULE_PREFERENCES, ...modulePrefs };
     } else {
       // Create new user document with default preferences
       await setDoc(userDocRef, {
         modulePreferences: DEFAULT_MODULE_PREFERENCES,
+        pregnancyTrackingEnabled: DEFAULT_MODULE_PREFERENCES.pregnancyTracker,
         createdAt: new Date().toISOString()
       });
       return DEFAULT_MODULE_PREFERENCES;
@@ -46,10 +54,17 @@ export const getModulePreferences = async (userId) => {
 export const updateModulePreferences = async (userId, preferences) => {
   try {
     const userDocRef = doc(db, 'users', userId);
-    await updateDoc(userDocRef, {
+    const updateData = {
       modulePreferences: preferences,
       updatedAt: new Date().toISOString()
-    });
+    };
+    
+    // Also update pregnancy tracking setting if it's being changed
+    if (preferences.pregnancyTracker !== undefined) {
+      updateData.pregnancyTrackingEnabled = preferences.pregnancyTracker;
+    }
+    
+    await updateDoc(userDocRef, updateData);
     return true;
   } catch (error) {
     console.error('Error updating module preferences:', error);
@@ -111,4 +126,3 @@ export const getModuleMetadata = () => {
     }
   };
 };
-

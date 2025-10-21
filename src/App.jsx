@@ -26,7 +26,7 @@ import RelaxSound from "./pages/RelaxSound";
 import RelaxQuotes from "./pages/RelaxQuotes";
 import RelaxMeditations from "./pages/RelaxMeditations";
 import RelaxVisuals from "./pages/RelaxVisuals";
-import Insights from "./pages/Insights";
+import InsightsPage from "./pages/InsightsPage";
 import EmotionalWellness from "./pages/EmotionalWellness";
 import AdminDashboard from "./pages/admin/AdminDashboardFixed";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -181,7 +181,7 @@ function App() {
                 path="/export"
                 element={
                   <ProtectedRoute>
-                    <Insights />
+                    <InsightsPage />
                   </ProtectedRoute>
                 }
               />

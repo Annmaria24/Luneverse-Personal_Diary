@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import AdminNavbar from '../../components/AdminNavbar';
 import { db } from '../../firebase/config';
-import { collection, getDocs, orderBy, query, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import './Styles/Admin.css';
 
 const AdminUsers = () => {
@@ -46,9 +46,25 @@ const AdminUsers = () => {
       <AdminNavbar />
       <div className="admin-container">
         <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>Users</h2>
+        <div style={{ 
+          background: 'rgba(59, 130, 246, 0.1)', 
+          border: '1px solid rgba(59, 130, 246, 0.3)', 
+          borderRadius: '8px', 
+          padding: '12px 16px', 
+          marginBottom: '20px',
+          fontSize: '14px',
+          color: '#1e40af'
+        }}>
+          <strong>ℹ️ Admin Management:</strong> To add new admin users, go to <strong>Settings</strong> → <strong>Add Admin</strong>. Admin status cannot be changed from this page for security reasons.
+        </div>
         <div className="panel">
           <div className="filters">
-            <input className="input" placeholder="Search by email or name" value={search} onChange={e => setSearch(e.target.value)} />
+            <input 
+              className="input" 
+              placeholder="Search by email or name" 
+              value={search} 
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
           {loading ? (
             <div>Loading...</div>
@@ -71,18 +87,16 @@ const AdminUsers = () => {
                     <td className="td">{u.displayName || '—'}</td>
                     <td className="td">{u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : '—'}</td>
                     <td className="td">
-                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                        <input
-                          type="checkbox"
-                          checked={!!u.isAdmin}
-                          onChange={async (e) => {
-                            const next = e.target.checked;
-                            await setDoc(doc(db, 'users', u.id), { isAdmin: next }, { merge: true });
-                            setUsers(prev => prev.map(x => x.id === u.id ? { ...x, isAdmin: next } : x));
-                          }}
-                        />
-                        <span>{u.isAdmin ? 'Admin' : 'User'}</span>
-                      </label>
+                      <span style={{ 
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        backgroundColor: u.isAdmin ? '#dcfce7' : '#f3f4f6',
+                        color: u.isAdmin ? '#166534' : '#6b7280'
+                      }}>
+                        {u.isAdmin ? 'Admin' : 'User'}
+                      </span>
                     </td>
                   </tr>
                 ))}

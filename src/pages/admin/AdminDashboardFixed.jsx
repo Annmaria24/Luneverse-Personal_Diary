@@ -8,6 +8,8 @@ import { getRecentUsers, getSessionSeries, getTotals, recomputeActivityAverages,
 import { getFeedbackStats } from '../../services/feedbackService';
 import { Line, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useToast } from '../../hooks/useToast';
+import ToastContainer from '../../components/ToastContainer';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend);
 
@@ -21,6 +23,8 @@ const AdminDashboardFixed = () => {
   const [signupSeries, setSignupSeries] = useState([]);
   const [adminBreakdown, setAdminBreakdown] = useState({ admins: 0, users: 0 });
   const [feedbackStats, setFeedbackStats] = useState({ totalFeedback: 0, averageRating: 0, feedbackTypes: {}, recentFeedback: [] });
+  
+  const { toasts, showSuccess, showError, removeToast } = useToast();
 
   useEffect(() => {
     const loadStats = async () => {
@@ -175,86 +179,69 @@ const AdminDashboardFixed = () => {
           </div>
         </div>
 
-        <div className="two-col" style={{ marginTop: 24 }}>
-          <div className="panel">
-            <h3>User Feedback Types</h3>
-            <div style={{ height: '260px', position: 'relative' }}>
-              <Doughnut
-                data={{
-                  labels: Object.keys(feedbackStats.feedbackTypes),
-                  datasets: [{
-                    data: Object.values(feedbackStats.feedbackTypes),
-                    backgroundColor: ['#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6'],
-                    borderWidth: 0
-                  }]
-                }}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { legend: { labels: { color: '#e6e9f5' }, position: 'bottom' } }
-                }}
-              />
-              <div style={{ marginTop: 12, color: '#a7b0d0' }}>
-                <span>Total feedback: {feedbackStats.totalFeedback}</span>
-                <span style={{ marginLeft: 12 }}>Avg rating: {feedbackStats.averageRating > 0 ? feedbackStats.averageRating.toFixed(1) + '⭐' : '—'}</span>
-              </div>
-            </div>
-          </div>
-          <div className="panel">
-            <h3>Recent User Feedback</h3>
-            <div style={{ height: '260px', overflowY: 'auto' }}>
-              {feedbackStats.recentFeedback.length ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {feedbackStats.recentFeedback.map((f, i) => (
-                    <div key={i} style={{ padding: 10, background: 'rgba(139, 92, 246, 0.08)', borderRadius: 8, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                        <span style={{ textTransform: 'capitalize', color: '#e6e9f5' }}>{f.type}</span>
-                        <span style={{ color: '#a7b0d0', fontSize: 12 }}>{f.timestamp?.toDate ? f.timestamp.toDate().toLocaleDateString() : '—'}</span>
-                      </div>
-                      <div style={{ color: '#a7b0d0', fontSize: 14 }}>
-                        {f.message?.length > 100 ? f.message.slice(0, 100) + '…' : f.message}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', color: '#a7b0d0', marginTop: 20 }}>No feedback yet</div>
-              )}
-            </div>
-          </div>
-        </div>
 
         <div className="panel" style={{ marginTop: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h3>Recent Users</h3>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="button primary" onClick={async () => {
-                const r = await recomputeActivityAverages();
-                setAvgSessionMins(Math.round((r.averageSessionMinutes || 0) * 10) / 10);
-              }}>Recompute Averages</button>
-              <button className="button success" onClick={async () => {
-                // Refresh all data
-                const totals = await getTotals();
-                setTotalUsers(totals.users);
-                setAvgSessionMins(Math.round((totals.averageSessionMinutes || 0) * 10) / 10);
-                setRecentUsers(await getRecentUsers());
-                const s = await getSessionSeries(14);
-                setSeries(s);
-                setSessions(s.reduce((acc, cur) => acc + (cur.value || 0), 0));
-                setSignupSeries(await getSignupSeries(14));
-              }}>Refresh Data</button>
-              <button className="button" onClick={async () => {
-                try {
-                  await seedSampleSessionsForCurrentUser(7, 3);
-                  const s = await getSessionSeries(14);
-                  setSeries(s);
-                  setSessions(s.reduce((acc, cur) => acc + (cur.value || 0), 0));
-                  const totals = await getTotals();
-                  setAvgSessionMins(Math.round((totals.averageSessionMinutes || 0) * 10) / 10);
-                } catch (e) {
-                  console.error('Failed to seed sessions:', e);
-                }
-              }}>Seed Sessions</button>
+              <button 
+                className="button primary" 
+                onClick={async () => {
+                  try {
+                    console.log('Recomputing averages...');
+                    const r = await recomputeActivityAverages();
+                    setAvgSessionMins(Math.round((r.averageSessionMinutes || 0) * 10) / 10);
+                    showSuccess('Averages recomputed successfully!');
+                  } catch (error) {
+                    console.error('Error recomputing averages:', error);
+                    showError('Failed to recompute averages: ' + error.message);
+                  }
+                }}
+              >
+                Recompute Averages
+              </button>
+              <button 
+                className="button success" 
+                onClick={async () => {
+                  try {
+                    console.log('Refreshing data...');
+                    const totals = await getTotals();
+                    setTotalUsers(totals.users);
+                    setAvgSessionMins(Math.round((totals.averageSessionMinutes || 0) * 10) / 10);
+                    setRecentUsers(await getRecentUsers());
+                    const s = await getSessionSeries(14);
+                    setSeries(s);
+                    setSessions(s.reduce((acc, cur) => acc + (cur.value || 0), 0));
+                    setSignupSeries(await getSignupSeries(14));
+                    showSuccess('Data refreshed successfully!');
+                  } catch (error) {
+                    console.error('Error refreshing data:', error);
+                    showError('Failed to refresh data: ' + error.message);
+                  }
+                }}
+              >
+                Refresh Data
+              </button>
+              <button 
+                className="button" 
+                onClick={async () => {
+                  try {
+                    console.log('Seeding sample sessions...');
+                    await seedSampleSessionsForCurrentUser(7, 3);
+                    const s = await getSessionSeries(14);
+                    setSeries(s);
+                    setSessions(s.reduce((acc, cur) => acc + (cur.value || 0), 0));
+                    const totals = await getTotals();
+                    setAvgSessionMins(Math.round((totals.averageSessionMinutes || 0) * 10) / 10);
+                    showSuccess('Sample sessions seeded successfully!');
+                  } catch (e) {
+                    console.error('Failed to seed sessions:', e);
+                    showError('Failed to seed sessions: ' + e.message);
+                  }
+                }}
+              >
+                Seed Sessions
+              </button>
             </div>
           </div>
           <div style={{ overflowX: 'auto' }}>
@@ -284,6 +271,7 @@ const AdminDashboardFixed = () => {
           </div>
         </div>
       </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 };

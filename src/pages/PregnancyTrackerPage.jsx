@@ -15,10 +15,13 @@ import {
 import { getUserSettings, saveUserSettings } from "../services/userService";
 import ProfileDropdown from '../components/ProfileDropdown';
 import Navbar from '../components/Navbar';
+import { useToast } from "../hooks/useToast";
+import ToastContainer from "../components/ToastContainer";
 
 function PregnancyTrackerPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { toasts, showSuccess, showError, removeToast } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [pregnancyData, setPregnancyData] = useState({});
@@ -177,6 +180,42 @@ function PregnancyTrackerPage() {
     }
   }, [currentUser]);
 
+  // Daily appointment notification check
+  useEffect(() => {
+    const checkDailyAppointments = () => {
+      if (currentUser && pregnancyData) {
+        checkAppointmentNotifications(pregnancyData);
+      }
+    };
+
+    // Only check immediately if we haven't shown notifications yet (temporarily disabled)
+    // if (shownNotifications.size === 0) {
+    //   checkDailyAppointments();
+    // }
+
+    // Set up daily check (every 24 hours)
+    const interval = setInterval(checkDailyAppointments, 24 * 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [currentUser, pregnancyData]);
+
+  // Listen for external view mode toggle (from MyCycle toolbar)
+  useEffect(() => {
+    const handler = (e) => {
+      const next = e?.detail;
+      if (next === 'calendar' || next === 'insights') {
+        setViewMode(next);
+        // Force reload data when switching to insights to ensure appointments are shown
+        if (next === 'insights') {
+          console.log('🔄 Switching to insights, reloading data...');
+          loadPregnancyData();
+        }
+      }
+    };
+    window.addEventListener('pregnancy:setViewMode', handler);
+    return () => window.removeEventListener('pregnancy:setViewMode', handler);
+  }, []);
+
   const loadPregnancyData = async () => {
     try {
       setLoading(true);
@@ -187,6 +226,9 @@ function PregnancyTrackerPage() {
 
       const stats = await getPregnancyStats(currentUser.uid);
       setPregnancyStats(stats);
+
+      // Check for appointment notifications (temporarily disabled)
+      // checkAppointmentNotifications(data);
 
     } catch (error) {
       console.error("Error loading pregnancy data:", error);
@@ -252,6 +294,10 @@ function PregnancyTrackerPage() {
 
   const handleSaveData = async () => {
     try {
+      console.log('💾 Saving pregnancy data...');
+      console.log('Selected date:', selectedDate);
+      console.log('Doctor appointments to save:', doctorAppointments);
+      
       // Prefer conception date for week calculation; fallback to due date if not set
       const effectiveWeek = conceptionDate
         ? calculatePregnancyWeek(conceptionDate, true)
@@ -267,7 +313,9 @@ function PregnancyTrackerPage() {
         babyGrowthInfo: getBabyGrowthInfo(effectiveWeek).size
       };
 
+      console.log('Entry data to save:', entryData);
       await savePregnancyEntry(currentUser.uid, selectedDate, entryData);
+      console.log('✅ Data saved to database');
 
       const dateKey = formatDateKey(selectedDate);
       const newData = {
@@ -279,12 +327,25 @@ function PregnancyTrackerPage() {
         }
       };
       setPregnancyData(newData);
+      console.log('✅ Local state updated:', newData);
+
+      // Reload pregnancy data to ensure we have the latest from database
+      await loadPregnancyData();
+      console.log('✅ Pregnancy data reloaded');
 
       const stats = await getPregnancyStats(currentUser.uid);
       setPregnancyStats(stats);
 
       setSuccessMessage("Pregnancy data saved successfully!");
       setTimeout(() => setSuccessMessage(null), 3000);
+
+      // Show specific notification for appointments
+      if (doctorAppointments.length > 0) {
+        const appointmentCount = doctorAppointments.filter(apt => apt.date && apt.description).length;
+        if (appointmentCount > 0) {
+          showSuccess(`📅 ${appointmentCount} doctor appointment${appointmentCount > 1 ? 's' : ''} saved successfully!`);
+        }
+      }
 
       setShowSymptomModal(false);
     } catch (error) {
@@ -307,8 +368,34 @@ function PregnancyTrackerPage() {
     );
   };
 
-  const addAppointment = () => {
-    setDoctorAppointments([...doctorAppointments, { date: '', description: '' }]);
+  const addAppointment = async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDateOnly = new Date(selectedDate);
+    selectedDateOnly.setHours(0, 0, 0, 0);
+    
+    // Check if selected date is in the past
+    if (selectedDateOnly < today) {
+      showError('Cannot add appointments for past dates. Please select today or a future date.');
+      return;
+    }
+    
+    // Check if there are any empty appointments
+    const hasEmptyAppointments = doctorAppointments.some(apt => !apt.description.trim());
+    if (hasEmptyAppointments) {
+      showError('Please fill in all appointment descriptions before adding new ones.');
+      return;
+    }
+    
+    // If no appointments exist, add one and save immediately
+    if (doctorAppointments.length === 0) {
+      const selectedDateStr = formatDateKey(selectedDate);
+      const newAppointments = [{ date: selectedDateStr, description: '' }];
+      setDoctorAppointments(newAppointments);
+    } else {
+      // Save current appointments and close modal
+      await handleSaveData();
+    }
   };
 
   const updateAppointment = (index, field, value) => {
@@ -319,6 +406,43 @@ function PregnancyTrackerPage() {
 
   const removeAppointment = (index) => {
     setDoctorAppointments(doctorAppointments.filter((_, i) => i !== index));
+  };
+
+  // Track shown notifications to prevent duplicates (temporarily disabled)
+  // const [shownNotifications, setShownNotifications] = useState(new Set());
+  // const [lastNotificationDate, setLastNotificationDate] = useState(new Date().toDateString());
+
+  // Check for appointment notifications
+  const checkAppointmentNotifications = (data) => {
+    if (!data) return;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Check all pregnancy entries for appointments
+    Object.values(data).forEach(entry => {
+      if (entry.doctorAppointments && Array.isArray(entry.doctorAppointments)) {
+        entry.doctorAppointments.forEach(appointment => {
+          if (appointment.date && appointment.description) {
+            const appointmentDate = new Date(appointment.date);
+            appointmentDate.setHours(0, 0, 0, 0);
+            const daysUntilAppointment = Math.floor((appointmentDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Create notification key
+            const notificationKey = `${appointment.date}-${appointment.description}-${daysUntilAppointment}`;
+            
+            // Show notification if appointment is today, tomorrow, or in 2 days (temporarily disabled)
+            // if (daysUntilAppointment === 0) {
+            //   showSuccess(`📅 Doctor appointment today: ${appointment.description}`);
+            // } else if (daysUntilAppointment === 1) {
+            //   showSuccess(`📅 Doctor appointment tomorrow: ${appointment.description}`);
+            // } else if (daysUntilAppointment === 2) {
+            //   showSuccess(`📅 Doctor appointment in 2 days: ${appointment.description}`);
+            // }
+          }
+        });
+      }
+    });
   };
 
   const handleDeleteEntry = async () => {
@@ -443,41 +567,6 @@ function PregnancyTrackerPage() {
     <div className="pregnancy-tracker-page">
       {/* Removed Calendar/Insights toggle as requested */}
 
-      <div className="pregnancy-dates-section">
-        <div className="date-inputs-container">
-          <div className="date-input-group">
-            <label>Conception Date</label>
-            <input
-              type="date"
-              value={conceptionDate}
-              onChange={(e) => handleConceptionDateChange(e.target.value)}
-              className="pregnancy-date-input"
-            />
-          </div>
-
-          <div className="date-input-group">
-            <label>Due Date</label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => handleDueDateChange(e.target.value)}
-              className="pregnancy-date-input"
-            />
-          </div>
-        </div>
-
-        {conceptionDate && (
-          <div className="remove-conception-container">
-            <button
-              className="remove-conception-btn"
-              onClick={() => setShowRemoveConceptionModal(true)}
-            >
-              Remove Conception Details
-            </button>
-          </div>
-        )}
-      </div>
-
       {showRemoveConceptionModal && (
         <div className="modal-overlay" onClick={() => setShowRemoveConceptionModal(false)}>
           <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
@@ -521,6 +610,41 @@ function PregnancyTrackerPage() {
 
         {viewMode === 'calendar' ? (
           <>
+            <div className="pregnancy-dates-section">
+              <div className="date-inputs-container">
+                <div className="date-input-group">
+                  <label>Conception Date</label>
+                  <input
+                    type="date"
+                    value={conceptionDate}
+                    onChange={(e) => handleConceptionDateChange(e.target.value)}
+                    className="pregnancy-date-input"
+                  />
+                </div>
+
+                <div className="date-input-group">
+                  <label>Due Date</label>
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => handleDueDateChange(e.target.value)}
+                    className="pregnancy-date-input"
+                  />
+                </div>
+              </div>
+
+              {conceptionDate && (
+                <div className="remove-conception-container">
+                  <button
+                    className="remove-conception-btn"
+                    onClick={() => setShowRemoveConceptionModal(true)}
+                  >
+                    Remove Conception Details
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="calendar-navigation">
               <button onClick={() => navigateMonth(-1)} className="nav-btn">
                 <span>‹</span>
@@ -568,31 +692,95 @@ function PregnancyTrackerPage() {
           </>
         ) : (
           <div className="insights-section">
+            <div style={{textAlign: 'center', marginBottom: '20px'}}>
+              <button 
+                onClick={() => {
+                  console.log('🔄 Manual refresh triggered');
+                  loadPregnancyData();
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                🔄 Refresh Data
+              </button>
+            </div>
             <div className="insights-grid">
-              <div className="insight-card">
-                <h3>Baby Growth</h3>
-                <div className="growth-info">
-                  <p><strong>Size:</strong> {babyInfo.size}</p>
-                  <p><strong>Weight:</strong> {babyInfo.weight}</p>
+              <div className="insight-card growth-card">
+                <h3>👶 Baby Growth</h3>
+                <div className="growth-visual">
+                  <div className="growth-chart">
+                    <div className="baby-size-indicator">
+                      <div className="size-circle" style={{ 
+                        width: `${Math.min(headerWeek * 2, 100)}px`, 
+                        height: `${Math.min(headerWeek * 2, 100)}px` 
+                      }}>
+                        <span className="week-number">{headerWeek}</span>
+                      </div>
+                      <div className="size-labels">
+                        <span className="current-size">Size: {babyInfo.size}</span>
+                        <span className="current-weight">Weight: {babyInfo.weight}</span>
+                        <span className="growth-context">
+                          {headerWeek <= 8 ? "Embryo stage - rapid cell division" :
+                           headerWeek <= 12 ? "Fetal stage - major organs forming" :
+                           headerWeek <= 20 ? "Active movement begins" :
+                           headerWeek <= 28 ? "Eyes open, can hear sounds" :
+                           "Final growth and development"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                   <div className="developments">
-                    <strong>Key Developments:</strong>
-                    <ul>
-                      {babyInfo.developments.map((dev, index) => (
-                        <li key={index}>{dev}</li>
+                    <h4>This Week's Milestones</h4>
+                    <div className="milestone-list">
+                      {babyInfo.developments.slice(0, 3).map((dev, index) => (
+                        <div key={index} className="milestone-item">
+                          <span className="milestone-icon">✨</span>
+                          <span className="milestone-text">{dev}</span>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="insight-card">
-                <h3>Common Symptoms</h3>
-                <div className="common-symptoms">
+              <div className="insight-card symptoms-card">
+                <h3>🤰 Common Symptoms</h3>
+                <div className="symptoms-visual">
                   {pregnancyStats.commonSymptoms.length > 0 ? (
-                    pregnancyStats.commonSymptoms.slice(0, 3).map((symptom, index) => (
-                      <span key={index}>{symptom.symptom.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                    ))
+                    <div className="symptoms-chart">
+                      {pregnancyStats.commonSymptoms.slice(0, 5).map((symptom, index) => {
+                        const intensity = Math.min(symptom.count || 1, 5);
+                        return (
+                          <div key={index} className="symptom-bar">
+                            <div className="symptom-label">
+                              <span className="symptom-icon">🤢</span>
+                              <span className="symptom-name">
+                                {symptom.symptom.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </span>
+                            </div>
+                            <div className="symptom-intensity">
+                              <div 
+                                className="intensity-bar" 
+                                style={{ width: `${(intensity / 5) * 100}%` }}
+                              ></div>
+                              <span className="intensity-count">{symptom.count || 1}x</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <span>No symptoms tracked yet</span>
+                    <div className="no-symptoms">
+                      <div className="no-symptoms-icon">😊</div>
+                      <p>No symptoms tracked yet</p>
+                      <small>Start logging your daily symptoms to see patterns</small>
+                    </div>
                   )}
                 </div>
               </div>
@@ -602,6 +790,204 @@ function PregnancyTrackerPage() {
                   {advice.map((tip, index) => (
                     <p key={index}>• {tip}</p>
                   ))}
+                </div>
+              </div>
+              
+              <div className="insight-card progress-card">
+                <h3>📊 Pregnancy Progress</h3>
+                <div className="progress-visual">
+                  <div className="week-progress">
+                    <div className="progress-circle">
+                      <svg width="120" height="120" className="progress-ring">
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="50"
+                          fill="none"
+                          stroke="#e5e7eb"
+                          strokeWidth="8"
+                        />
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="50"
+                          fill="none"
+                          stroke="#8b5cf6"
+                          strokeWidth="8"
+                          strokeDasharray={`${(headerWeek / 40) * 314} 314`}
+                          strokeDashoffset="0"
+                          transform="rotate(-90 60 60)"
+                          className="progress-ring-fill"
+                        />
+                      </svg>
+                      <div className="progress-center">
+                        <span className="week-number">{headerWeek}</span>
+                        <span className="week-label">weeks</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="progress-stats">
+                    <div className="stat-item">
+                      <div className="stat-icon">🏆</div>
+                      <div className="stat-content">
+                        <span className="stat-value">{getTrimester(headerWeek)}</span>
+                        <span className="stat-label">Trimester</span>
+                      </div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-icon">📝</div>
+                      <div className="stat-content">
+                        <span className="stat-value">{pregnancyStats.totalEntries}</span>
+                        <span className="stat-label">Days Tracked</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="insight-card">
+                <h3>Upcoming Appointments</h3>
+                <div className="appointments-list">
+                  {(() => {
+                    const upcomingAppointments = [];
+                    console.log('🔍 Debugging appointments...');
+                    console.log('Pregnancy data for appointments:', pregnancyData);
+                    console.log('Current doctorAppointments state:', doctorAppointments);
+                    
+                    // Check saved data first
+                    Object.values(pregnancyData).forEach((entry, index) => {
+                      console.log(`Entry ${index}:`, entry);
+                      if (entry.doctorAppointments && Array.isArray(entry.doctorAppointments)) {
+                        console.log('Found saved appointments:', entry.doctorAppointments);
+                        entry.doctorAppointments.forEach((apt, aptIndex) => {
+                          console.log(`Processing saved appointment ${aptIndex}:`, apt);
+                          if (apt.date) {
+                            const aptDate = new Date(apt.date);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0); // Reset time to start of day
+                            aptDate.setHours(0, 0, 0, 0); // Reset time to start of day
+                            const daysUntil = Math.floor((aptDate - today) / (1000 * 60 * 60 * 24));
+                            console.log('Saved appointment date:', aptDate, 'Today:', today, 'Days until:', daysUntil);
+                            if (daysUntil >= 0) {
+                              upcomingAppointments.push({ 
+                                ...apt, 
+                                daysUntil, 
+                                source: 'saved',
+                                description: apt.description || 'No description'
+                              });
+                              console.log('✅ Added saved appointment to list:', apt);
+                            } else {
+                              console.log('❌ Saved appointment is in the past, skipping:', apt);
+                            }
+                          }
+                        });
+                      }
+                    });
+                    
+                    // Also check current doctorAppointments state (unsaved appointments)
+                    if (doctorAppointments && doctorAppointments.length > 0) {
+                      console.log('Processing current doctor appointments state:', doctorAppointments);
+                      doctorAppointments.forEach((apt, index) => {
+                        console.log(`Processing current appointment ${index}:`, apt);
+                        if (apt.date) {
+                          const aptDate = new Date(apt.date);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0); // Reset time to start of day
+                          aptDate.setHours(0, 0, 0, 0); // Reset time to start of day
+                          const daysUntil = Math.floor((aptDate - today) / (1000 * 60 * 60 * 24));
+                          console.log('Current appointment date:', aptDate, 'Today:', today, 'Days until:', daysUntil, 'Description:', apt.description);
+                          if (daysUntil >= 0) {
+                            // Check if this appointment is already in the list (avoid duplicates)
+                            const isDuplicate = upcomingAppointments.some(existing => 
+                              existing.date === apt.date
+                            );
+                            if (!isDuplicate) {
+                              upcomingAppointments.push({ 
+                                ...apt, 
+                                daysUntil, 
+                                source: 'current',
+                                description: apt.description || 'No description'
+                              });
+                              console.log('✅ Added current appointment to list:', apt);
+                            }
+                          } else {
+                            console.log('❌ Appointment is in the past, skipping:', apt);
+                          }
+                        }
+                      });
+                    }
+                    
+                    console.log('✅ Final upcoming appointments found:', upcomingAppointments);
+                    upcomingAppointments.sort((a, b) => a.daysUntil - b.daysUntil);
+                    
+                    return upcomingAppointments.length > 0 ? (
+                      upcomingAppointments.slice(0, 3).map((apt, index) => (
+                        <div key={index} className="appointment-item">
+                          <span className="appointment-date">{new Date(apt.date).toLocaleDateString()}</span>
+                          <span className="appointment-desc">{apt.description}</span>
+                          <span className="appointment-days">
+                            {apt.daysUntil === 0 ? 'Today' : 
+                             apt.daysUntil === 1 ? 'Tomorrow' : 
+                             `In ${apt.daysUntil} days`}
+                          </span>
+                          <span className="appointment-source" style={{fontSize: '10px', color: '#666'}}>
+                            ({apt.source})
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-appointments">
+                        <p>No upcoming appointments</p>
+                        <div style={{fontSize: '12px', color: '#666', marginTop: '8px'}}>
+                          <p>Debug info:</p>
+                          <p>Pregnancy data entries: {Object.keys(pregnancyData).length}</p>
+                          <p>Current appointments: {doctorAppointments.length}</p>
+                          <p>Current appointments data: {JSON.stringify(doctorAppointments)}</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+              
+              <div className="insight-card timeline-card">
+                <h3>📅 Pregnancy Timeline</h3>
+                <div className="timeline-visual">
+                  <div className="timeline-chart">
+                    <div className="timeline-line">
+                      {[1, 2, 3].map(trimester => {
+                        const isActive = getTrimester(headerWeek) === trimester;
+                        const isCompleted = headerWeek > (trimester * 13);
+                        return (
+                          <div key={trimester} className={`timeline-marker ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+                            <div className="marker-circle">
+                              <span className="marker-number">{trimester}</span>
+                            </div>
+                            <div className="marker-label">
+                              <span className="trimester-name">Trimester {trimester}</span>
+                              <span className="trimester-weeks">
+                                {trimester === 1 ? 'Weeks 1-13' : 
+                                 trimester === 2 ? 'Weeks 14-26' : 
+                                 'Weeks 27-40'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="timeline-progress">
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill" 
+                          style={{ width: `${(headerWeek / 40) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="progress-labels">
+                        <span>Week 1</span>
+                        <span>Week 40</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -675,6 +1061,7 @@ function PregnancyTrackerPage() {
                       value={appointment.date}
                       onChange={(e) => updateAppointment(index, 'date', e.target.value)}
                       className="appointment-date"
+                      min={new Date().toISOString().split('T')[0]}
                     />
                     <input
                       type="text"
@@ -686,7 +1073,22 @@ function PregnancyTrackerPage() {
                     <button onClick={() => removeAppointment(index)} className="remove-appointment">×</button>
                   </div>
                 ))}
-                <button onClick={addAppointment} className="add-appointment-btn">Add Appointment</button>
+          <button 
+            onClick={addAppointment} 
+            className="add-appointment-btn"
+            disabled={selectedDate < new Date(new Date().setHours(0, 0, 0, 0))}
+            style={{
+              opacity: selectedDate < new Date(new Date().setHours(0, 0, 0, 0)) ? 0.5 : 1,
+              cursor: selectedDate < new Date(new Date().setHours(0, 0, 0, 0)) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {selectedDate < new Date(new Date().setHours(0, 0, 0, 0)) 
+              ? `Cannot add appointment for past date (${selectedDate.toLocaleDateString()})`
+              : doctorAppointments.length === 0 
+                ? `Add Appointment for ${selectedDate.toLocaleDateString()}`
+                : `Save & Close`
+            }
+          </button>
               </div>
 
               <div className="modal-actions">
@@ -706,6 +1108,7 @@ function PregnancyTrackerPage() {
           </div>
         </div>
       )}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

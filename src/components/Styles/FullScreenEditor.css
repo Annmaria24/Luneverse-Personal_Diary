@@ -5,11 +5,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999;
+  /* Ensure overlay appears above navbar, tabs, and any sticky UI */
+  z-index: 2147483000; /* very high but below max */
   display: flex;
   align-items: center;
   justify-content: center;
   animation: fadeIn 0.3s ease-out;
+  /* Prevent page scrollbars while overlay is open */
+  overflow: hidden;
 }
 
 @keyframes fadeIn {
@@ -89,6 +92,7 @@
   overflow: hidden;
   animation: slideIn 0.3s ease-out;
   position: relative;
+  z-index: 1;
 }
 
 @keyframes slideIn {
@@ -112,7 +116,7 @@
   flex-shrink: 0;
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 2;
   background: inherit;
   border-bottom: 1px solid var(--neutral-gray-200, #e5e5e5);
 }

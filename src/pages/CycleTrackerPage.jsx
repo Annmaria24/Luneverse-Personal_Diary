@@ -98,6 +98,23 @@ function CycleTrackerPage({ hideTopToggle = false }) {
     }
   }, [currentUser]);
 
+  // Daily period notification check
+  useEffect(() => {
+    const checkDailyNotifications = () => {
+      if (currentUser && cycleStats) {
+        checkPeriodNotifications(cycleStats);
+      }
+    };
+
+    // Check immediately
+    checkDailyNotifications();
+
+    // Set up daily check (every 24 hours)
+    const interval = setInterval(checkDailyNotifications, 24 * 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [currentUser, cycleStats]);
+
   // Listen for external view mode toggle (from MyCycle toolbar)
   useEffect(() => {
     const handler = (e) => {
@@ -162,6 +179,60 @@ function CycleTrackerPage({ hideTopToggle = false }) {
   //   }
   // };
 
+  // Period notification function
+  const checkPeriodNotifications = (stats) => {
+    if (!stats || !stats.averageCycleLength) return;
+    
+    const today = new Date();
+    const lastPeriod = stats.lastPeriodDate ? new Date(stats.lastPeriodDate) : null;
+    
+    if (!lastPeriod) return;
+    
+    // Calculate days since last period
+    const daysSinceLastPeriod = Math.floor((today - lastPeriod) / (1000 * 60 * 60 * 24));
+    const averageCycleLength = stats.averageCycleLength;
+    
+    // Check if period is due (within 2 days of expected date)
+    const expectedPeriodDate = new Date(lastPeriod);
+    expectedPeriodDate.setDate(expectedPeriodDate.getDate() + averageCycleLength);
+    
+    const daysUntilExpected = Math.floor((expectedPeriodDate - today) / (1000 * 60 * 60 * 24));
+    
+    // Show notification if period is due soon
+    if (daysUntilExpected <= 2 && daysUntilExpected >= -1) {
+      const message = daysUntilExpected === 0 
+        ? "Your period is expected today! 🩸"
+        : daysUntilExpected === 1 
+        ? "Your period is expected tomorrow! 🩸"
+        : daysUntilExpected === -1
+        ? "Your period was expected yesterday! 🩸"
+        : `Your period is expected in ${daysUntilExpected} days! 🩸`;
+      
+      // Show browser notification if permission granted
+      if (Notification.permission === 'granted') {
+        new Notification('Period Reminder', {
+          body: message,
+          icon: '/favicon.ico',
+          tag: 'period-reminder'
+        });
+      } else if (Notification.permission !== 'denied') {
+        // Request permission for future notifications
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification('Period Reminder', {
+              body: message,
+              icon: '/favicon.ico',
+              tag: 'period-reminder'
+            });
+          }
+        });
+      }
+      
+      // Also show in-app notification
+      console.log('🔔 Period Notification:', message);
+    }
+  };
+
   const loadCycleData = async () => {
     try {
       setLoading(true);
@@ -173,6 +244,9 @@ function CycleTrackerPage({ hideTopToggle = false }) {
       
       // Load cycle statistics
       const stats = await getCycleStats(currentUser.uid);
+      
+      // Check for period notifications
+      checkPeriodNotifications(stats);
       setCycleStats(stats);
       
       // Load common symptoms
@@ -395,6 +469,48 @@ function CycleTrackerPage({ hideTopToggle = false }) {
 
   const getCurrentPhase = () => {
     return cycleStats.currentPhase || 'Follicular';
+  };
+
+  const getPeriodNotificationBanner = () => {
+    if (!cycleStats || !cycleStats.averageCycleLength) return null;
+    
+    const today = new Date();
+    const lastPeriod = cycleStats.lastPeriodDate ? new Date(cycleStats.lastPeriodDate) : null;
+    
+    if (!lastPeriod) return null;
+    
+    const averageCycleLength = cycleStats.averageCycleLength;
+    const expectedPeriodDate = new Date(lastPeriod);
+    expectedPeriodDate.setDate(expectedPeriodDate.getDate() + averageCycleLength);
+    
+    const daysUntilExpected = Math.floor((expectedPeriodDate - today) / (1000 * 60 * 60 * 24));
+    
+    // Only show banner if period is due within 3 days
+    if (daysUntilExpected > 3) return null;
+    
+    const getBannerMessage = () => {
+      if (daysUntilExpected === 0) return "Your period is expected today! 🩸";
+      if (daysUntilExpected === 1) return "Your period is expected tomorrow! 🩸";
+      if (daysUntilExpected === -1) return "Your period was expected yesterday! 🩸";
+      if (daysUntilExpected > 0) return `Your period is expected in ${daysUntilExpected} days! 🩸`;
+      return `Your period was expected ${Math.abs(daysUntilExpected)} days ago! 🩸`;
+    };
+    
+    const getBannerClass = () => {
+      if (daysUntilExpected === 0) return "period-banner today";
+      if (daysUntilExpected === 1) return "period-banner tomorrow";
+      if (daysUntilExpected < 0) return "period-banner overdue";
+      return "period-banner upcoming";
+    };
+    
+    return (
+      <div className={getBannerClass()}>
+        <div className="banner-content">
+          <span className="banner-icon">🔔</span>
+          <span className="banner-message">{getBannerMessage()}</span>
+        </div>
+      </div>
+    );
   };
 
   const formatSymptomName = (symptomId) => {
@@ -632,6 +748,9 @@ function CycleTrackerPage({ hideTopToggle = false }) {
             </div>
           </div>
         </div>
+
+        {/* Period Notification Banner */}
+        {getPeriodNotificationBanner()}
 
         {viewMode === 'calendar' ? (
           <>

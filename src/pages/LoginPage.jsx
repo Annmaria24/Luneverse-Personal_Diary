@@ -110,6 +110,7 @@ function LoginPage() {
                 <label>Email Address</label>
                 <input
                   type="email"
+                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
@@ -122,6 +123,7 @@ function LoginPage() {
                 <div className="password-input">
                   <input
                     type={showPassword ? "text" : "password"}
+                    name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"

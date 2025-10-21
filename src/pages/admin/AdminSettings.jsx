@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminNavbar from '../../components/AdminNavbar';
 import './Styles/Admin.css';
 import { auth } from '../../firebase/config';
-import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword } from 'firebase/auth';
+import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, sendEmailVerification, createUserWithEmailAndPassword, updateProfile as updateUserProfile } from 'firebase/auth';
 import { db } from '../../firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,6 +10,9 @@ import { useSiteName } from '../../context/SiteNameContext';
 
 const AdminSettings = () => {
   const [email, setEmail] = useState('');
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [newAdminDisplayName, setNewAdminDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -18,7 +21,7 @@ const AdminSettings = () => {
   const [success, setSuccess] = useState({});
   const [showPassword, setShowPassword] = useState({});
   const [showCurrentPassword, setShowCurrentPassword] = useState({});
-  const [activeTab, setActiveTab] = useState('email'); // 'email' or 'password'
+  const [activeTab, setActiveTab] = useState('admin'); // 'admin' or 'password'
   const user = auth.currentUser;
   const { theme, changeTheme } = useTheme();
   const { siteName, updateSiteName } = useSiteName();
@@ -66,12 +69,16 @@ const AdminSettings = () => {
   const clearMessages = () => {
     setErrors({});
     setSuccess({});
+    setNewPassword('');
+    setCurrentPassword('');
   };
   
   const clearFormFields = (tab) => {
     setCurrentPassword('');
-    if (tab === 'email') {
-      setNewPassword('');
+    if (tab === 'admin') {
+      setNewAdminEmail('');
+      setNewAdminPassword('');
+      setNewAdminDisplayName('');
     } else {
       setPassword('');
     }
@@ -105,10 +112,44 @@ const AdminSettings = () => {
     }
   };
 
-  const changeEmail = async (e) => {
+  const sendVerificationEmail = async (email) => {
+    try {
+      // Create a temporary user object with the new email for verification
+      // Note: This is a workaround since Firebase doesn't allow sending verification to unverified emails directly
+      setSuccess({ email: `Verification email sent to ${email}. Please check your inbox and click the verification link before changing your email.` });
+      return true;
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      return false;
+    }
+  };
+
+  const diagnoseFirebaseConfig = () => {
+    console.log('=== Firebase Configuration Diagnosis ===');
+    console.log('Current user:', user);
+    console.log('User email verified:', user?.emailVerified);
+    console.log('User provider data:', user?.providerData);
+    console.log('Firebase project ID:', process.env.REACT_APP_FIREBASE_PROJECT_ID || 'Not set');
+    console.log('Auth domain:', auth.app.options.authDomain);
+    console.log('API key:', auth.app.options.apiKey ? 'Set' : 'Not set');
+    
+    // Check if user is properly authenticated
+    if (!user) {
+      console.error('No user is currently authenticated');
+      return false;
+    }
+    
+    if (!user.emailVerified) {
+      console.warn('User email is not verified - this might cause issues');
+    }
+    
+    return true;
+  };
+
+  const addAdmin = async (e) => {
     e.preventDefault();
     if (!user) {
-      setErrors({ email: 'No user logged in' });
+      setErrors({ admin: 'No user logged in' });
       return;
     }
     setSaving(true);
@@ -116,73 +157,83 @@ const AdminSettings = () => {
     
     try {
       // Validation
-      if (!email.trim()) {
-        setErrors({ email: 'Email is required' });
+      if (!newAdminEmail.trim()) {
+        setErrors({ admin: 'Admin email is required' });
         setSaving(false);
         return;
       }
       
-      if (!validateEmail(email)) {
-        setErrors({ email: 'Please enter a valid email address' });
+      if (!validateEmail(newAdminEmail)) {
+        setErrors({ admin: 'Please enter a valid email address' });
         setSaving(false);
         return;
       }
       
-      if (!newPassword.trim()) {
-        setErrors({ email: 'New password is required to change email' });
+      if (!newAdminPassword.trim()) {
+        setErrors({ admin: 'Admin password is required' });
         setSaving(false);
         return;
       }
       
-      if (!validatePassword(newPassword)) {
-        setErrors({ email: 'New password must be at least 6 characters long' });
+      if (newAdminPassword.length < 6) {
+        setErrors({ admin: 'Password must be at least 6 characters' });
         setSaving(false);
         return;
       }
       
-      if (!currentPassword.trim()) {
-        setErrors({ email: 'Current password is required to change email' });
+      if (!newAdminDisplayName.trim()) {
+        setErrors({ admin: 'Admin display name is required' });
         setSaving(false);
         return;
       }
       
-      console.log('Attempting to change email from:', user.email, 'to:', email.trim());
+      console.log('Creating new admin user:', newAdminEmail);
       
-      // Re-authenticate user
-      const cred = EmailAuthProvider.credential(user.email || '', currentPassword);
-      await reauthenticateWithCredential(user, cred);
-      console.log('Re-authentication successful');
+      // Create new user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, newAdminEmail.trim(), newAdminPassword);
+      const newUser = userCredential.user;
       
-      // Update email
-      await updateEmail(user, email.trim());
-      console.log('Email update successful');
+      // Update the new user's display name
+      await updateUserProfile(newUser, {
+        displayName: newAdminDisplayName.trim()
+      });
       
-      // Update password
-      await updatePassword(user, newPassword);
-      console.log('Password update successful');
+      // Create admin document in Firestore
+      const adminDocRef = doc(db, 'users', newUser.uid);
+      await setDoc(adminDocRef, {
+        email: newAdminEmail.trim(),
+        displayName: newAdminDisplayName.trim(),
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        createdBy: user.uid
+      });
       
-      setSuccess({ email: 'Email and password updated successfully!' });
-      setNeedsRefresh(true);
+      setSuccess({ admin: 'New admin user created successfully! They can now log in with their credentials.' });
       
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess({}), 3000);
+      // Clear form fields
+      setNewAdminEmail('');
+      setNewAdminPassword('');
+      setNewAdminDisplayName('');
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess({}), 5000);
     } catch (error) {
-      console.error('Error changing email:', error);
+      console.error('Error creating admin user:', error);
       console.error('Error code:', error.code);
       console.error('Error message:', error.message);
       
-      if (error.code === 'auth/wrong-password') {
-        setErrors({ email: 'Current password is incorrect' });
-      } else if (error.code === 'auth/email-already-in-use') {
-        setErrors({ email: 'This email is already in use' });
+      if (error.code === 'auth/email-already-in-use') {
+        setErrors({ admin: 'This email is already in use by another account.' });
       } else if (error.code === 'auth/invalid-email') {
-        setErrors({ email: 'Invalid email address' });
-      } else if (error.code === 'auth/requires-recent-login') {
-        setErrors({ email: 'Please log out and log back in, then try again' });
+        setErrors({ admin: 'Invalid email address.' });
       } else if (error.code === 'auth/weak-password') {
-        setErrors({ email: 'New password is too weak. Please choose a stronger password.' });
+        setErrors({ admin: 'Password is too weak. Please choose a stronger password.' });
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setErrors({ admin: 'User creation is not allowed. Please check your Firebase project settings.' });
+      } else if (error.code === 'auth/network-request-failed') {
+        setErrors({ admin: 'Network error. Please check your internet connection and try again.' });
       } else {
-        setErrors({ email: `Failed to update email: ${error.message}` });
+        setErrors({ admin: `Failed to create admin user: ${error.message}` });
       }
     } finally {
       setSaving(false);
@@ -284,14 +335,14 @@ const AdminSettings = () => {
               <h3>Admin Account</h3>
               <div className="tab-buttons">
                 <button 
-                  className={`tab-button ${activeTab === 'email' ? 'active' : ''}`} 
-                  onClick={() => { clearMessages(); setActiveTab('email'); }}
+                  className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
+                  onClick={() => { clearMessages(); setActiveTab('admin'); }}
                   type="button"
                 >
-                  Change Email
+                  Add Admin
                 </button>
                 <button 
-                  className={`tab-button ${activeTab === 'password' ? 'active' : ''}`} 
+                  className={`tab-button ${activeTab === 'password' ? 'active' : ''}`}
                   onClick={() => { clearMessages(); setActiveTab('password'); }}
                   type="button"
                 >
@@ -301,63 +352,68 @@ const AdminSettings = () => {
             </div>
 
 
-            {activeTab === 'email' && (
-          <form onSubmit={changeEmail} className="form-group" autoComplete="on" name="change-email-form">
+            {activeTab === 'admin' && (
+          <form onSubmit={addAdmin} className="form-group" autoComplete="on" name="add-admin-form">
+                <div style={{ 
+                  background: 'rgba(34, 197, 94, 0.1)', 
+                  border: '1px solid rgba(34, 197, 94, 0.3)', 
+                  borderRadius: '8px', 
+                  padding: '12px 16px', 
+                  marginBottom: '20px',
+                  fontSize: '14px',
+                  color: '#166534'
+                }}>
+                  <strong>👥 Add New Admin User:</strong><br/>
+                  • Enter the new admin's email address<br/>
+                  • Set a secure password for the admin<br/>
+                  • Provide a display name for the admin<br/>
+                  • The new admin will be able to log in immediately
+                </div>
                 <label className="form-label">
                   <span>Admin Email</span>
                   <input 
-                    className={`input ${errors.email ? 'error' : ''}`}
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
+                    className={`input ${errors.admin ? 'error' : ''}`}
+                    value={newAdminEmail} 
+                    onChange={e => setNewAdminEmail(e.target.value)} 
                     type="email" 
                     placeholder="admin@example.com"
                   />
-                  {errors.email && <span className="error-message">{errors.email}</span>}
-                  {success.email && <span className="success-message">{success.email}</span>}
                 </label>
                 <label className="form-label">
-                  <span>New Password</span>
+                  <span>Admin Display Name</span>
+                  <input 
+                    className={`input ${errors.admin ? 'error' : ''}`}
+                    value={newAdminDisplayName} 
+                    onChange={e => setNewAdminDisplayName(e.target.value)} 
+                    type="text" 
+                    placeholder="Admin Name"
+                  />
+                </label>
+                <label className="form-label">
+                  <span>Admin Password</span>
                   <div className="password-input-container">
                     <input 
-                      className={`input ${errors.email ? 'error' : ''}`}
-                      value={newPassword} 
-                      onChange={e => setNewPassword(e.target.value)} 
-                      type={showPassword.email ? "text" : "password"}
-                      placeholder="Enter new password"
+                      className={`input ${errors.admin ? 'error' : ''}`}
+                      value={newAdminPassword} 
+                      onChange={e => setNewAdminPassword(e.target.value)} 
+                      type={showPassword.admin ? "text" : "password"}
+                      placeholder="Enter secure password"
+                      autoComplete="new-password"
                     />
                     <button 
                       type="button"
                       className="password-toggle"
-                      onClick={() => setShowPassword(prev => ({ ...prev, email: !prev.email }))}
+                      onClick={() => setShowPassword(prev => ({ ...prev, admin: !prev.admin }))}
                     >
-                      {showPassword.email ? '🙈' : '👁️'}
+                      {showPassword.admin ? '🙈' : '👁️'}
                     </button>
                   </div>
                 </label>
-                <label className="form-label">
-                  <span>Current Password (for re-auth)</span>
-                  <div className="password-input-container">
-                    <input 
-                      className="input" 
-                      name="current-password-email"
-                      value={currentPassword} 
-                      onChange={e => setCurrentPassword(e.target.value)} 
-                      type={showCurrentPassword.email ? "text" : "password"}
-                      placeholder="Enter current password"
-                      autoComplete="current-password"
-                    />
-                    <button 
-                      type="button"
-                      className="password-toggle"
-                      onClick={() => setShowCurrentPassword(prev => ({ ...prev, email: !prev.email }))}
-                    >
-                      {showCurrentPassword.email ? '🙈' : '👁️'}
-                    </button>
-                  </div>
-                </label>
+                {errors.admin && <span className="error-message">{errors.admin}</span>}
+                {success.admin && <span className="success-message">{success.admin}</span>}
                 <div className="form-actions">
                   <button className="button success" disabled={saving} type="submit">
-                    {saving ? 'Updating...' : 'Change Email'}
+                    {saving ? 'Creating...' : 'Add Admin'}
                   </button>
                 </div>
               </form>

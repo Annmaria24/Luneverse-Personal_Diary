@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import RichTextEditor from './RichTextEditor';
 import CustomModal from './CustomModal';
 import LoadingSpinner from './LoadingSpinner';
@@ -106,7 +107,7 @@ const FullScreenEditor = ({
 
   if (!isOpen) return null;
 
-  return (
+  const overlay = (
     <div className={`fullscreen-editor-overlay ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
       <div className="fullscreen-editor">
         {/* Header */}
@@ -219,6 +220,9 @@ const FullScreenEditor = ({
       />
     </div>
   );
+
+  // Render in a portal so it sits above navbar and other sticky UI
+  return ReactDOM.createPortal(overlay, document.body);
 };
 
 export default FullScreenEditor;
