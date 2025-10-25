@@ -99,3 +99,6 @@ Local storage used for non-sensitive preferences like affirmation settings and d
 5. Access the app at `http://localhost:5173`
 
 Made with 💜 by Ann | Personal Wellness App © 2025
+
+
+

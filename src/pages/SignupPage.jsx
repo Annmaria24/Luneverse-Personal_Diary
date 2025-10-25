@@ -8,6 +8,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { createUserProfile, updateLastLogin } from "../services/userService";
+import { getErrorMessage } from "../utils/errorMessages";
 
 function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -49,7 +50,8 @@ function SignUpPage() {
       }
     } catch (error) {
       console.error("❌ Google Sign-up error:", error);
-      setError("Google Sign-Up failed. Try again.");
+      const userFriendlyMessage = getErrorMessage(error);
+      setError(userFriendlyMessage);
     }
   };
 
@@ -100,7 +102,8 @@ function SignUpPage() {
       navigate("/verify-email");
     } catch (error) {
       console.error("Signup error:", error);
-      setError("Signup failed: " + error.message);
+      const userFriendlyMessage = getErrorMessage(error);
+      setError(userFriendlyMessage);
       setIsLoading(false);
     }
   };

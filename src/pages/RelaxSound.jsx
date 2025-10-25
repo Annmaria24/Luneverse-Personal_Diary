@@ -5,51 +5,52 @@ import './Styles/RelaxMode.css';
 const sounds = [
   {
     name: 'Gentle Rain', icon: '🌧️', srcs: [
-      'https://cdn.pixabay.com/audio/2022/03/10/audio_3cbad0d51a.mp3',
-      'https://actions.google.com/sounds/v1/weather/rain_moderate.ogg'
+      '/src/assets/Sounds/Gentle rain.wav'
     ],
     videoId: 'M0qWBKQ7ldY'
   },
   {
     name: 'Forest Birds', icon: '🌲', srcs: [
-      'https://cdn.pixabay.com/audio/2021/09/28/audio_0d3c1ee8e1.mp3',
-      'https://actions.google.com/sounds/v1/ambiences/forest_ambience_2.ogg'
+      '/src/assets/Sounds/Forest Birds.wav'
     ],
     videoId: '2G8LAiHSCAs'
   },
   {
     name: 'Ocean Waves', icon: '🌊', srcs: [
-      'https://cdn.pixabay.com/audio/2021/08/04/audio_2f0f0b1b4e.mp3',
-      'https://actions.google.com/sounds/v1/water/ocean_waves.ogg'
+      '/src/assets/Sounds/Ocean.wav'
     ],
     videoId: 'bn9F19Hi1Lk'
   },
   {
     name: 'Crackling Fireplace', icon: '🔥', srcs: [
-      'https://cdn.pixabay.com/audio/2021/08/09/audio_4a2b3a2f5f.mp3',
-      'https://actions.google.com/sounds/v1/foley/fire_crackle.ogg'
+      '/src/assets/Sounds/Fireplace.aiff',
+      'https://cdn.pixabay.com/audio/2021/08/09/audio_4a2b3a2f5f.mp3'
     ],
     videoId: 'UgHKb_7884o'
   },
   {
     name: 'Night Ambience', icon: '🌙', srcs: [
-      'https://cdn.pixabay.com/audio/2022/03/22/audio_9b7c37a1d7.mp3',
-      'https://actions.google.com/sounds/v1/ambiences/night.ogg'
+      '/src/assets/Sounds/NightAmbience.wav'
     ],
     videoId: 'g1w3IT5WnYw'
   },
   {
     name: 'Cafe Murmur', icon: '☕', srcs: [
-      'https://cdn.pixabay.com/audio/2022/01/12/audio_3f4a0a0e95.mp3',
-      'https://actions.google.com/sounds/v1/ambiences/cafe_restaurant.ogg'
+      '/src/assets/Sounds/Cafe Murmur.wav'
     ],
     videoId: 'uiMXGIG_DQo'
   },
   {
-    name: 'Relaxing Piano', icon: '🎹', srcs: [], videoId: 'oYoXxPCQsoM'
+    name: 'Relaxing Piano', icon: '🎹', srcs: [
+      '/src/assets/Sounds/Relaxing Piano.mp3'
+    ], 
+    videoId: 'oYoXxPCQsoM'
   },
   {
-    name: 'River', icon: '🏞️', srcs: [], videoId: 'HAzZH6wccew'
+    name: 'River', icon: '🏞️', srcs: [
+      '/src/assets/Sounds/River.wav'
+    ], 
+    videoId: 'HAzZH6wccew'
   }
 ];
 
@@ -70,59 +71,127 @@ function RelaxSound({ embedded = false }) {
     if (!window.YT || !window.YT.Player) return null;
     if (ytPlayers.current[sound.name]) return ytPlayers.current[sound.name];
 
+    console.log(`Creating YouTube player for ${sound.name} with video ID: ${sound.videoId}`);
+
     ytPlayers.current[sound.name] = new window.YT.Player(`yt-${sound.name.replace(/\s+/g,'-')}`, {
-      height: '1', width: '1', videoId: sound.videoId,
-      playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, origin: window.location.origin, host: 'https://www.youtube.com' },
+      height: '1', 
+      width: '1', 
+      videoId: sound.videoId,
+      playerVars: { 
+        autoplay: 0, 
+        controls: 0, 
+        rel: 0, 
+        modestbranding: 1, 
+        playsinline: 1, 
+        origin: window.location.origin, 
+        host: 'https://www.youtube.com',
+        loop: 1,
+        mute: 0
+      },
       events: {
         onReady: (e) => {
-          try { e.target.unMute && e.target.unMute(); e.target.setVolume(85); } catch {}
+          console.log(`YouTube player ready for ${sound.name}`);
+          try { 
+            e.target.unMute && e.target.unMute(); 
+            e.target.setVolume && e.target.setVolume(85); 
+          } catch {}
+          
           if (pendingPlay.current[sound.name]) {
             try {
-              e.target.cueVideoById({ videoId: sound.videoId, startSeconds: 0, suggestedQuality: 'large' });
+              e.target.loadVideoById({ 
+                videoId: sound.videoId, 
+                startSeconds: 0, 
+                suggestedQuality: 'large' 
+              });
               e.target.playVideo();
-            } catch {}
+            } catch (error) {
+              console.warn(`Failed to play YouTube video for ${sound.name}:`, error);
+            }
             pendingPlay.current[sound.name] = false;
           }
         },
         onStateChange: (e) => {
+          console.log(`YouTube state change for ${sound.name}:`, e.data);
+          
           if (e.data === window.YT.PlayerState.PLAYING) {
             try {
               const v = e.target.getVideoData();
+              console.log(`Now playing: ${v?.title} (ID: ${v?.video_id})`);
+              
+              // Verify we're playing the correct video
               if (v && v.video_id && sound.videoId && v.video_id !== sound.videoId) {
-                e.target.loadVideoById({ videoId: sound.videoId, startSeconds: 0, suggestedQuality: 'large' });
+                console.warn(`Video ID mismatch! Expected: ${sound.videoId}, Got: ${v.video_id}`);
+                e.target.loadVideoById({ 
+                  videoId: sound.videoId, 
+                  startSeconds: 0, 
+                  suggestedQuality: 'large' 
+                });
                 return;
               }
-              setVideoMeta(prev => ({ ...prev, [sound.name]: { id: v?.video_id || '', title: v?.title || '' } }));
-            } catch {}
+              
+              setVideoMeta(prev => ({ 
+                ...prev, 
+                [sound.name]: { 
+                  id: v?.video_id || sound.videoId, 
+                  title: v?.title || sound.name 
+                } 
+              }));
+            } catch (error) {
+              console.warn(`Error getting video data for ${sound.name}:`, error);
+            }
+            
+            // Stop all other sounds
             sounds.forEach(s => {
               if (s.name !== sound.name) {
                 const other = ytPlayers.current[s.name];
-                if (other && other.pauseVideo) { try { other.pauseVideo(); } catch {} }
+                if (other && other.pauseVideo) { 
+                  try { 
+                    other.pauseVideo(); 
+                    other.stopVideo && other.stopVideo();
+                  } catch {} 
+                }
                 const a = audioRefs.current[s.name];
-                if (a) { try { a.pause(); a.currentTime = 0; } catch {} }
+                if (a) { 
+                  try { 
+                    a.pause(); 
+                    a.currentTime = 0; 
+                  } catch {} 
+                }
                 stopSynth(s);
+                setPlaying(prev => ({ ...prev, [s.name]: false }));
               }
             });
-            setPlaying(() => {
-              const next = {}; sounds.forEach(s => { next[s.name] = s.name === sound.name; }); return next;
-            });
+            
+            setPlaying(prev => ({ ...prev, [sound.name]: true }));
           }
+          
           if (e.data === window.YT.PlayerState.PAUSED || e.data === window.YT.PlayerState.ENDED) {
             setPlaying(prev => ({ ...prev, [sound.name]: false }));
           }
         },
-        onError: () => {
-          // Embedding blocked or unavailable. Fall back and provide open link.
+        onError: (error) => {
+          console.error(`YouTube player error for ${sound.name}:`, error);
           setPlaying(prev => ({ ...prev, [sound.name]: false }));
-          setVideoMeta(prev => ({ ...prev, [sound.name]: { id: 'blocked', title: 'Embed blocked' } }));
-          stopSynth(sound);
+          setVideoMeta(prev => ({ 
+            ...prev, 
+            [sound.name]: { 
+              id: 'error', 
+              title: 'Video unavailable' 
+            } 
+          }));
+          
+          // Fallback to audio
           const a = audioRefs.current[sound.name];
-          if (a) {
-            a.src = (sound.srcs && sound.srcs[0]) || '';
+          if (a && sound.srcs && sound.srcs[0]) {
+            a.src = sound.srcs[0];
             a.load();
-            a.play().catch(() => { setUseSynth(p => ({ ...p, [sound.name]: true })); startSynth(sound); });
+            a.play().catch(() => { 
+              setUseSynth(p => ({ ...p, [sound.name]: true })); 
+              startSynth(sound); 
+            });
           } else {
-            setUseSynth(p => ({ ...p, [sound.name]: true })); startSynth(sound);
+            setUseSynth(p => ({ ...p, [sound.name]: true })); 
+            startSynth(sound);
           }
         }
       }
@@ -152,6 +221,32 @@ function RelaxSound({ embedded = false }) {
       }
     });
   }, [ytReady]);
+
+  // Cleanup function to stop all audio when component unmounts
+  useEffect(() => {
+    return () => {
+      // Stop all audio elements
+      sounds.forEach(sound => {
+        const audio = audioRefs.current[sound.name];
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+        
+        // Stop all YouTube players
+        const ytPlayer = ytPlayers.current[sound.name];
+        if (ytPlayer) {
+          try {
+            ytPlayer.pauseVideo();
+            ytPlayer.stopVideo && ytPlayer.stopVideo();
+          } catch {}
+        }
+        
+        // Stop all synths
+        stopSynth(sound);
+      });
+    };
+  }, []);
 
   // First user gesture to unlock audio on mobile/desktop
   const handleActivate = async () => {
@@ -404,17 +499,91 @@ function RelaxSound({ embedded = false }) {
     const audio = audioRefs.current[sound.name];
     if (!audio) return;
 
-    // Pause other audios
+    const wasPlaying = !!playing[sound.name];
+    
+    // First, stop ALL other sounds completely
     sounds.forEach((s) => {
       if (s.name !== sound.name) {
+        // Stop other audio elements
         const otherAudio = audioRefs.current[s.name];
         if (otherAudio) {
           otherAudio.pause();
           otherAudio.currentTime = 0;
         }
+        
+        // Stop other YouTube players
+        const otherYt = ytPlayers.current[s.name];
+        if (otherYt && ytReady) {
+          try { 
+            otherYt.pauseVideo(); 
+            otherYt.stopVideo && otherYt.stopVideo();
+          } catch {}
+        }
+        
+        // Stop other synths
+        stopSynth(s);
+        
+        // Update UI state for other sounds
+        setPlaying(prev => ({ ...prev, [s.name]: false }));
       }
     });
 
+    if (wasPlaying) {
+      // Pause current sound completely
+      audio.pause();
+      audio.currentTime = 0;
+      stopSynth(sound);
+      
+      // Pause YouTube if exists
+      const yp = ytPlayers.current[sound.name];
+      if (yp && ytReady) {
+        try { 
+          yp.pauseVideo(); 
+          yp.stopVideo && yp.stopVideo();
+        } catch {}
+      }
+      
+      // Update UI state
+      setPlaying(prev => ({ ...prev, [sound.name]: false }));
+    } else {
+      // Play current sound
+      if (ytReady && sound.videoId) {
+        // Use YouTube player
+        try {
+          // Create player if it doesn't exist
+          if (!ytPlayers.current[sound.name]) {
+            createYTPlayer(sound);
+          }
+          
+          const player = ytPlayers.current[sound.name];
+          if (player) {
+            // Ensure we're using the correct video ID
+            player.loadVideoById({ 
+              videoId: sound.videoId, 
+              startSeconds: 0, 
+              suggestedQuality: 'large' 
+            });
+            player.unMute && player.unMute();
+            player.setVolume && player.setVolume(85);
+            player.playVideo();
+          }
+        } catch (error) {
+          console.warn('YouTube player failed, falling back to audio:', error);
+          // Fallback to audio
+          playAudioFallback(sound, audio);
+        }
+      } else if (!ytReady && sound.videoId) {
+        // Queue play until API is ready
+        pendingPlay.current[sound.name] = true;
+        setPlaying(prev => ({ ...prev, [sound.name]: true }));
+      } else {
+        // Use audio fallback
+        playAudioFallback(sound, audio);
+      }
+    }
+  };
+
+  const playAudioFallback = (sound, audio) => {
     // Ensure correct source is selected for HTMLAudio
     const index = srcIndex[sound.name] || 0;
     const list = sound.srcs || [];
@@ -426,79 +595,20 @@ function RelaxSound({ embedded = false }) {
     audio.volume = 1;
     audio.load();
 
-    const wasPlaying = !!playing[sound.name];
-    if (wasPlaying) {
-      audio.pause();
-      audio.currentTime = 0;
-      stopSynth(sound);
-      // Pause YouTube if exists
-      const yp = ytPlayers.current[sound.name];
-      if (yp && ytReady) {
-        try { yp.pauseVideo(); } catch {}
-      }
+    if (useSynth[sound.name]) {
+      startSynth(sound);
     } else {
-      // Prefer YouTube when available
-      if (ytReady && sound.videoId) {
-        // create player lazily
-        if (!ytPlayers.current[sound.name]) {
-          createYTPlayer(sound);
-        }
-        // Pause other players
-        sounds.forEach(s => {
-          if (s.name !== sound.name) {
-            const other = ytPlayers.current[s.name];
-            if (other && other.pauseVideo) { try { other.pauseVideo(); } catch {} }
-          }
-        });
-        // Try play (force-load exact ID every time to avoid mismatches)
-        try {
-          const p = ytPlayers.current[sound.name];
-          if (p && p.loadVideoById) {
-            p.stopVideo && p.stopVideo();
-            p.cueVideoById && p.cueVideoById({ videoId: sound.videoId, startSeconds: 0, suggestedQuality: 'large' });
-            p.unMute && p.unMute();
-            p.playVideo();
-          } else {
-            ytPlayers.current[sound.name].unMute && ytPlayers.current[sound.name].unMute();
-            ytPlayers.current[sound.name].playVideo();
-          }
-        } catch {
-          // fallback to audio/synth if API play fails
-          if (useSynth[sound.name]) {
-            startSynth(sound);
-          } else {
-            audio.play().catch(() => { setUseSynth(prev => ({ ...prev, [sound.name]: true })); startSynth(sound); });
-          }
-        }
-      } else if (!ytReady && sound.videoId) {
-        // Queue play until API is ready
-        pendingPlay.current[sound.name] = true;
-        setPlaying(() => {
-          const next = {};
-          sounds.forEach((s) => { next[s.name] = s.name === sound.name; });
-          return next;
-        });
-      } else if (useSynth[sound.name]) {
+      audio.play().then(() => {
+        // Ensure any synth is stopped if it existed
+        stopSynth(sound);
+        setPlaying(prev => ({ ...prev, [sound.name]: true }));
+      }).catch(() => {
+        // fallback to synth if play fails
+        setUseSynth(prev => ({ ...prev, [sound.name]: true }));
         startSynth(sound);
-      } else {
-        audio.play().then(() => {
-          // ensure any synth is stopped if it existed
-          stopSynth(sound);
-        }).catch(() => {
-          // fallback to synth if play fails
-          setUseSynth(prev => ({ ...prev, [sound.name]: true }));
-          startSynth(sound);
-        });
-      }
+        setPlaying(prev => ({ ...prev, [sound.name]: true }));
+      });
     }
-
-    // Update UI state based on toggle intent
-    const willPlay = !wasPlaying;
-    setPlaying(() => {
-      const next = {};
-      sounds.forEach((s) => { next[s.name] = s.name === sound.name ? willPlay : false; });
-      return next;
-    });
   };
 
   const Content = (

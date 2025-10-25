@@ -12,6 +12,7 @@ import {
   updateDoc,
   getDoc
 } from "firebase/firestore";
+import { getErrorMessage } from "../utils/errorMessages";
 
 const cycleRef = collection(db, "cycleEntries");
 
@@ -41,7 +42,11 @@ export const saveCycleEntry = async (userId, date, entryData) => {
     return { id: docId, ...cycleEntry };
   } catch (error) {
     console.error("Error saving cycle entry:", error);
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 

@@ -13,6 +13,7 @@ import {
   startAfter,
   Timestamp 
 } from "firebase/firestore";
+import { getErrorMessage } from "../utils/errorMessages";
 
 const moodRef = collection(db, "moodEntries");
 
@@ -43,7 +44,11 @@ export const addMoodEntry = async (userId, moodData) => {
     return docRef;
   } catch (error) {
     console.error("Error adding mood entry:", error);
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 
@@ -119,7 +124,11 @@ export const getMoodHistory = async (userId, options = {}) => {
       return [];
     }
     
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 
@@ -195,7 +204,11 @@ export const getMoodStats = async (userId, viewMode = 'month', selectedDate = ne
       };
     }
     
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 
@@ -345,6 +358,9 @@ const calculateMoodStats = (entries) => {
 
   // Build weekly series for charts (7 values Sun..Sat for current week)
   const weeklySeries = buildWeeklySeries(entries);
+  
+  // Build monthly series for charts (30 values for current month)
+  const monthlySeries = buildMonthlySeries(entries);
 
   return {
     averageMood: parseFloat(averageMood.toFixed(1)),
@@ -353,7 +369,8 @@ const calculateMoodStats = (entries) => {
     mostCommonMood,
     moodDistribution,
     weeklyTrend,
-    weeklySeries
+    weeklySeries,
+    monthlySeries
   };
 };
 
@@ -421,6 +438,34 @@ const buildWeeklySeries = (entries) => {
   // Fill missing values: forward fill from previous, start at 0
   let last = 0;
   for (let i = 0; i < 7; i++) {
+    if (dayValues[i] == null) dayValues[i] = last;
+    else last = dayValues[i];
+  }
+
+  // Ensure within 1..5 range
+  return dayValues.map(v => Math.max(0, Math.min(5, v || 0)));
+};
+
+// Build 30-day monthly series for the current month. If no data for a day, carry last known or use 0.
+const buildMonthlySeries = (entries) => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1); // First day of current month
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
+  const daysInMonth = end.getDate();
+  const dayValues = Array(daysInMonth).fill(null);
+
+  // Aggregate to last value per day in the current month
+  entries.forEach(e => {
+    const d = new Date(e.timestamp);
+    if (d >= start && d <= end) {
+      const dayOfMonth = d.getDate() - 1; // Convert to 0-based index
+      dayValues[dayOfMonth] = e.value || 0; // keep last encountered value for that day
+    }
+  });
+
+  // Fill missing values: forward fill from previous, start at 0
+  let last = 0;
+  for (let i = 0; i < daysInMonth; i++) {
     if (dayValues[i] == null) dayValues[i] = last;
     else last = dayValues[i];
   }

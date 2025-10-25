@@ -1,5 +1,6 @@
 import { db } from "../firebase/config";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { getErrorMessage } from "../utils/errorMessages";
 
 /**
  * ✅ Creates a user profile in Firestore
@@ -39,7 +40,11 @@ export const getUserProfile = async (uid) => {
     return userDoc.exists() ? userDoc.data() : null;
   } catch (error) {
     console.error("Error getting user profile:", error);
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 
@@ -70,7 +75,11 @@ export const getUserSettings = async (uid) => {
     return userDoc.exists() ? userDoc.data() : null;
   } catch (error) {
     console.error("Error getting user settings:", error);
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 
@@ -84,6 +93,10 @@ export const saveUserSettings = async (uid, settings) => {
     console.log("✅ Updated user settings for user:", uid);
   } catch (error) {
     console.error("Error saving user settings:", error);
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };

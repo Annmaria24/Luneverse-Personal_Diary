@@ -1,5 +1,6 @@
 import { db, auth } from "../firebase/config";
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, setDoc, where } from "firebase/firestore";
+import { getErrorMessage } from "../utils/errorMessages";
 
 /**
  * ✅ Submit user feedback
@@ -49,7 +50,13 @@ export const submitUserFeedback = async (uid, feedbackData) => {
       message: error.message,
       stack: error.stack
     });
-    throw error;
+    
+    // Create a new error with user-friendly message
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 

@@ -190,10 +190,18 @@
 .diary-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding-top: var(--spacing-sm); /* Reduced from var(--spacing-lg) to minimize gap */
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
   position: relative;
   /* Keep content above floating tab buttons */
   z-index: 2001;
+}
+
+/* Reduce top padding for diary content to minimize gap after toggle buttons */
+.diary-content {
+  margin-top: -1.5rem; /* Reduce the gap between toggle buttons and diary content */
 }
 
 /* Date Navigation */
@@ -1122,24 +1130,33 @@
   right: var(--spacing-sm);
   top: 50%;
   transform: translateY(-50%);
-  background: none;
-  border: none;
-  font-size: 1rem;
+  background: rgba(113, 51, 214, 0.1);
+  border: 1px solid rgba(113, 51, 214, 0.2);
   cursor: pointer;
-  padding: var(--spacing-xs);
+  padding: 6px;
   border-radius: var(--radius-sm);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  color: var(--primary-purple);
+  box-shadow: 0 2px 4px rgba(113, 51, 214, 0.1);
   z-index: 2;
 }
 
 .calendar-icon-btn:hover {
-  background: rgba(113, 51, 214, 0.1);
-  transform: translateY(-50%) scale(1.1);
+  background: rgba(113, 51, 214, 0.2);
+  border-color: var(--primary-purple);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 8px rgba(113, 51, 214, 0.2);
+}
+
+.calendar-icon-btn:focus {
+  outline: 2px solid var(--primary-purple);
+  outline-offset: 2px;
+  background: rgba(113, 51, 214, 0.2);
 }
 
 .date-input-wrapper {
@@ -1168,6 +1185,20 @@
   background: var(--neutral-white);
   color: var(--neutral-gray-800);
   text-align: center;
+  /* Hide the browser's default calendar icon */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Hide webkit calendar picker button */
+.date-picker::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+/* Hide moz calendar picker button */
+.date-picker::-moz-calendar-picker-indicator {
+  display: none;
 }
 
 .date-picker:focus {

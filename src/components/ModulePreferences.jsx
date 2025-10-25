@@ -69,7 +69,7 @@ function ModulePreferences() {
       journal: true,
       moodTracker: true,
       relaxMode: true,
-      cycleTracker: false,
+      cycleTracker: true,
       pregnancyTracker: false
     });
   };

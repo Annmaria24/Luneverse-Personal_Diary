@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { auth } from "../firebase/config";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "../utils/errorMessages";
 import "./Styles/ForgotPasswordPage.css";
 
 function ForgotPasswordPage() {
@@ -45,20 +46,8 @@ function ForgotPasswordPage() {
 
     } catch (error) {
       console.error("Password reset error:", error);
-      
-      switch (error.code) {
-        case 'auth/user-not-found':
-          setError("No account found with this email address. Please check your email or create a new account.");
-          break;
-        case 'auth/invalid-email':
-          setError("Invalid email address. Please enter a valid email.");
-          break;
-        case 'auth/too-many-requests':
-          setError("Too many password reset attempts. Please wait a few minutes before trying again.");
-          break;
-        default:
-          setError("Failed to send password reset email. Please try again.");
-      }
+      const userFriendlyMessage = getErrorMessage(error);
+      setError(userFriendlyMessage);
     } finally {
       setIsLoading(false);
     }

@@ -170,18 +170,38 @@ function InsightsPage() {
   };
 
   const getMoodTrend = () => {
-    if (insightsData.mood.entries.length < 4) return 'Need more data';
+    if (insightsData.mood.entries.length < 2) return 'Need more data';
     
-    const recent = insightsData.mood.entries.slice(-7);
-    const older = insightsData.mood.entries.slice(-14, -7);
+    // Sort entries by timestamp to ensure proper chronological order
+    const sortedEntries = [...insightsData.mood.entries].sort((a, b) => {
+      const dateA = new Date(a.timestamp || a.date);
+      const dateB = new Date(b.timestamp || b.date);
+      return dateA - dateB;
+    });
     
-    if (older.length === 0) return 'Need more data';
+    // For monthly view, use all entries from this month
+    const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
+    const currentMonthEnd = new Date(currentYear, currentMonth, 0);
     
-    const recentAvg = recent.reduce((sum, entry) => sum + (entry.value || 0), 0) / recent.length;
-    const olderAvg = older.reduce((sum, entry) => sum + (entry.value || 0), 0) / older.length;
+    const thisMonthEntries = sortedEntries.filter(entry => {
+      const entryDate = new Date(entry.timestamp || entry.date);
+      return entryDate >= currentMonthStart && entryDate <= currentMonthEnd;
+    });
     
-    if (recentAvg > olderAvg + 0.5) return '📈 Improving';
-    if (recentAvg < olderAvg - 0.5) return '📉 Declining';
+    if (thisMonthEntries.length < 2) return 'Need more data';
+    
+    // Calculate trend based on first half vs second half of the month
+    const midPoint = Math.floor(thisMonthEntries.length / 2);
+    const firstHalf = thisMonthEntries.slice(0, midPoint);
+    const secondHalf = thisMonthEntries.slice(midPoint);
+    
+    if (firstHalf.length === 0 || secondHalf.length === 0) return 'Need more data';
+    
+    const firstHalfAvg = firstHalf.reduce((sum, entry) => sum + (entry.value || 0), 0) / firstHalf.length;
+    const secondHalfAvg = secondHalf.reduce((sum, entry) => sum + (entry.value || 0), 0) / secondHalf.length;
+    
+    if (secondHalfAvg > firstHalfAvg + 0.3) return '📈 Improving';
+    if (secondHalfAvg < firstHalfAvg - 0.3) return '📉 Declining';
     return '📊 Consistent';
   };
 

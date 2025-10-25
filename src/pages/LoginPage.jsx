@@ -5,6 +5,7 @@ import { auth, googleProvider } from "../firebase/config";
 import { createUserProfile, updateLastLogin } from "../services/userService";
 import CustomModal from "../components/CustomModal";
 import { useModal } from "../hooks/useModal";
+import { getErrorMessage } from "../utils/errorMessages";
 import "./Styles/LoginPage.css";
 
 function LoginPage() {
@@ -40,7 +41,8 @@ function LoginPage() {
       }
     } catch (error) {
       console.error("Google Sign-in error:", error);
-      showError("Google Sign-In failed. Please try again.");
+      const userFriendlyMessage = getErrorMessage(error);
+      showError(userFriendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -64,8 +66,9 @@ function LoginPage() {
 
       navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error.message);
-      showError("Login failed. Please check your email and password.");
+      console.error("Login error:", error);
+      const userFriendlyMessage = getErrorMessage(error);
+      showError(userFriendlyMessage);
     }
   };
 

@@ -5,7 +5,7 @@ const DEFAULT_MODULE_PREFERENCES = {
   journal: true,
   moodTracker: true,
   relaxMode: true,
-  cycleTracker: false,
+  cycleTracker: true,
   pregnancyTracker: false
 };
 
@@ -85,6 +85,45 @@ export const isModuleEnabled = async (userId, moduleName) => {
   } catch (error) {
     console.error('Error checking module status:', error);
     return DEFAULT_MODULE_PREFERENCES[moduleName] || false;
+  }
+};
+
+/**
+ * Migrate existing users to enable cycle tracking by default
+ * This is optional and can be called to update existing users
+ * @param {string} userId - User ID
+ * @returns {Promise<boolean>} Success status
+ */
+export const migrateToCycleTrackingDefault = async (userId) => {
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const modulePrefs = userData.modulePreferences || {};
+      
+      // Only update if cycleTracker is not explicitly set to false
+      if (modulePrefs.cycleTracker === undefined) {
+        const updatedPrefs = {
+          ...DEFAULT_MODULE_PREFERENCES,
+          ...modulePrefs,
+          cycleTracker: true
+        };
+        
+        await updateDoc(userDocRef, {
+          modulePreferences: updatedPrefs,
+          updatedAt: new Date().toISOString()
+        });
+        
+        console.log('✅ Migrated user to enable cycle tracking by default');
+        return true;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('Error migrating user preferences:', error);
+    return false;
   }
 };
 

@@ -11,8 +11,10 @@ import {
   deleteDoc,
   updateDoc
 } from "firebase/firestore";
+import { getErrorMessage } from "../utils/errorMessages";
 
 const pregnancyRef = collection(db, "pregnancyEntries");
+
 
 // Add or update pregnancy entry for a specific date
 export const savePregnancyEntry = async (userId, date, entryData) => {
@@ -42,7 +44,11 @@ export const savePregnancyEntry = async (userId, date, entryData) => {
     return { id: docId, ...pregnancyEntry };
   } catch (error) {
     console.error("Error saving pregnancy entry:", error);
-    throw error;
+    const userFriendlyMessage = getErrorMessage(error);
+    const friendlyError = new Error(userFriendlyMessage);
+    friendlyError.code = error.code;
+    friendlyError.originalError = error;
+    throw friendlyError;
   }
 };
 

@@ -5,6 +5,7 @@ import { auth, db } from "../firebase/config";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "../utils/errorMessages";
 import "./Styles/SetPasswordPage.css";
 
 function SetPasswordPage() {
@@ -38,7 +39,9 @@ function SetPasswordPage() {
       toast.success("Password set successfully!");
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (error) {
-      toast.error("Error setting password: " + error.message);
+      console.error("Set password error:", error);
+      const userFriendlyMessage = getErrorMessage(error);
+      toast.error(userFriendlyMessage);
     }
   };
 

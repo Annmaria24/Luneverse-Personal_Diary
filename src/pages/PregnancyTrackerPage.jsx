@@ -390,7 +390,10 @@ function PregnancyTrackerPage() {
     // If no appointments exist, add one and save immediately
     if (doctorAppointments.length === 0) {
       const selectedDateStr = formatDateKey(selectedDate);
-      const newAppointments = [{ date: selectedDateStr, description: '' }];
+      const newAppointments = [{ 
+        date: selectedDateStr, 
+        description: ''
+      }];
       setDoctorAppointments(newAppointments);
     } else {
       // Save current appointments and close modal
@@ -407,6 +410,7 @@ function PregnancyTrackerPage() {
   const removeAppointment = (index) => {
     setDoctorAppointments(doctorAppointments.filter((_, i) => i !== index));
   };
+
 
   // Track shown notifications to prevent duplicates (temporarily disabled)
   // const [shownNotifications, setShownNotifications] = useState(new Set());
@@ -1070,6 +1074,7 @@ function PregnancyTrackerPage() {
                       placeholder="Appointment description"
                       className="appointment-desc"
                     />
+                    
                     <button onClick={() => removeAppointment(index)} className="remove-appointment">×</button>
                   </div>
                 ))}
