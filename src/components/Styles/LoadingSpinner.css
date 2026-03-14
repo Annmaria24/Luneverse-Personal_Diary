@@ -1,0 +1,99 @@
+/* Loading Spinner Styles */
+.loading-spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  position: relative;
+  display: inline-block;
+}
+
+.spinner-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: spin 1.5s linear infinite;
+}
+
+/* Size Variations */
+.spinner-small .spinner-ring {
+  width: 16px;
+  height: 16px;
+}
+
+.spinner-medium .spinner-ring {
+  width: 24px;
+  height: 24px;
+}
+
+.spinner-large .spinner-ring {
+  width: 32px;
+  height: 32px;
+}
+
+/* Color Variations */
+.spinner-purple .spinner-ring:nth-child(1) {
+  border-top-color: var(--primary-purple, #7133d6);
+  animation-delay: 0s;
+}
+
+.spinner-purple .spinner-ring:nth-child(2) {
+  border-top-color: rgba(113, 51, 214, 0.6);
+  animation-delay: -0.5s;
+}
+
+.spinner-purple .spinner-ring:nth-child(3) {
+  border-top-color: rgba(113, 51, 214, 0.3);
+  animation-delay: -1s;
+}
+
+.spinner-white .spinner-ring:nth-child(1) {
+  border-top-color: white;
+  animation-delay: 0s;
+}
+
+.spinner-white .spinner-ring:nth-child(2) {
+  border-top-color: rgba(255, 255, 255, 0.6);
+  animation-delay: -0.5s;
+}
+
+.spinner-white .spinner-ring:nth-child(3) {
+  border-top-color: rgba(255, 255, 255, 0.3);
+  animation-delay: -1s;
+}
+
+/* Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Message */
+.spinner-message {
+  font-size: 0.9rem;
+  color: var(--neutral-gray-600, #666666);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Inline spinner for buttons */
+.inline-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-spinner .loading-spinner {
+  margin: 0;
+}
+
+.inline-spinner .spinner-message {
+  margin: 0;
+}

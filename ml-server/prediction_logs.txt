@@ -1,0 +1,904 @@
+
+--- Prediction Debug ---
+Original: I am so grateful for this wonderful day.
+Processed: grateful,wonderful,dai
+Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.00003955458196332023
+  },
+  {
+    "label": "Calm",
+    "value": 2.086387894188735e-7
+  },
+  {
+    "label": "Sad",
+    "value": 1.0527132561482459e-7
+  },
+  {
+    "label": "Angry",
+    "value": 1.8983355526757623e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 1.5844541032150396e-8
+  },
+  {
+    "label": "Neutral",
+    "value": 1.3740384956976064e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: Everything is so blessed and amazing.
+Processed: everyth,blessed,amazing
+Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.00001021807435873029
+  },
+  {
+    "label": "Neutral",
+    "value": 0.0000016213654249231774
+  },
+  {
+    "label": "Calm",
+    "value": 5.522791484617233e-7
+  },
+  {
+    "label": "Sad",
+    "value": 4.306554229697371e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 2.9425576202565006e-8
+  },
+  {
+    "label": "Angry",
+    "value": 8.99211577583255e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I had a very frustrating day today.
+Processed: frustrating,dai,todai
+Classifications: [
+  {
+    "label": "Angry",
+    "value": 0.00002147017510076286
+  },
+  {
+    "label": "Happy",
+    "value": 2.7934026810254406e-7
+  },
+  {
+    "label": "Sad",
+    "value": 2.631783140370612e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 1.5844541032150416e-7
+  },
+  {
+    "label": "Calm",
+    "value": 7.510996419079422e-8
+  },
+  {
+    "label": "Neutral",
+    "value": 1.3740384956976064e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel completely overwhelmed by everything.
+Processed: feel,complet,overwhelmed,everyth
+Classifications: [
+  {
+    "label": "Neutral",
+    "value": 0.000036274616286416775
+  },
+  {
+    "label": "Stressed",
+    "value": 0.000006836061890007762
+  },
+  {
+    "label": "Sad",
+    "value": 1.9296498341845286e-7
+  },
+  {
+    "label": "Calm",
+    "value": 7.954637940806719e-8
+  },
+  {
+    "label": "Angry",
+    "value": 7.800792413750644e-8
+  },
+  {
+    "label": "Happy",
+    "value": 2.581908175190681e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: It was a peaceful night and very relaxing.
+Processed: peaceful,night,relax
+Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.00005650478423741585
+  },
+  {
+    "label": "Happy",
+    "value": 2.50442998988488e-7
+  },
+  {
+    "label": "Neutral",
+    "value": 9.974501672471516e-8
+  },
+  {
+    "label": "Sad",
+    "value": 2.8710361531315772e-8
+  },
+  {
+    "label": "Angry",
+    "value": 8.99211577583255e-9
+  },
+  {
+    "label": "Stressed",
+    "value": 2.263505861735767e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I had an amazing day at the park.
+Processed: amazing,dai,park
+Classifications: [
+  {
+    "label": "Neutral",
+    "value": 0.00002269911594892449
+  },
+  {
+    "label": "Happy",
+    "value": 0.000002136953050984463
+  },
+  {
+    "label": "Sad",
+    "value": 1.0527132561482459e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 6.337816412860161e-8
+  },
+  {
+    "label": "Calm",
+    "value": 4.172775788377458e-8
+  },
+  {
+    "label": "Angry",
+    "value": 1.8983355526757623e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so grateful for this wonderful day.
+Processed: grateful,wonderful,dai
+Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.00004392615331163353
+  },
+  {
+    "label": "Calm",
+    "value": 1.8869465032522583e-7
+  },
+  {
+    "label": "Sad",
+    "value": 1.6328780409180546e-7
+  },
+  {
+    "label": "Neutral",
+    "value": 2.5002107212482515e-8
+  },
+  {
+    "label": "Angry",
+    "value": 2.106869075812733e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 1.609250187094299e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: Everything is so blessed and amazing.
+Processed: everyth,blessed,amazing
+Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.000011015806958151505
+  },
+  {
+    "label": "Neutral",
+    "value": 0.0000019053931473326815
+  },
+  {
+    "label": "Calm",
+    "value": 6.350300732098955e-8
+  },
+  {
+    "label": "Sad",
+    "value": 4.9481152755092464e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 3.678286141929828e-8
+  },
+  {
+    "label": "Angry",
+    "value": 7.0228969193757675e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I had a very frustrating day today.
+Processed: frustrating,dai,todai
+Classifications: [
+  {
+    "label": "Angry",
+    "value": 0.000018308692268812632
+  },
+  {
+    "label": "Happy",
+    "value": 4.1122356291741996e-7
+  },
+  {
+    "label": "Sad",
+    "value": 2.7214634015300853e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 2.092025243222588e-7
+  },
+  {
+    "label": "Calm",
+    "value": 4.717366258130653e-8
+  },
+  {
+    "label": "Neutral",
+    "value": 2.5002107212482558e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel completely overwhelmed by everything.
+Processed: feel,complet,overwhelmed,everyth
+Classifications: [
+  {
+    "label": "Neutral",
+    "value": 0.00006163019427876945
+  },
+  {
+    "label": "Stressed",
+    "value": 0.000013028372405750016
+  },
+  {
+    "label": "Sad",
+    "value": 1.851603646090246e-7
+  },
+  {
+    "label": "Calm",
+    "value": 1.3028507902000827e-7
+  },
+  {
+    "label": "Happy",
+    "value": 3.1367559507268565e-8
+  },
+  {
+    "label": "Angry",
+    "value": 2.8400434004741375e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: It was a peaceful night and very relaxing.
+Processed: peaceful,night,relax
+Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.000046504159446979566
+  },
+  {
+    "label": "Happy",
+    "value": 2.834950320112516e-7
+  },
+  {
+    "label": "Neutral",
+    "value": 1.308249796001994e-7
+  },
+  {
+    "label": "Sad",
+    "value": 2.9688691653055536e-8
+  },
+  {
+    "label": "Angry",
+    "value": 9.029438896340277e-9
+  },
+  {
+    "label": "Stressed",
+    "value": 4.0231254677357476e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I had an amazing day at the park.
+Processed: amazing,dai,park
+Classifications: [
+  {
+    "label": "Neutral",
+    "value": 0.00004237857172515789
+  },
+  {
+    "label": "Happy",
+    "value": 0.0000028598729602893334
+  },
+  {
+    "label": "Stressed",
+    "value": 6.437000748377199e-8
+  },
+  {
+    "label": "Sad",
+    "value": 5.4429268030601755e-8
+  },
+  {
+    "label": "Angry",
+    "value": 2.106869075812733e-8
+  },
+  {
+    "label": "Calm",
+    "value": 1.1793415645326632e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so grateful for this wonderful day.
+Processed: grateful,wonderful
+Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0008123162617979269
+  },
+  {
+    "label": "Sad",
+    "value": 0.0000036499680627794547
+  },
+  {
+    "label": "Calm",
+    "value": 0.0000018879145152307508
+  },
+  {
+    "label": "Angry",
+    "value": 5.116777658102037e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 4.1041619896320687e-7
+  },
+  {
+    "label": "Neutral",
+    "value": 3.967356589977667e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: Everything is so blessed and amazing.
+Processed: blessed,amazing
+Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0010842041681048333
+  },
+  {
+    "label": "Neutral",
+    "value": 0.00004165724419476553
+  },
+  {
+    "label": "Calm",
+    "value": 0.00003020663224369202
+  },
+  {
+    "label": "Sad",
+    "value": 0.000002433312041852967
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000016416647958528251
+  },
+  {
+    "label": "Angry",
+    "value": 5.116777658102037e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: I had a very frustrating day today.
+Processed: frustrating
+Classifications: [
+  {
+    "label": "Angry",
+    "value": 0.024911032028469747
+  },
+  {
+    "label": "Stressed",
+    "value": 0.00027374760470845895
+  },
+  {
+    "label": "Neutral",
+    "value": 0.0002737476047084589
+  },
+  {
+    "label": "Sad",
+    "value": 0.0002737476047084588
+  },
+  {
+    "label": "Calm",
+    "value": 0.0002737476047084588
+  },
+  {
+    "label": "Happy",
+    "value": 0.0002737476047084587
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel completely overwhelmed by everything.
+Processed: overwhelmed
+Classifications: [
+  {
+    "label": "Stressed",
+    "value": 0.04872707363810567
+  },
+  {
+    "label": "Neutral",
+    "value": 0.014508623049548319
+  },
+  {
+    "label": "Calm",
+    "value": 0.0010949904188338353
+  },
+  {
+    "label": "Sad",
+    "value": 0.0005474952094169176
+  },
+  {
+    "label": "Angry",
+    "value": 0.0002737476047084589
+  },
+  {
+    "label": "Happy",
+    "value": 0.0002737476047084587
+  }
+]
+
+--- Prediction Debug ---
+Original: It was a peaceful night and very relaxing.
+Processed: peaceful,night,relax
+Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.00003587037578938426
+  },
+  {
+    "label": "Happy",
+    "value": 2.1831242105176022e-7
+  },
+  {
+    "label": "Neutral",
+    "value": 1.1269592632400329e-7
+  },
+  {
+    "label": "Sad",
+    "value": 3.2444160558039626e-8
+  },
+  {
+    "label": "Angry",
+    "value": 1.4346105583463662e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 4.307216480873234e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I had an amazing day at the park.
+Processed: amazing,park
+Classifications: [
+  {
+    "label": "Neutral",
+    "value": 0.0005832014187267166
+  },
+  {
+    "label": "Happy",
+    "value": 0.00006137004725121697
+  },
+  {
+    "label": "Sad",
+    "value": 0.000002433312041852967
+  },
+  {
+    "label": "Calm",
+    "value": 0.0000018879145152307508
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000016416647958528251
+  },
+  {
+    "label": "Angry",
+    "value": 5.116777658102037e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so grateful for this wonderful day.
+Processed: grateful,wonderful
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0007279373044636497
+  },
+  {
+    "label": "Calm",
+    "value": 0.000009498429719598758
+  },
+  {
+    "label": "Sad",
+    "value": 0.000003434301806442753
+  },
+  {
+    "label": "Angry",
+    "value": 4.848922133099036e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 4.0014661371926665e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: Everything is so blessed and amazing.
+Processed: blessed,amazing
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0009514577050122074
+  },
+  {
+    "label": "Calm",
+    "value": 0.00003229466104663578
+  },
+  {
+    "label": "Sad",
+    "value": 0.000002289534537628499
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000016005864548770668
+  },
+  {
+    "label": "Angry",
+    "value": 4.848922133099036e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: I had a very frustrating day today.
+Processed: frustrating
+Filtered Classifications: [
+  {
+    "label": "Angry",
+    "value": 0.02448657187993681
+  },
+  {
+    "label": "Sad",
+    "value": 0.0002632964718272775
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0002632964718272775
+  },
+  {
+    "label": "Calm",
+    "value": 0.0002632964718272775
+  },
+  {
+    "label": "Happy",
+    "value": 0.0002632964718272774
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel completely overwhelmed by everything.
+Processed: overwhelmed
+Filtered Classifications: [
+  {
+    "label": "Stressed",
+    "value": 0.041337546076882566
+  },
+  {
+    "label": "Sad",
+    "value": 0.000526592943654555
+  },
+  {
+    "label": "Angry",
+    "value": 0.0002632964718272776
+  },
+  {
+    "label": "Calm",
+    "value": 0.0002632964718272775
+  },
+  {
+    "label": "Happy",
+    "value": 0.0002632964718272774
+  }
+]
+
+--- Prediction Debug ---
+Original: It was a peaceful night and very relaxing.
+Processed: peaceful,night,relax
+Filtered Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.00004031007475518028
+  },
+  {
+    "label": "Happy",
+    "value": 1.9576505669333445e-7
+  },
+  {
+    "label": "Sad",
+    "value": 7.465873492266857e-9
+  },
+  {
+    "label": "Stressed",
+    "value": 6.08125552764842e-9
+  },
+  {
+    "label": "Angry",
+    "value": 4.4649375074576856e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I had an amazing day at the park.
+Processed: amazing,park
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0000538560965101249
+  },
+  {
+    "label": "Calm",
+    "value": 0.000001899685943919753
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000016005864548770668
+  },
+  {
+    "label": "Sad",
+    "value": 0.0000011447672688142495
+  },
+  {
+    "label": "Angry",
+    "value": 4.848922133099036e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: i'm very happy today
+Processed: happi
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.006319115323854661
+  },
+  {
+    "label": "Sad",
+    "value": 0.0026329647182727752
+  },
+  {
+    "label": "Stressed",
+    "value": 0.001843075302790943
+  },
+  {
+    "label": "Angry",
+    "value": 0.001316482359136388
+  },
+  {
+    "label": "Calm",
+    "value": 0.0013164823591363876
+  }
+]
+
+--- Prediction Debug ---
+Original: I was yelled at today at work. And i'm feeling stressed and sad.
+Processed: yell,work,stress,sad
+Filtered Classifications: [
+  {
+    "label": "Angry",
+    "value": 2.9355113999307327e-9
+  },
+  {
+    "label": "Sad",
+    "value": 2.759127160185571e-9
+  },
+  {
+    "label": "Calm",
+    "value": 6.052109414485447e-10
+  },
+  {
+    "label": "Happy",
+    "value": 2.2648672231592043e-10
+  },
+  {
+    "label": "Stressed",
+    "value": 7.02394255473072e-11
+  }
+]
+
+--- Prediction Debug ---
+Original: I had a very frustrating day today
+Processed: frustrating
+Filtered Classifications: [
+  {
+    "label": "Angry",
+    "value": 0.021997929606625253
+  },
+  {
+    "label": "Happy",
+    "value": 0.0002587991718426502
+  },
+  {
+    "label": "Sad",
+    "value": 0.0002587991718426501
+  },
+  {
+    "label": "Calm",
+    "value": 0.0002587991718426501
+  },
+  {
+    "label": "Stressed",
+    "value": 0.00025879917184265007
+  }
+]
+
+--- Prediction Debug ---
+Original: I had a wonderful day today
+Processed: wonderful
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.014492753623188404
+  },
+  {
+    "label": "Calm",
+    "value": 0.0012939958592132507
+  },
+  {
+    "label": "Sad",
+    "value": 0.0005175983436853002
+  },
+  {
+    "label": "Angry",
+    "value": 0.0002587991718426501
+  },
+  {
+    "label": "Stressed",
+    "value": 0.00025879917184265007
+  }
+]
+
+--- Prediction Debug ---
+Original: Feeling grateful for everything.
+Processed: grateful
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.010643821391484943
+  },
+  {
+    "label": "Calm",
+    "value": 0.0012980269989615787
+  },
+  {
+    "label": "Sad",
+    "value": 0.0007788161993769469
+  },
+  {
+    "label": "Angry",
+    "value": 0.00025960539979231567
+  },
+  {
+    "label": "Stressed",
+    "value": 0.00025960539979231567
+  }
+]
+
+--- Prediction Debug ---
+Original: Sad today.
+Processed: sad
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 0.002336448598130842
+  },
+  {
+    "label": "Calm",
+    "value": 0.002336448598130841
+  },
+  {
+    "label": "Angry",
+    "value": 0.00181723779854621
+  },
+  {
+    "label": "Happy",
+    "value": 0.0007788161993769468
+  },
+  {
+    "label": "Stressed",
+    "value": 0.00025960539979231567
+  }
+]
+
+--- Prediction Debug ---
+Original: Feeling depressed now.
+Processed: depress
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 0.0025960539979231565
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0010384215991692627
+  },
+  {
+    "label": "Happy",
+    "value": 0.0002596053997923157
+  },
+  {
+    "label": "Angry",
+    "value": 0.00025960539979231567
+  },
+  {
+    "label": "Calm",
+    "value": 0.00025960539979231567
+  }
+]
+
+--- Prediction Debug ---
+Original: Happyy today.
+Processed: happyi
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.19132917964693666
+  },
+  {
+    "label": "Stressed",
+    "value": 0.18717549325025962
+  },
+  {
+    "label": "Calm",
+    "value": 0.1819833852544133
+  },
+  {
+    "label": "Angry",
+    "value": 0.1342159916926272
+  },
+  {
+    "label": "Sad",
+    "value": 0.1240913811007269
+  }
+]

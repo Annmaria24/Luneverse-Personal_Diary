@@ -1,0 +1,57 @@
+﻿≡ƒÜÇ Starting model training with 80/20 split and preprocessing...
+
+≡ƒôè Label Distribution (Normalized):
+- Sad: 581 (29.0%)
+- Happy: 695 (34.8%)
+- Stressed: 224 (11.2%)
+- Angry: 275 (13.8%)
+- Calm: 159 (8.0%)
+- Neutral: 66 (3.3%)
+Training samples: 1600
+Testing samples: 400
+ΓÅ│ Training...
+
+≡ƒöì Detailed Evaluation:
+Sample 1: Actual [Angry] | Pred [Neutral] (94.4%) | Γ¥î
+Sample 2: Actual [Happy] | Pred [Neutral] (39.8%) | Γ¥î
+Sample 3: Actual [Sad] | Pred [Neutral] (66.7%) | Γ¥î
+Sample 4: Actual [Sad] | Pred [Sad] (51.3%) | Γ£à
+Sample 5: Actual [Sad] | Pred [Neutral] (98.8%) | Γ¥î
+Sample 6: Actual [Sad] | Pred [Neutral] (61.2%) | Γ¥î
+Sample 7: Actual [Angry] | Pred [Angry] (65.2%) | Γ£à
+Sample 8: Actual [Angry] | Pred [Neutral] (100.0%) | Γ¥î
+Sample 9: Actual [Sad] | Pred [Neutral] (49.7%) | Γ¥î
+Sample 10: Actual [Sad] | Pred [Neutral] (76.5%) | Γ¥î
+Sample 11: Actual [Calm] | Pred [Neutral] (76.1%) | Γ¥î
+Sample 12: Actual [Happy] | Pred [Neutral] (51.8%) | Γ¥î
+Sample 13: Actual [Sad] | Pred [Sad] (51.2%) | Γ£à
+Sample 14: Actual [Happy] | Pred [Neutral] (81.7%) | Γ¥î
+Sample 15: Actual [Sad] | Pred [Calm] (39.6%) | Γ¥î
+Sample 16: Actual [Calm] | Pred [Calm] (37.3%) | Γ£à
+Sample 17: Actual [Stressed] | Pred [Angry] (37.4%) | Γ¥î
+Sample 18: Actual [Happy] | Pred [Happy] (30.6%) | Γ£à
+Sample 19: Actual [Happy] | Pred [Neutral] (99.4%) | Γ¥î
+Sample 20: Actual [Happy] | Pred [Neutral] (90.7%) | Γ¥î
+
+Model Accuracy: 27.25%
+
+≡ƒôè Confusion Summary (Actual \ Predicted):
+          Happy     Sad       Angry     Stressed  Calm      Neutral   
+Happy     28        1         1         1         5         89        
+Sad       1         24        1         1         3         81        
+Angry     1         1         18        0         0         47        
+Stressed  0         3         3         13        0         33        
+Calm      1         0         1         0         9         16        
+Neutral   0         0         0         1         0         17        
+
+≡ƒº¬ Running Manual Verification Tests:
+- Sentence: "I cried all evening and felt exhausted."
+  Prediction: Sad (55.5% confidence)
+- Sentence: "I felt calm and relaxed today."
+  Prediction: Happy (69.6% confidence)
+- Sentence: "I was extremely anxious about my exams."
+  Prediction: Stressed (51.8% confidence)
+- Sentence: "I had a joyful and productive day."
+  Prediction: Happy (67.6% confidence)
+
+Γ£à Model successfully trained and saved to D:\Luneverse\wellness-app\ml-server\model.json
