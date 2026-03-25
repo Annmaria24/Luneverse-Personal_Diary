@@ -9,14 +9,14 @@ import {
   deleteMoodEntry,
   hasTodayMoodEntry,
   getAggregatedMoodCounts,
-  getEmotionalTrendData,
-  getUnifiedEmotionalStats
+  getEmotionalTrendData
 } from "../services/moodService";
 import { generateEmotionalInsight } from "../services/aiMoodService";
 import MoodLineChart from '../components/charts/MoodLineChart';
+import Navbar from '../components/Navbar';
 
 
-function MoodTrackerPage({ viewMode = 'today' }) {
+function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
   const { currentUser } = useAuth();
   const [selectedMood, setSelectedMood] = useState('');
   const [moodNote, setMoodNote] = useState('');
@@ -41,48 +41,35 @@ function MoodTrackerPage({ viewMode = 'today' }) {
     totalEntries: 0,
     rawPoints: []
   });
-  const [unifiedBalance, setUnifiedBalance] = useState({
-    averageScore: 0,
-    label: 'Balanced',
-    color: '#6b7280'
-  });
   const [aiInsight, setAiInsight] = useState('');
   const [aiInsightLoading, setAiInsightLoading] = useState(false);
 
-  // Generate textual insight for mood distribution
+  // Generate textual insight for mood distribution and emotional narrative
   const getMoodDistributionInsight = () => {
-    const { moodCounts } = aggregatedMoodData;
+    const { moodCounts, dominantMood, trendMessage, hasData } = aggregatedMoodData;
     const total = aggregatedMoodData.totalEntries;
 
-    if (total === 0) return 'No mood data available for this period.';
+    if (total === 0) return 'No emotional data available for this period.';
 
-    // Sort moods by count descending
+    // If we have a trend message from the service, use it as the primary narrative
+    if (trendMessage) {
+      return trendMessage;
+    }
+
+    // Fallback/detailed breakdown if trendMessage is somehow missing
     const sortedMoods = Object.entries(moodCounts)
       .filter(([mood, count]) => count > 0)
       .sort((a, b) => b[1] - a[1]);
 
-    if (sortedMoods.length === 0) return 'No mood data available for this period.';
-
-    const [dominantMood, dominantCount] = sortedMoods[0];
     const timePeriod = viewMode === 'today' ? 'today' : viewMode === 'week' ? 'week' : 'month';
-
-    let insight = `This ${timePeriod} your dominant mood was ${dominantMood} (${dominantCount} ${dominantCount === 1 ? 'entry' : 'entries'})`;
+    let insight = `This ${timePeriod} your dominant mood was ${dominantMood}`;
 
     if (sortedMoods.length > 1) {
-      const [secondMood, secondCount] = sortedMoods[1];
-      insight += ` followed by ${secondMood} (${secondCount} ${secondCount === 1 ? 'entry' : 'entries'})`;
+      const secondMood = sortedMoods[1][0];
+      insight += ` with some periods of ${secondMood.toLowerCase()}`;
     }
 
-    if (sortedMoods.length > 2) {
-      const remaining = sortedMoods.slice(2).reduce((sum, [, count]) => sum + count, 0);
-      if (remaining > 0) {
-        insight += ` and ${remaining} other ${remaining === 1 ? 'entry' : 'entries'}`;
-      }
-    }
-
-    insight += '.';
-
-    return insight;
+    return insight + '.';
   };
 
   // Generate compact statistical summary for small datasets
@@ -146,39 +133,6 @@ function MoodTrackerPage({ viewMode = 'today' }) {
       setAiInsight(interpretation);
     } finally {
       setAiInsightLoading(false);
-    }
-  };
-
-  const getTrendInsightMessage = () => {
-    const points = emotionalTrendData.dataPoints;
-    if (points.length < 2) return null;
-
-    const firstMood = points[0].y;
-    const lastMood = points[points.length - 1].y;
-
-    // Check for large fluctuations (any change >= 1.5 points between steps or max-min >= 2.5)
-    let maxStepChange = 0;
-    let minVal = points[0].y;
-    let maxVal = points[0].y;
-
-    for (let i = 1; i < points.length; i++) {
-      maxStepChange = Math.max(maxStepChange, Math.abs(points[i].y - points[i - 1].y));
-      minVal = Math.min(minVal, points[i].y);
-      maxVal = Math.max(maxVal, points[i].y);
-    }
-
-    const timeFrame = viewMode === 'today' ? 'day' : 'period';
-
-    if (maxStepChange >= 2.0 || (maxVal - minVal) >= 3.0) {
-      return `Your emotions shifted several times this ${timeFrame}. That’s natural—our feelings can change as we experience different moments.`;
-    }
-
-    if (lastMood > firstMood + 0.5) {
-      return `Your mood appears to have improved throughout the ${timeFrame}. Small positive moments can gradually lift your emotional state.`;
-    } else if (lastMood < firstMood - 0.5) {
-      return `Your mood dipped during the ${timeFrame}. It might help to pause, breathe, and give yourself some gentle care.`;
-    } else {
-      return `Your emotional state has remained fairly steady this ${timeFrame}. Maintaining balance is a good sign of emotional awareness.`;
     }
   };
 
@@ -275,10 +229,6 @@ function MoodTrackerPage({ viewMode = 'today' }) {
       const trendData = await getEmotionalTrendData(currentUser.uid, viewMode, selectedDate);
       setEmotionalTrendData(trendData);
 
-      // Load unified emotional balance for dashboard/stats
-      const balanceData = await getUnifiedEmotionalStats(currentUser.uid, viewMode, selectedDate);
-      setUnifiedBalance(balanceData);
-
       // Check if user has entry for today
       const todayEntry = await hasTodayMoodEntry(currentUser.uid);
       setHasEntryToday(todayEntry);
@@ -321,8 +271,6 @@ function MoodTrackerPage({ viewMode = 'today' }) {
       setSaving(true);
       setError('');
 
-      console.log(`🚀 [Mood Tracker] Initiating save for: ${selectedMood.name}`);
-
       const moodData = {
         mood: selectedMood.emoji,
         moodName: selectedMood.name,
@@ -348,7 +296,7 @@ function MoodTrackerPage({ viewMode = 'today' }) {
       await loadMoodData();
 
     } catch (err) {
-      console.error('❌ Error saving mood:', err);
+      console.error('Error saving mood:', err);
       setError('Failed to save mood entry. Please try again.');
     } finally {
       setSaving(false);
@@ -384,11 +332,11 @@ function MoodTrackerPage({ viewMode = 'today' }) {
   };
 
   const getMoodAverage = () => {
-    return unifiedBalance.averageScore || 0;
+    return stats.averageMood || 0;
   };
 
   const getMoodInsight = () => {
-    const avgMood = unifiedBalance.averageScore || 0;
+    const avgMood = stats.averageMood || 0;
     const totalEntries = stats.totalEntries || 0;
 
     // Show insight even with 1 entry
@@ -396,7 +344,16 @@ function MoodTrackerPage({ viewMode = 'today' }) {
       return 'Start tracking';
     }
 
-    return unifiedBalance.label;
+    // Analyze mood level and provide professional insights
+    if (avgMood >= 4.0) {
+      return 'Thriving';
+    } else if (avgMood >= 3.0) {
+      return 'Positive';
+    } else if (avgMood >= 2.0) {
+      return 'Stable';
+    } else {
+      return 'Challenging';
+    }
   };
 
   const getMoodStreak = () => {
@@ -631,7 +588,16 @@ function MoodTrackerPage({ viewMode = 'today' }) {
   if (loading) {
     return (
       <div className="mood-tracker-page">
-        <div className="mood-container">
+        <div className="dashboard-background">
+          <div className="floating-element element-1">🌙</div>
+          <div className="floating-element element-2">✨</div>
+          <div className="floating-element element-3">🌸</div>
+          <div className="floating-element element-4">💜</div>
+          <div className="floating-element element-5">🦋</div>
+          <div className="floating-element element-6">🌺</div>
+        </div>
+        {includeNavbar && <Navbar />}
+        <div className="mood-tracker-container">
           <div className="loading-state">
             <div className="loading-spinner">⏳</div>
             <p>Loading your mood data...</p>
@@ -651,6 +617,7 @@ function MoodTrackerPage({ viewMode = 'today' }) {
         <div className="floating-element element-5">🦋</div>
         <div className="floating-element element-6">🌺</div>
       </div>
+      {includeNavbar && <Navbar />}
       {/* View Toggle moved to navbar */}
 
       <div className="mood-container">
@@ -669,11 +636,9 @@ function MoodTrackerPage({ viewMode = 'today' }) {
           <div className="stat-card">
             <div className="stat-icon">📊</div>
             <div className="stat-content">
-              <h3>Emotional Balance</h3>
-              <p className="stat-value" style={{ color: unifiedBalance.color }}>
-                {unifiedBalance.label}
-              </p>
-              <p className="mood-insight-text">Weighted Avg: {unifiedBalance.averageScore}/5</p>
+              <h3>Average Mood</h3>
+              <p className="stat-value">{getMoodAverage().toFixed(1)}/5</p>
+              <p className="mood-insight-text">{getMoodInsight()}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -820,7 +785,7 @@ function MoodTrackerPage({ viewMode = 'today' }) {
               <div className="card-icon">📊</div>
               <h3>Current {viewMode === 'today' ? 'Day' : viewMode === 'week' ? 'Week' : 'Month'}</h3>
               <span className="mood-score">
-                {unifiedBalance.averageScore ? `${unifiedBalance.averageScore.toFixed(1)}/5` : 'No data'}
+                {stats.averageMood ? `${stats.averageMood.toFixed(1)}/5` : 'No data'}
               </span>
               <p className="mood-insight-text">{getMoodInsight()}</p>
             </div>
@@ -835,15 +800,28 @@ function MoodTrackerPage({ viewMode = 'today' }) {
                 </div>
               ) : (
                 <>
-                  <div className="chart-preview-container">
+                  <div className="chart-container">
+                    <div className="chart-label">
+                      {viewMode === 'today' ? 'Today' : viewMode === 'week' ? 'This Week' : 'This Month'}
+                      ({emotionalTrendData.dataPoints.length} {emotionalTrendData.dataPoints.length === 1 ? 'point' : 'points'})
+                    </div>
                     <MoodLineChart
                       dataPoints={emotionalTrendData.dataPoints}
-                      size={110}
-                      showYLabels={false}
-                      showXLabels={false}
+                      size={220}
+                      showYLabels={viewMode === 'month'}
                     />
-                    <div className="chart-click-hint">Click for full analysis</div>
                   </div>
+                  {viewMode === 'month' ? (
+                    <div className="mood-insight-text mood-ai-insight">
+                      {aiInsightLoading ? (
+                        <span className="loading-insight">Generating insight...</span>
+                      ) : (
+                        aiInsight
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mood-insight-text">{getMoodDistributionInsight()}</p>
+                  )}
                 </>
               )}
             </div>
@@ -878,14 +856,6 @@ function MoodTrackerPage({ viewMode = 'today' }) {
                           showYLabels={true}
                         />
                       </div>
-
-                      {/* Emotional Progression Insight */}
-                      {getTrendInsightMessage() && (
-                        <div className="trend-insight-container" style={{ margin: '15px auto', maxWidth: '80%' }}>
-                          <p className="trend-progression-msg">{getTrendInsightMessage()}</p>
-                        </div>
-                      )}
-
                       {viewMode === 'month' ? (
                         <div className="mood-insight-text mood-ai-insight" style={{ marginTop: '12px' }}>
                           {aiInsightLoading ? (

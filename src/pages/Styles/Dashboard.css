@@ -69,6 +69,7 @@
   background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   font-family: var(--font-primary);
   position: relative;
+  padding-top: var(--navbar-height);
 }
 
 .dashboard::before {
@@ -78,9 +79,9 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    radial-gradient(800px 500px at 10% -10%, rgba(124,58,237,0.05), transparent 60%),
-    radial-gradient(600px 400px at 110% 0%, rgba(236,72,153,0.03), transparent 60%);
+  background:
+    radial-gradient(800px 500px at 10% -10%, rgba(124, 58, 237, 0.05), transparent 60%),
+    radial-gradient(600px 400px at 110% 0%, rgba(236, 72, 153, 0.03), transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -105,8 +106,8 @@ body::after {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(800px 500px at 10% -10%, rgba(124,58,237,0.08), transparent 60%),
-    radial-gradient(600px 400px at 110% 0%, rgba(236,72,153,0.06), transparent 60%);
+    radial-gradient(800px 500px at 10% -10%, rgba(124, 58, 237, 0.08), transparent 60%),
+    radial-gradient(600px 400px at 110% 0%, rgba(236, 72, 153, 0.06), transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -155,9 +156,12 @@ body::after {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-20px) rotate(5deg);
   }
@@ -166,9 +170,9 @@ body::after {
 /* Header */
 .dashboard-header {
   background: linear-gradient(135deg,
-    rgba(113, 51, 214, 0.95) 0%,
-    rgba(200, 35, 115, 0.95) 50%,
-    rgba(161, 122, 214, 0.95) 100%);
+      rgba(113, 51, 214, 0.95) 0%,
+      rgba(200, 35, 115, 0.95) 50%,
+      rgba(161, 122, 214, 0.95) 100%);
   backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 20px rgba(113, 51, 214, 0.3);
@@ -271,6 +275,7 @@ body::after {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -348,7 +353,7 @@ body::after {
   border: none !important;
   border-radius: var(--radius-lg) !important;
   padding: 0.75rem 0.9rem !important;
-  box-shadow: 0 6px 18px rgba(124,58,237,0.25) !important;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25) !important;
   cursor: pointer !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
   font-size: 0.9rem !important;
@@ -363,7 +368,7 @@ body::after {
 
 .affirmations-quick-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(124,58,237,0.35);
+  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.35);
 }
 
 .affirmations-quick-btn.loading {
@@ -374,10 +379,12 @@ body::after {
 
 @media (max-width: 768px) {
   .quick-actions {
-    position: fixed; /* make it a FAB on small screens */
+    position: fixed;
+    /* make it a FAB on small screens */
     bottom: 16px;
     right: 16px;
   }
+
   .affirmations-quick-btn {
     border-radius: var(--radius-full);
     padding: 0.9rem 1rem;
@@ -425,10 +432,20 @@ body::after {
   margin: 0 auto;
 }
 
-/* Wellness Insights Card */
-.wellness-insights-card {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+/* Insights Grid Section - Tightened connection to Stats */
+.cycle-insights-section {
+  margin-top: calc(var(--spacing-xl) * -0.85); /* Pull closer to stats above */
+  margin-bottom: var(--spacing-lg);
+  position: relative;
+  z-index: 5;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .wellness-insights-card .feature-icon {
@@ -608,8 +625,13 @@ body::after {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .feature-button.settings-redirect {
@@ -950,7 +972,7 @@ body .quick-actions-sticky {
 }
 
 /* Additional override for any potential scrolling issues */
-body > div[style*="position: fixed"] {
+body>div[style*="position: fixed"] {
   position: fixed !important;
   top: 120px !important;
   right: 20px !important;
@@ -1046,7 +1068,7 @@ body > div[style*="position: fixed"] {
   border: none !important;
   border-radius: 12px !important;
   padding: 12px 16px !important;
-  box-shadow: 0 6px 18px rgba(124,58,237,0.25) !important;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25) !important;
   cursor: pointer !important;
   font-size: 14px !important;
   font-weight: 500 !important;
@@ -1072,27 +1094,27 @@ body > div[style*="position: fixed"] {
     top: 100px !important;
     right: 10px !important;
   }
-  
+
   body .quick-actions-sticky {
     top: 100px !important;
     right: 10px !important;
   }
-  
+
   .affirmations-fixed-container {
     top: 100px !important;
     right: 10px !important;
   }
-  
+
   #affirmations-button-container {
     top: 100px !important;
     right: 10px !important;
   }
-  
+
   .affirmations-quick-btn {
     padding: 0.6rem 0.8rem !important;
     font-size: 0.8rem !important;
   }
-  
+
   #affirmations-button {
     padding: 0.6rem 0.8rem !important;
     font-size: 0.8rem !important;

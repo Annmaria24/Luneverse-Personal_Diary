@@ -63,6 +63,7 @@
   background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   font-family: var(--font-primary);
   position: relative;
+  padding-top: var(--navbar-height);
 }
 
 /* Background Elements */
@@ -171,7 +172,7 @@
   /* left - title - right */
   align-items: center;
   position: sticky;
-  top: 0;
+  top: var(--navbar-height, 112px);
   z-index: 100;
 }
 
@@ -1038,16 +1039,17 @@
 /* Graph Modal Styles */
 .graph-modal-overlay {
   position: fixed;
-  top: 0;
+  top: var(--navbar-height, 112px); /* Start below the fixed Navbar */
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
   padding: var(--spacing-md);
+  backdrop-filter: blur(4px);
 }
 
 .graph-modal {
@@ -1056,9 +1058,11 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 800px;
   width: 100%;
-  max-height: 90vh;
+  max-height: calc(100vh - var(--navbar-height, 112px) - 60px); /* Fit in remaining space */
   overflow: hidden;
   animation: modalSlideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes modalSlideIn {
@@ -1107,7 +1111,7 @@
 
 .graph-modal-content {
   padding: var(--spacing-lg);
-  max-height: 70vh;
+  flex: 1;
   overflow-y: auto;
 }
 

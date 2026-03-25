@@ -177,31 +177,10 @@ export const deleteMoodEntry = async (entryId) => {
   }
 };
 
-// Get mood statistics
 export const getMoodStats = async (userId, viewMode = 'month', selectedDate = new Date()) => {
   try {
-    const { startDate, endDate } = getDateRange(viewMode, selectedDate);
-
-    // Use simpler query to avoid index issues
-    const q = query(
-      moodRef,
-      where("userId", "==", userId)
-    );
-
-    const snapshot = await getDocs(q);
-    let entries = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      timestamp: doc.data().timestamp?.toDate() || new Date()
-    }));
-
-    // Apply client-side filtering
-    entries = entries.filter(entry => {
-      const entryDate = new Date(entry.timestamp);
-      return entryDate >= startDate && entryDate <= endDate;
-    });
-
-    return calculateMoodStats(entries);
+    // Use the unified stats instead of only raw entries
+    return getUnifiedMoodStats(userId, viewMode, selectedDate);
   } catch (error) {
     console.error("Error fetching mood stats:", error);
 
@@ -433,7 +412,7 @@ export const getEmotionalTrendData = async (userId, viewMode = 'month', selected
         // Weighted combination: 0.7 Diary ML + 0.3 Manual Selection
         finalScore = (diaryAvg * 0.7) + (manualAvg * 0.3);
       } else {
-        finalScore = diaryAvg ?? manualAvg ?? 4; // Fallback to neutral
+        finalScore = diaryAvg ?? manualAvg ?? 3; // Neutral baseline
       }
 
       const d = data.timestamp;
@@ -457,13 +436,14 @@ export const getEmotionalTrendData = async (userId, viewMode = 'month', selected
       return viewMode === 'today' ? a.timestamp - b.timestamp : a.timestamp.localeCompare(b.timestamp);
     });
 
-    // Apply Emotional Inertia Smoothing: (Previous * 0.6) + (Current * 0.4)
+    // Apply Emotional Inertia Smoothing: (Previous * 0.25) + (Current * 0.75)
+    // Reduced inertia so recent happy/calm entries can shift the chart upward quickly
     const dataPoints = sortedPoints.map((p, idx, arr) => {
       if (idx === 0) return { ...p, y: Math.round(p.y * 10) / 10 };
 
       const previousSmoothed = arr[idx - 1].y; // Sequential smoothing uses previously modified value
       const rawCurrent = p.y;
-      const smoothed = (previousSmoothed * 0.6) + (rawCurrent * 0.4);
+      const smoothed = (previousSmoothed * 0.25) + (rawCurrent * 0.75);
 
       // Update object in-place for sequential benefit
       p.y = smoothed;
@@ -521,6 +501,19 @@ export const getAggregatedMoodCounts = async (userId, viewMode = 'month', select
   try {
     const trendData = await getEmotionalTrendData(userId, viewMode, selectedDate);
 
+    if (trendData.rawPoints.length === 0) {
+      return {
+        moodCounts: { Happy: 0, Sad: 0, Angry: 0, Stressed: 0, Calm: 0, Neutral: 0 },
+        totalEntries: 0,
+        dataPoints: [],
+        rawPoints: [],
+        dominantMood: "Neutral",
+        firstMood: "Neutral",
+        lastMood: "Neutral",
+        trendMessage: "No data available."
+      };
+    }
+
     const moodCounts = { Happy: 0, Sad: 0, Angry: 0, Stressed: 0, Calm: 0, Neutral: 0 };
 
     // Map aggregated score (0-5) back to a dominant category for the summary counts
@@ -537,11 +530,49 @@ export const getAggregatedMoodCounts = async (userId, viewMode = 'month', select
       moodCounts[category]++;
     });
 
+    // Determine dominant mood
+    const dominantMood = Object.keys(moodCounts).reduce((a, b) =>
+      moodCounts[a] > moodCounts[b] ? a : b, "Neutral");
+
+    // Progression Logic: Detect first and last mood in the series
+    const firstPoint = trendData.rawPoints[0];
+    const lastPoint = trendData.rawPoints[trendData.rawPoints.length - 1];
+
+    const getCategoryFromScore = (score) => {
+      if (score < 0.8) return "Sad";
+      if (score < 1.8) return "Angry";
+      if (score < 2.8) return "Stressed";
+      if (score < 3.8) return "Neutral";
+      if (score < 4.8) return "Calm";
+      return "Happy";
+    };
+
+    const firstMood = getCategoryFromScore(firstPoint.y);
+    const lastMood = getCategoryFromScore(lastPoint.y);
+
+    // Trend Direction
+    let trendMessage = "";
+    const scoreDiff = lastPoint.y - firstPoint.y;
+
+    if (trendData.rawPoints.length < 2) {
+      trendMessage = `Your mood remained fairly consistent during this period.`;
+    } else if (Math.abs(scoreDiff) < 0.5) {
+      trendMessage = `Your mood remained fairly consistent throughout the ${viewMode === 'today' ? 'day' : 'period'}.`;
+    } else if (scoreDiff > 0.5) {
+      trendMessage = `Your emotional state improved as the ${viewMode === 'today' ? 'day' : 'period'} progressed.`;
+    } else if (scoreDiff < -0.5) {
+      trendMessage = `Your mood shifted from a ${firstMood.toLowerCase()} state earlier to a more ${lastMood.toLowerCase()} state later in the ${viewMode === 'today' ? 'day' : 'period'}.`;
+    }
+
     return {
       moodCounts,
       totalEntries: trendData.totalEntries,
       dataPoints: trendData.dataPoints,
-      rawPoints: trendData.rawPoints
+      rawPoints: trendData.rawPoints,
+      dominantMood,
+      firstMood,
+      lastMood,
+      trendMessage
     };
   } catch (error) {
     console.error("Error getting aggregated mood counts:", error);
@@ -549,8 +580,60 @@ export const getAggregatedMoodCounts = async (userId, viewMode = 'month', select
       moodCounts: { Happy: 0, Sad: 0, Angry: 0, Stressed: 0, Calm: 0, Neutral: 0 },
       totalEntries: 0,
       dataPoints: [],
-      rawPoints: []
+      rawPoints: [],
+      dominantMood: "Neutral",
+      firstMood: "Neutral",
+      lastMood: "Neutral",
+      trendMessage: ""
     };
+  }
+};
+
+/**
+ * Get unified stats for the dashboard using combined dataset.
+ */
+export const getUnifiedMoodStats = async (userId, viewMode = 'month', selectedDate = new Date()) => {
+  try {
+    const trendData = await getEmotionalTrendData(userId, viewMode, selectedDate);
+    
+    if (trendData.rawPoints.length === 0) {
+      return {
+        averageMood: 0,
+        totalEntries: 0,
+        mostCommonMood: "Neutral",
+        moodDistribution: {},
+        firstMood: "Neutral",
+        lastMood: "Neutral",
+        trendMessage: "No data available."
+      };
+    }
+
+    const totalScore = trendData.rawPoints.reduce((sum, p) => sum + p.y, 0);
+    const averageScore = totalScore / trendData.rawPoints.length;
+
+    // Build the aggregated counts for distribution
+    const aggregated = await getAggregatedMoodCounts(userId, viewMode, selectedDate);
+
+    // Calculate distribution percentages
+    const moodDistribution = {};
+    Object.entries(aggregated.moodCounts).forEach(([mood, count]) => {
+      if (count > 0) {
+        moodDistribution[mood] = ((count / trendData.rawPoints.length) * 100).toFixed(1);
+      }
+    });
+
+    return {
+      averageMood: parseFloat(averageScore.toFixed(1)), // 0-5 scale
+      totalEntries: trendData.totalEntries,
+      mostCommonMood: aggregated.dominantMood,
+      moodDistribution,
+      firstMood: aggregated.firstMood,
+      lastMood: aggregated.lastMood,
+      trendMessage: aggregated.trendMessage
+    };
+  } catch (error) {
+    console.error("Error in getUnifiedMoodStats:", error);
+    return { averageMood: 0, totalEntries: 0, mostCommonMood: "Neutral", moodDistribution: {} };
   }
 };
 

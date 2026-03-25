@@ -135,8 +135,8 @@ function MyCycle() {
           </div>
         </div>
         <div className="tab-content">
-          {activeTab === 'cycle' && modulePreferences.cycleTracker && <CycleTrackerPage hideTopToggle />}
-          {activeTab === 'pregnancy' && modulePreferences.pregnancyTracker && <PregnancyTrackerPage />}
+          {activeTab === 'cycle' && modulePreferences.cycleTracker && <CycleTrackerPage hideTopToggle includeNavbar={false} />}
+          {activeTab === 'pregnancy' && modulePreferences.pregnancyTracker && <PregnancyTrackerPage includeNavbar={false} />}
         </div>
       </div>
     </>

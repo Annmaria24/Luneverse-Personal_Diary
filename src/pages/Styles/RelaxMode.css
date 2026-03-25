@@ -76,14 +76,15 @@
   display: flex;
   flex: 1;
   width: 100%;
-  height: calc(100vh - 70px); /* full viewport minus navbar */
+  margin-top: 112px; /* Standardize with --navbar-height */
+  height: calc(100vh - 112px); 
   position: relative;
   z-index: 2;
   /* Soft pinkish backdrop to match header gap */
   background: linear-gradient(135deg, #fde2f1 0%, #fce7f3 30%, #f3e8ff 60%, #efe9ff 100%);
   backdrop-filter: blur(12px);
   align-items: flex-start; /* start from top instead of center */
-  padding-top: 20px; /* small spacing under navbar */
+  padding-top: 15px; /* small spacing under navbar */
   box-sizing: border-box;
   overflow: hidden; /* avoid inner scrolling */
 }
@@ -95,12 +96,12 @@
   background: rgba(252, 231, 243, 0.8);
   backdrop-filter: blur(12px);
   border-right: 1px solid rgba(236, 72, 153, 0.15);
-  height: calc(100vh - 70px);
+  height: calc(100vh - 112px);
   overflow-y: auto;
   box-shadow: 4px 0 20px rgba(236, 72, 153, 0.08);
   padding: 1.5rem;
   position: sticky;
-  top: 70px;
+  top: 112px;
 }
 
 /* ================= Main Content ================= */

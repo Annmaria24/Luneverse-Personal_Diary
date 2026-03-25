@@ -180,7 +180,7 @@ const FullScreenEditor = ({
                 <div className="saving-indicator">
                   <LoadingSpinner 
                     size="small" 
-                    message={isEditing ? "Updating entry..." : "Saving entry & classifying mood..."} 
+                    message={isEditing ? "Updating entry..." : "Saving entry..."} 
                     showMessage={true}
                   />
                 </div>
@@ -201,7 +201,7 @@ const FullScreenEditor = ({
               className="save-btn"
               disabled={isSaving || (!content.trim() && !mood)}
             >
-              {isSaving ? (isEditing ? 'Updating...' : 'Saving & Classifying Mood...') : (isEditing ? 'Update Entry' : 'Save Entry')}
+              {isSaving ? (isEditing ? 'Updating...' : 'Saving...') : (isEditing ? 'Update Entry' : 'Save Entry')}
             </button>
           </div>
         </div>

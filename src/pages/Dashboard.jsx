@@ -7,12 +7,13 @@ import { useToast } from "../hooks/useToast";
 import ToastContainer from "../components/ToastContainer";
 import "./Styles/Dashboard.css";
 import { getDiaryEntriesCountForMonth } from "../services/diaryService";
-import { getMoodEntriesCountForMonth, getUnifiedEmotionalStats } from "../services/moodService";
+import { getMoodEntriesCountForMonth } from "../services/moodService";
 import { getCycleEntriesCountForMonth, getCycleStats } from "../services/cycleService";
 import Navbar from '../components/Navbar';
 import { getPregnancyEntriesCountForMonth, getPregnancyStats } from '../services/pregnancyService';
 import { getUserSettings } from '../services/userService';
 import CycleInsightsCard from '../components/CycleInsightsCard';
+import { detectPersonalPatterns, getStoredPatterns } from "../services/patternDetectionService";
 
 function Dashboard() {
   const { currentUser, modulePreferences } = useAuth();
@@ -23,11 +24,6 @@ function Dashboard() {
   // New state variables for counts
   const [journalCount, setJournalCount] = useState(0);
   const [moodCount, setMoodCount] = useState(0);
-  const [emotionalBalance, setEmotionalBalance] = useState({
-    averageScore: 0,
-    label: 'Loading...',
-    color: '#9ca3af'
-  });
   const [cycleStats, setCycleStats] = useState({
     currentPhase: '',
     nextPredictedPeriod: null,
@@ -37,6 +33,7 @@ function Dashboard() {
   const [pregnancyTrackingEnabled, setPregnancyTrackingEnabled] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [pregnancyStats, setPregnancyStats] = useState({});
+  const [personalPatterns, setPersonalPatterns] = useState(null);
 
   // Loading states for navigation buttons
   const [loadingStates, setLoadingStates] = useState({
@@ -247,22 +244,14 @@ function Dashboard() {
         const userSettings = await getUserSettings(currentUser.uid);
         setPregnancyTrackingEnabled(userSettings?.pregnancyTrackingEnabled || false);
 
-        const [
-          journalEntriesCount,
-          moodEntriesCount,
-          cycleEntriesCount,
-          pregnancyEntriesCount,
-          cycleStatsData,
-          pregnancyStatsData,
-          unifiedStats
-        ] = await Promise.all([
+        const [journalEntriesCount, moodEntriesCount, cycleEntriesCount, pregnancyEntriesCount, cycleStatsData, pregnancyStatsData, storedPatterns] = await Promise.all([
           getDiaryEntriesCountForMonth(currentUser.uid, year, month),
           getMoodEntriesCountForMonth(currentUser.uid, year, month),
           getCycleEntriesCountForMonth(currentUser.uid, year, month),
           getPregnancyEntriesCountForMonth(currentUser.uid, year, month),
           getCycleStats(currentUser.uid),
           getPregnancyStats(currentUser.uid),
-          getUnifiedEmotionalStats(currentUser.uid, 'month')
+          getStoredPatterns(currentUser.uid)
         ]);
 
         console.log("Dashboard counts fetched:", {
@@ -271,15 +260,19 @@ function Dashboard() {
           cycleEntriesCount,
           pregnancyEntriesCount,
           cycleStatsData,
-          pregnancyStatsData,
-          unifiedStats
+          pregnancyStatsData
         });
 
         setJournalCount(journalEntriesCount);
         setMoodCount(moodEntriesCount);
         setCycleStats(cycleStatsData);
         setPregnancyStats(pregnancyStatsData);
-        setEmotionalBalance(unifiedStats);
+        setPersonalPatterns(storedPatterns);
+
+        // Run detection in background to update patterns if needed
+        detectPersonalPatterns(currentUser.uid).then(newPatterns => {
+          if (newPatterns.hasData) setPersonalPatterns(newPatterns);
+        });
       } catch (error) {
         console.error("Error fetching counts:", error);
       }
@@ -301,29 +294,26 @@ function Dashboard() {
       setPregnancyTrackingEnabled(userSettings?.pregnancyTrackingEnabled || false);
 
       // eslint-disable-next-line no-unused-vars
-      const [
-        journalEntriesCount,
-        moodEntriesCount,
-        cycleEntriesCount,
-        pregnancyEntriesCount,
-        cycleStatsData,
-        pregnancyStatsData,
-        unifiedStats
-      ] = await Promise.all([
+      const [journalEntriesCount, moodEntriesCount, cycleEntriesCount, pregnancyEntriesCount, cycleStatsData, pregnancyStatsData, storedPatterns] = await Promise.all([
         getDiaryEntriesCountForMonth(currentUser.uid, year, month),
         getMoodEntriesCountForMonth(currentUser.uid, year, month),
         getCycleEntriesCountForMonth(currentUser.uid, year, month),
         getPregnancyEntriesCountForMonth(currentUser.uid, year, month),
         getCycleStats(currentUser.uid),
         getPregnancyStats(currentUser.uid),
-        getUnifiedEmotionalStats(currentUser.uid, 'month')
+        getStoredPatterns(currentUser.uid)
       ]);
 
       setJournalCount(journalEntriesCount);
       setMoodCount(moodEntriesCount);
       setCycleStats(cycleStatsData);
       setPregnancyStats(pregnancyStatsData);
-      setEmotionalBalance(unifiedStats);
+      setPersonalPatterns(storedPatterns);
+
+      // Also refresh background logic
+      detectPersonalPatterns(currentUser.uid).then(newPatterns => {
+        if (newPatterns.hasData) setPersonalPatterns(newPatterns);
+      });
     } catch (error) {
       console.error("Error refreshing counts:", error);
     }
@@ -407,11 +397,9 @@ function Dashboard() {
               <div className="stat-card">
                 <div className="stat-icon">📊</div>
                 <div className="stat-content">
-                  <h3>Emotional Balance</h3>
-                  <p className="stat-number" style={{ color: emotionalBalance.color }}>
-                    {emotionalBalance.label}
-                  </p>
-                  <span className="stat-label">Score: {emotionalBalance.averageScore}/5</span>
+                  <h3>Mood Tracking</h3>
+                  <p className="stat-number">{moodCount}</p>
+                  <span className="stat-label">Days logged</span>
                 </div>
               </div>
             )}
@@ -419,22 +407,11 @@ function Dashboard() {
               <div className="stat-card">
                 <div className="stat-icon">🌸</div>
                 <div className="stat-content">
-                  <h3>
-                    {cycleStats.currentPhase || 'Cycle'} {cycleStats.currentCycleDay ? `— Day ${cycleStats.currentCycleDay}` : ''}
-                  </h3>
-                  <p className="stat-number" style={{ fontSize: '1.2rem', color: '#be185d' }}>
-                    {(() => {
-                      if (!cycleStats.nextPredictedPeriod) return 'No data';
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const next = new Date(cycleStats.nextPredictedPeriod);
-                      next.setHours(0, 0, 0, 0);
-                      const diff = Math.ceil((next - today) / (1000 * 60 * 60 * 24));
-                      if (diff === 0) return 'Today';
-                      return diff > 0 ? `${diff}d left` : `${Math.abs(diff)}d late`;
-                    })()}
+                  <h3>Cycle Insights</h3>
+                  <p className="stat-number">
+                    {cycleStats.totalCycles > 0 ? cycleStats.currentPhase : ''}
                   </p>
-                  <span className="stat-label">Period Status</span>
+                  <span className="stat-label">Current phase</span>
                 </div>
               </div>
             ) : (
@@ -450,6 +427,13 @@ function Dashboard() {
           </div>
         </section>
 
+        {/* AI Cycle Insights Section - Separate row as requested */}
+        <section className="cycle-insights-section">
+          <div className="insights-grid">
+            <CycleInsightsCard personalPatterns={personalPatterns} />
+          </div>
+        </section>
+
         {/* Main Features */}
         <section className="features-section">
           <div className="features-grid">
@@ -462,7 +446,7 @@ function Dashboard() {
                 <p>Capture your thoughts, feelings, and daily reflections in your private digital space.</p>
                 <button
                   className={`feature-button ${loadingStates.diary ? 'loading' : ''}`}
-                  onClick={() => handleNavigateWithLoading('/diary', 'diary')}
+                  onClick={() => handleNavigateWithLoading('/my-journal', 'diary')}
                   disabled={loadingStates.diary}
                 >
                   {loadingStates.diary ? (
@@ -542,15 +526,6 @@ function Dashboard() {
 
           </div>
         </section>
-
-        {/* AI Cycle Insights Section */}
-        <section className="cycle-insights-section">
-          <CycleInsightsCard />
-        </section>
-
-
-        {/* Pregnancy Tracker - Only show if enabled */}
-        {/* Removed separate pregnancy tracker card section as it is now conditionally rendered inside features grid */}
 
         {/* Achievements */}
         <section className="activity-section">

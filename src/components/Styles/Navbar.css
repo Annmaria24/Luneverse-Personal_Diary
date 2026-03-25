@@ -1,7 +1,5 @@
-
 :root {
-  /* Expose navbar height so pages can offset sticky elements */
-  --navbar-height: 88px;
+  --navbar-height: 112px;
 }
 
 .navbar {
@@ -9,14 +7,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.5rem 1.5rem; /* slightly more padding for breathing space */
-  background: linear-gradient(135deg, #4b0082, #c71585); /* keep the gradient */
-  backdrop-filter: blur(12px); /* softer blur for readability */
+  padding: 0.5rem 1.5rem;
+  /* slightly more padding for breathing space */
+  background: linear-gradient(135deg, #4b0082, #c71585);
+  /* keep the gradient */
+  backdrop-filter: blur(12px);
+  /* softer blur for readability */
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 20px rgba(75, 0, 130, 0.3), 0 2px 8px rgba(199, 21, 133, 0.2);
-  color: #ffffff; /* default text color */
+  color: #ffffff;
+  /* default text color */
   font-family: 'Poppins', sans-serif;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   z-index: 1000;
 }
 
@@ -26,6 +31,7 @@
       0 4px 6px -1px rgba(124, 58, 237, 0.3),
       0 2px 4px -1px rgba(124, 58, 237, 0.2);
   }
+
   100% {
     box-shadow:
       0 0 20px 5px rgba(124, 58, 237, 0.6),
@@ -104,9 +110,12 @@
 
 /* Logo */
 .navbar-logo {
-  font-size: 2.5rem; /* increased size for prominence */
-  font-weight: 800; /* bolder */
-  color: #ffffff; /* bright white */
+  font-size: 2.5rem;
+  /* increased size for prominence */
+  font-weight: 800;
+  /* bolder */
+  color: #ffffff;
+  /* bright white */
   text-decoration: none;
   transition: all 0.3s ease;
   display: flex;
@@ -140,7 +149,8 @@
   font-weight: 400;
   color: #e0e0e0;
   margin-top: 2px;
-  text-shadow: none; /* no glow */
+  text-shadow: none;
+  /* no glow */
 }
 
 /* ===== Center links ===== */
@@ -154,7 +164,8 @@
 }
 
 .nav-link {
-  color: #ffffff !important; /* pure white for non-selected - !important to override global styles */
+  color: #ffffff !important;
+  /* pure white for non-selected - !important to override global styles */
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
@@ -169,8 +180,10 @@
 }
 
 .nav-link:hover {
-  color: #1e293b !important; /* dark text for better visibility */
-  background: rgba(255, 255, 255, 0.8) !important; /* strong white background on hover */
+  color: #1e293b !important;
+  /* dark text for better visibility */
+  background: rgba(255, 255, 255, 0.8) !important;
+  /* strong white background on hover */
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
@@ -182,11 +195,15 @@
 }
 
 .nav-link.active {
-  color: #ffea00; /* bright yellow/gold for active */
+  color: #ffea00;
+  /* bright yellow/gold for active */
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.35); /* stronger subtle background */
-  box-shadow: 0 0 12px rgba(255, 234, 0, 0.7); /* subtle glow */
-  border-bottom: none; /* no underline */
+  background: rgba(255, 255, 255, 0.35);
+  /* stronger subtle background */
+  box-shadow: 0 0 12px rgba(255, 234, 0, 0.7);
+  /* subtle glow */
+  border-bottom: none;
+  /* no underline */
 }
 
 /* Feedback button styling */
@@ -210,9 +227,11 @@
   0% {
     box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
   }
@@ -257,15 +276,20 @@
 /* Removed floating moon pseudo-element from navbar */
 
 @keyframes gentleFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   25% {
     transform: translateY(-3px) rotate(1deg);
   }
+
   50% {
     transform: translateY(-6px) rotate(0deg);
   }
+
   75% {
     transform: translateY(-3px) rotate(-1deg);
   }
@@ -278,6 +302,7 @@
     flex-wrap: wrap;
     gap: 1rem;
   }
+
   .navbar-center {
     order: 3;
     width: 100%;
@@ -285,10 +310,12 @@
     gap: 1rem;
     flex-wrap: wrap;
   }
+
   .nav-link {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
   }
+
   .navbar-logo {
     font-size: 1.6rem;
   }
@@ -298,13 +325,16 @@
   .navbar-center {
     gap: 0.5rem;
   }
+
   .nav-link {
     padding: 0.3rem 0.6rem;
     font-size: 0.85rem;
   }
+
   .navbar-logo {
     font-size: 1.4rem;
   }
+
   .navbar-date {
     font-size: 0.75rem;
   }

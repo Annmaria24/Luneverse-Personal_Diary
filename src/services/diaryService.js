@@ -184,7 +184,12 @@ export const updateDiaryEntry = async (id, updatedData) => {
 
     if (updatedData.content !== undefined || updatedData.mood !== undefined) {
       try {
-        const plainText = (updatedData.content || "").replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        const plainText = (updatedData.content || "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&[a-z0-9]+;/gi, " ")
+          .replace(/&#\d+;/gi, " ")
+          .replace(/\s+/g, " ")
+          .trim();
         console.log("Sending updated diary text to ML server...");
         const response = await fetch("http://localhost:5000/predict", {
           method: "POST",

@@ -133,7 +133,7 @@ export const getEmotionalInsights = async (userId) => {
                 forecastingText = "You may feel more emotionally sensitive or experience mood dips soon. Be gentle with yourself.";
                 copingSuggestions = [
                     { text: "🫧 Calming Breath", link: "/relax?section=breathe" },
-                    { text: "📝 Safe Journaling", link: "/diary" }
+                    { text: "📝 Safe Journaling", link: "/my-journal" }
                 ];
                 quote = "Listen to your body's need for rest.";
                 break;
@@ -149,7 +149,7 @@ export const getEmotionalInsights = async (userId) => {
                 forecastingText = "Energy and positivity are rising. A fresh perspective is emerging.";
                 copingSuggestions = [
                     { text: "🎨 Flow Mode Art", link: "/relax?section=flow" },
-                    { text: "📝 New Intentions", link: "/diary" }
+                    { text: "📝 New Intentions", link: "/my-journal" }
                 ];
                 quote = "Embrace your growing vitality.";
                 break;
@@ -213,5 +213,224 @@ export const getEmotionalInsights = async (userId) => {
     } catch (err) {
         console.error("Error generating insights:", err);
         return { hasData: false, message: "Could not generate insights at this time." };
+    }
+};
+
+/**
+ * New Cycle-Aware Emotional Insight function (Context-Aware Narrative)
+ * Returns structured supportive insights connecting menstrual cycle to current emotions.
+ */
+export const getCycleAwareEmotionInsight = async (userId) => {
+    try {
+        const { getCycleStats } = await import('./cycleService');
+        const { getEmotionalTrendData } = await import('./moodService');
+        
+        // Fetch all necessary data
+        const cycleStats = await getCycleStats(userId);
+        
+        if (!cycleStats || !cycleStats.lastPeriodStart) {
+            return {
+                hasData: false,
+                message: "Log your first period to receive cycle-aware emotional insights."
+            };
+        }
+
+        // 1. Combine Cycle Phase with Mood Data
+        // Fetch last 7 days of pulse/mood data via internal helper for real-time trend
+        const trendData = await trendAnalysis(userId, 7);
+        const currentPhase = cycleStats.currentPhase; 
+        const avgLength = cycleStats.averageCycleLength || 28;
+        
+        const today = new Date();
+        const nextPeriod = new Date(cycleStats.nextPredictedPeriod);
+        const daysUntilNextPeriod = Math.max(0, Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24)));
+
+        // Analyze current mood trend direction (improving, stable, declining)
+        let moodTrend = 'stable';
+        const points = trendData.points;
+        if (points.length >= 2) {
+            const startScore = points[0].y;
+            const endScore = points[points.length - 1].y;
+            const diff = endScore - startScore;
+            if (diff > 0.45) moodTrend = 'improving';
+            else if (diff < -0.45) moodTrend = 'declining';
+        }
+
+        // 2. Detect Cycle-Linked Emotional Patterns & 3. Generate Supportive Messages
+        let insightType = "general";
+        let insightMessage = "Your emotional state is currently moving through your cycle rhythm.";
+
+        // Pattern 1: PMS mood dip
+        if ((currentPhase === 'Luteal' || currentPhase === 'PMS') && daysUntilNextPeriod <= 3 && moodTrend === 'declining') {
+            insightType = "pms_mood_dip";
+            insightMessage = "You seem to be approaching your period, and your mood has dipped slightly. This can be a natural response to hormonal changes. Be gentle with yourself during this time.";
+        } 
+        // Pattern 2: Post-period emotional recovery
+        else if (currentPhase === 'Follicular' && moodTrend === 'improving') {
+            insightType = "energy_recovery_phase";
+            insightMessage = "Your mood is improving during this phase. You may feel more energetic and mentally clear this week.";
+        }
+        // Pattern 3: Ovulation positive phase
+        else if (currentPhase === 'Ovulation' && (moodTrend === 'stable' || moodTrend === 'improving')) {
+            insightType = "high_energy_phase";
+            insightMessage = "You may feel more confident and expressive around this phase. It’s a great time to engage in activities you enjoy.";
+        }
+        // Pattern 4: Cycle-based emotional fluctuation
+        else if (moodTrend !== 'stable') {
+            insightType = "cycle_linked_variation";
+            insightMessage = "Your emotions are fluctuating alongside your hormonal cycle. This is a normal part of your internal rhythm.";
+        }
+        else if (currentPhase === 'Menstrual') {
+            insightMessage = "You’re in your menstrual phase. Rest and self-care are your best companions right now.";
+        } else {
+             insightMessage = "Steadying energy phase. Focus on balance and a gentle routine.";
+        }
+
+        // 4. Period Reminder Integration
+        let periodReminder = "";
+        if (daysUntilNextPeriod <= 3) {
+            periodReminder = daysUntilNextPeriod === 0 
+                ? "Your period is expected today." 
+                : `Your period is expected in ${daysUntilNextPeriod} day${daysUntilNextPeriod === 1 ? '' : 's'}.`;
+        }
+
+        // 5. Predict Future Emotional Tendencies (Pattern Aware)
+        // Check recurring patterns over the last 90 days
+        const lastPeriodStart = new Date(cycleStats.lastPeriodStart);
+        const patterns = await detectRecurringPatterns(userId, lastPeriodStart, avgLength);
+        
+        let predictedMoodHint = "";
+        if (patterns && patterns.hasHistory) {
+            if ((currentPhase === 'Luteal' || currentPhase === 'PMS') && patterns.follicularAvg > patterns.lutealAvg + 0.5) {
+                predictedMoodHint = "Based on your history, you may feel more positive and energetic in the coming follicular phase.";
+            } else if ((currentPhase === 'Luteal' || currentPhase === 'PMS') && patterns.lutealAvg < 2.5) {
+                predictedMoodHint = "You often experience a slight mood dip before your period. Preparing for rest may help.";
+            } else if (currentPhase === 'Menstrual' && patterns.follicularAvg > 3.5) {
+                predictedMoodHint = "Expect your energy and mood to rise significantly as you transition into your follicular phase next week.";
+            }
+        }
+
+        // Fallback to general phase-based prediction if no specific pattern found
+        if (!predictedMoodHint) {
+            if (currentPhase === 'Luteal' || currentPhase === 'PMS') {
+                predictedMoodHint = "As you enter your follicular phase soon, you may notice a boost in energy and clarity.";
+            } else if (currentPhase === 'Menstrual') {
+                predictedMoodHint = "Based on your cycle, your mood and physical energy typically begin to rise in a few days.";
+            } else if (currentPhase === 'Follicular') {
+                predictedMoodHint = "You're heading towards your high-energy ovulation window — a great time for productivity.";
+            } else {
+                 predictedMoodHint = "Your internal energy is gradually stabilizing as you transition through this phase.";
+            }
+        }
+
+        // 6. Supportive Coping Suggestions based on Phase + Mood
+        let copingSuggestions = [];
+        switch (currentPhase) {
+            case 'Menstrual':
+                copingSuggestions = [
+                    { text: "✨ Gentle Affirmations", link: "/relax?section=affirmations" },
+                    { text: "🫧 Heartbeat Breath", link: "/relax?section=breathe" }
+                ];
+                break;
+            case 'Follicular':
+                copingSuggestions = [
+                    { text: "🎨 Flow Mode Art", link: "/relax?section=flow" },
+                    { text: "📝 New Intentions", link: "/my-journal" }
+                ];
+                break;
+            case 'Ovulation':
+                copingSuggestions = [
+                    { text: "🎨 Creative Flow", link: "/relax?section=flow" },
+                    { text: "💭 Daily Quotes", link: "/relax?section=quotes" }
+                ];
+                break;
+            case 'Luteal':
+            case 'PMS':
+            default:
+                if (moodTrend === 'declining') {
+                    copingSuggestions = [
+                        { text: "🫧 Calming Breath", link: "/relax?section=breathe" },
+                        { text: "📝 Safe Journaling", link: "/my-journal" }
+                    ];
+                } else {
+                    copingSuggestions = [
+                        { text: "🌧️ Focus Sounds", link: "/relax?section=sound" },
+                        { text: "🫧 Steady Breathing", link: "/relax?section=breathe" }
+                    ];
+                }
+                break;
+        }
+
+        return {
+            cyclePhase: currentPhase,
+            insightType,
+            insightMessage,
+            periodReminder,
+            predictedMoodHint,
+            copingSuggestions,
+            cycleDay: cycleStats.currentCycleDay,
+            hasData: true
+        };
+
+    } catch (err) {
+        console.error("Error in getCycleAwareEmotionInsight:", err);
+        return { hasData: false, message: "Could not correlate cycle and mood data." };
+    }
+};
+
+/**
+ * Internal helper to detect recurring emotional patterns across cycle phases
+ */
+const detectRecurringPatterns = async (userId, lastPeriodStart, avgLength) => {
+    try {
+        const { getEmotionalTrendData } = await import('./moodService');
+        // Fetch all history to analyze last 3 months
+        const trendData = await getEmotionalTrendData(userId, 'all');
+        const points = trendData.rawPoints || [];
+        
+        if (points.length < 5) return null; // Not enough data for patterns
+
+        const limit = new Date();
+        limit.setDate(limit.getDate() - 90);
+        
+        const phaseScores = { Menstrual: [], Follicular: [], Ovulation: [], Luteal: [] };
+        
+        points.forEach(p => {
+            if (p.rawTimestamp >= limit) {
+                const dayDiff = Math.floor((p.rawTimestamp - lastPeriodStart) / (1000 * 60 * 60 * 24));
+                const offset = ((dayDiff % avgLength) + avgLength) % avgLength;
+                const ph = calculatePhase(offset + 1, avgLength);
+                if (phaseScores[ph]) phaseScores[ph].push(p.y);
+            }
+        });
+
+        const getAvg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+        
+        return {
+            hasHistory: true,
+            follicularAvg: getAvg(phaseScores.Follicular || []),
+            lutealAvg: getAvg(phaseScores.Luteal || []),
+            ovulationAvg: getAvg(phaseScores.Ovulation || []),
+            menstrualAvg: getAvg(phaseScores.Menstrual || [])
+        };
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Internal helper for analyzing mood trends over a period
+ */
+const trendAnalysis = async (userId, days) => {
+    try {
+        const { getEmotionalTrendData } = await import('./moodService');
+        // 'week' view in moodService provides a 7-day aggregated dataset
+        const trendData = await getEmotionalTrendData(userId, 'week'); 
+        return {
+            points: trendData.rawPoints || [],
+            total: trendData.totalEntries || 0
+        };
+    } catch (e) {
+        return { points: [], total: 0 };
     }
 };

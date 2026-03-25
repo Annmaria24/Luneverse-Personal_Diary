@@ -58,7 +58,7 @@ const MoodLineChart = ({ dataPoints = [], size = 260, showYLabels = true, showXL
       </defs>
 
       {/* Y-axis grid lines */}
-      {[1, 2, 3, 4, 5].map((val, idx) => {
+      {[0, 1, 2, 3, 4, 5].map((val, idx) => {
         const y = padding.top + chartHeight - ((val - yMin) / yRange) * chartHeight;
         return (
           <g key={val}>

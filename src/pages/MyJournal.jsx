@@ -67,8 +67,8 @@ function MyJournal() {
         </div>
 
         <div className="tab-content">
-          {activeTab === 'diary' && <DiaryPage />}
-          {activeTab === 'mood' && <MoodTrackerPage viewMode={viewMode} />}
+          {activeTab === 'diary' && <DiaryPage includeNavbar={false} />}
+          {activeTab === 'mood' && <MoodTrackerPage viewMode={viewMode} includeNavbar={false} />}
         </div>
       </div>
     </>

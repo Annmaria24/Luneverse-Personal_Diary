@@ -3,7 +3,9 @@
   background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   font-family: 'Inter', sans-serif;
   color: #1f2937;
-  background-attachment: fixed; /* ensure consistent background */
+  background-attachment: fixed;
+  /* ensure consistent background */
+  padding-top: var(--navbar-height);
 }
 
 
@@ -13,7 +15,8 @@
   width: 100% !important;
   max-width: 1400px !important;
   margin: 0 auto !important;
-  margin-top: 60px !important; /* Add space below toggle buttons */
+  margin-top: 60px !important;
+  /* Add space below toggle buttons */
 }
 
 .insights-grid {
@@ -181,7 +184,8 @@
   text-align: center;
 }
 
-.current-size, .current-weight {
+.current-size,
+.current-weight {
   display: block;
   font-weight: 600;
   color: #1f2937;
@@ -510,8 +514,15 @@
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* Force pregnancy insights layout */
@@ -520,7 +531,8 @@
   width: 100% !important;
   max-width: 1400px !important;
   margin: 0 auto !important;
-  margin-top: 60px !important; /* Add space below toggle buttons */
+  margin-top: 60px !important;
+  /* Add space below toggle buttons */
 }
 
 .pregnancy-tracker-page .insights-grid {
@@ -574,7 +586,8 @@ div.pregnancy-tracker-page div.insights-section {
   width: 100% !important;
   max-width: 1400px !important;
   margin: 0 auto !important;
-  margin-top: 60px !important; /* Add space below toggle buttons */
+  margin-top: 60px !important;
+  /* Add space below toggle buttons */
 }
 
 div.pregnancy-tracker-page .growth-card {
@@ -667,51 +680,52 @@ div.pregnancy-tracker-page .stat-label {
 
 @media (max-width: 768px) {
   .insights-section {
-    margin-top: 40px !important; /* Reduce spacing on mobile */
+    margin-top: 40px !important;
+    /* Reduce spacing on mobile */
   }
-  
+
   .insights-grid {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 0 10px;
   }
-  
+
   .insight-card {
     padding: 16px;
   }
-  
+
   .progress-stats {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .timeline-line {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .timeline-line::before {
     display: none;
   }
-  
+
   .week-number {
     font-size: 28px;
   }
-  
+
   .size-circle {
     width: 80px !important;
     height: 80px !important;
   }
-  
+
   div.pregnancy-tracker-page .progress-card {
     min-height: 250px !important;
   }
-  
+
   div.pregnancy-tracker-page .progress-stats {
     flex-direction: column !important;
     gap: 8px !important;
   }
-  
+
   div.pregnancy-tracker-page .stat-item {
     min-width: 100px !important;
     max-width: none !important;
@@ -859,7 +873,9 @@ div.pregnancy-tracker-page .stat-label {
   gap: 2px;
 }
 
-.symptoms-indicator, .appointment-indicator, .notes-indicator {
+.symptoms-indicator,
+.appointment-indicator,
+.notes-indicator {
   font-size: 12px;
   background: #7133d6;
   color: white;
@@ -883,7 +899,8 @@ div.pregnancy-tracker-page .stat-label {
   background: #10b981;
 }
 
-.loading-container, .error-container {
+.loading-container,
+.error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -962,11 +979,22 @@ div.pregnancy-tracker-page .stat-label {
 }
 
 /* Clear, compact header controls */
-.pregnancy-tracker-page .view-btn { padding: 8px 14px; border-radius: 9999px; }
-.pregnancy-tracker-page .view-btn + .view-btn { margin-left: 4px; }
+.pregnancy-tracker-page .view-btn {
+  padding: 8px 14px;
+  border-radius: 9999px;
+}
+
+.pregnancy-tracker-page .view-btn+.view-btn {
+  margin-left: 4px;
+}
 
 /* Remove Conception Details button */
-.remove-conception-container { display: flex; justify-content: center; margin-top: 10px; }
+.remove-conception-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
 .remove-conception-btn {
   background: #ef4444;
   color: #fff;
@@ -976,7 +1004,10 @@ div.pregnancy-tracker-page .stat-label {
   cursor: pointer;
   font-weight: 600;
 }
-.remove-conception-btn:hover { background: #dc2626; }
+
+.remove-conception-btn:hover {
+  background: #dc2626;
+}
 
 /* New date inputs section */
 .pregnancy-dates-section {
@@ -1144,7 +1175,8 @@ div.pregnancy-tracker-page .stat-label {
 }
 
 .calendar-section {
-  /* background: rgba(255, 255, 255, 0.95); */ /* Removed to maintain consistent page background */
+  /* background: rgba(255, 255, 255, 0.95); */
+  /* Removed to maintain consistent page background */
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
@@ -1246,7 +1278,9 @@ div.pregnancy-tracker-page .stat-label {
   gap: 2px;
 }
 
-.symptoms-indicator, .appointment-indicator, .notes-indicator {
+.symptoms-indicator,
+.appointment-indicator,
+.notes-indicator {
   font-size: 12px;
   background: #7133d6;
   color: white;
@@ -1303,7 +1337,8 @@ div.pregnancy-tracker-page .stat-label {
 }
 
 .insights-section {
-  /* background: rgba(255, 255, 255, 0.95); */ /* Removed to maintain consistent page background */
+  /* background: rgba(255, 255, 255, 0.95); */
+  /* Removed to maintain consistent page background */
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -1758,4 +1793,3 @@ div.pregnancy-tracker-page .stat-label {
     width: 100%;
   }
 }
-

@@ -26,10 +26,11 @@ export const classifyMood = async (diaryText, manualMood = "") => {
     const normalizedManual = mapManualMoodToFinal(manualMood);
     const manualScore = MOOD_SCORES[normalizedManual] ?? 3;
 
-    // If no diary text, return normalized manual mood immediately
+    // If no diary text, return normalized manual mood directly with high confidence
+    // (no text = no ML signal, so manual mood IS the truth — don't dilute it with Neutral)
     if (!diaryText || !diaryText.trim()) {
-      console.log(`ℹ️ [AI Service] No text provided. Using manual mood: ${normalizedManual} (Score: ${manualScore})`);
-      return { ...result, finalMood: normalizedManual, confidence: 0.6 };
+      console.log(`ℹ️ [AI Service] No text provided. Using manual mood directly: ${normalizedManual}`);
+      return { ...result, finalMood: normalizedManual, confidence: 0.9 };
     }
 
     let diaryMood = "Neutral";
@@ -37,12 +38,17 @@ export const classifyMood = async (diaryText, manualMood = "") => {
 
     // --- STEP 1: Local ML Execution ---
     try {
-      console.log(`📡 [AI Service] Calling Local ML Backend...`);
-      const mlServerRes = await fetch("http://localhost:5000/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: diaryText.replace(/<[^>]*>/g, " ").trim() })
-      });
+        const cleanTextForML = diaryText
+          .replace(/<[^>]*>/g, " ")
+          .replace(/&[a-z0-9]+;/gi, " ")
+          .replace(/&#\d+;/gi, " ")
+          .trim();
+
+        const mlServerRes = await fetch("http://localhost:5000/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: cleanTextForML })
+        });
 
       if (mlServerRes.ok) {
         const mlData = await mlServerRes.json();
@@ -58,7 +64,12 @@ export const classifyMood = async (diaryText, manualMood = "") => {
       // Fallback to OpenAI
       const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
       if (apiKey) {
-        const cleanText = diaryText.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+        const cleanText = diaryText
+          .replace(/<[^>]*>/g, " ")
+          .replace(/&[a-z0-9]+;/gi, " ")
+          .replace(/&#\d+;/gi, " ")
+          .replace(/\s+/g, " ")
+          .trim();
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
@@ -79,9 +90,13 @@ export const classifyMood = async (diaryText, manualMood = "") => {
       }
     }
 
-    // --- STEP 2: Weighted Aggregation (0.7 Diary + 0.3 Manual) ---
+    // --- STEP 2: Weighted Aggregation ---
+    // If ML gave a strong signal, trust it more (0.6 diary + 0.4 manual)
+    // If ML confidence is low (<0.4), let manual mood have equal say (0.5 / 0.5)
     const diaryScore = MOOD_SCORES[diaryMood] ?? 3;
-    const weightedScore = (diaryScore * 0.7) + (manualScore * 0.3);
+    const diaryWeight = diaryConfidence >= 0.4 ? 0.6 : 0.5;
+    const manualWeight = 1 - diaryWeight;
+    const weightedScore = (diaryScore * diaryWeight) + (manualScore * manualWeight);
 
     // Map weighted score back to label
     let finalMood = "Neutral";

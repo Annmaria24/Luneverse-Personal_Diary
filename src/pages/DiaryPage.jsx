@@ -8,8 +8,9 @@ import RichTextEditor from '../components/RichTextEditor';
 import FullScreenEditor from '../components/FullScreenEditor';
 import CustomModal from '../components/CustomModal';
 import { useCustomModal } from '../hooks/useCustomModal';
+import Navbar from '../components/Navbar';
 
-function DiaryPage() {
+function DiaryPage({ includeNavbar = true }) {
   const { currentUser } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [entries, setEntries] = useState([]);
@@ -98,7 +99,7 @@ function DiaryPage() {
       'This action cannot be undone. Are you sure you want to delete this entry?',
       'Delete Entry'
     );
-    
+
     if (!confirmDelete) return;
 
     setLoading(true);
@@ -141,22 +142,22 @@ function DiaryPage() {
   const generateEntryTitle = (content) => {
     const plainText = stripHtmlTags(content);
     const firstLine = plainText.split('\n')[0].trim();
-    
+
     // If first line is long enough and looks like a title, use it
     if (firstLine.length >= 10 && firstLine.length <= 60) {
       return firstLine;
     }
-    
+
     // Otherwise, create a title from the first few words
     const words = plainText.split(' ').filter(word => word.length > 0);
     if (words.length === 0) return 'Untitled Entry';
-    
+
     let title = '';
     for (let i = 0; i < Math.min(8, words.length); i++) {
       if ((title + ' ' + words[i]).length > 50) break;
       title += (title ? ' ' : '') + words[i];
     }
-    
+
     return title || 'Untitled Entry';
   };
 
@@ -164,22 +165,22 @@ function DiaryPage() {
   const generateEntryPreview = (content) => {
     const plainText = stripHtmlTags(content);
     const maxLength = 120;
-    
+
     if (plainText.length <= maxLength) {
       return plainText;
     }
-    
+
     // Find a good breaking point (end of sentence or word)
     let preview = plainText.substring(0, maxLength);
     const lastPeriod = preview.lastIndexOf('.');
     const lastSpace = preview.lastIndexOf(' ');
-    
+
     if (lastPeriod > maxLength * 0.7) {
       preview = preview.substring(0, lastPeriod + 1);
     } else if (lastSpace > maxLength * 0.7) {
       preview = preview.substring(0, lastSpace);
     }
-    
+
     return preview + '...';
   };
 
@@ -204,12 +205,12 @@ function DiaryPage() {
     // Prevent selecting future dates
     const today = new Date();
     today.setHours(23, 59, 59, 999); // Set to end of today
-    
+
     if (date > today) {
       setError("Cannot select future dates for diary entries.");
       return;
     }
-    
+
     setSelectedDate(date);
     setShowCalendar(false);
     await loadEntriesForDate(date);
@@ -254,21 +255,21 @@ function DiaryPage() {
         content: content,
         mood: mood
       };
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         await updateDiaryEntry(editingEntryId, entryData);
         console.log("Entry updated successfully");
-        
+
         // Reload the appropriate view
         if (viewMode === 'latest') {
           await loadLatestEntries();
         } else {
           await loadEntriesForDate(selectedDate);
         }
-        
+
         // Reset form
         setCurrentEntry('');
         setMood('');
@@ -283,34 +284,34 @@ function DiaryPage() {
     } else {
       // Create new entry
       if (!content.trim()) return;
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         const entryData = {
           date: selectedDate.toDateString(),
           content: content,
           mood: mood
         };
-        
+
         // addDiaryEntry now returns { id, finalMood, confidence, error }
         const result = await addDiaryEntry(currentUser.uid, entryData);
         console.log("Entry added successfully", result);
-        
+
         // Show info if mood classification had issues (but entry was still saved)
         if (result.error) {
           console.warn("Mood classification warning:", result.error);
           // Entry is still saved, just show a subtle message
         }
-        
+
         // Reload the appropriate view
         if (viewMode === 'latest') {
           await loadLatestEntries();
         } else {
           await loadEntriesForDate(selectedDate);
         }
-        
+
         // Reset form
         setCurrentEntry('');
         setMood('');
@@ -333,6 +334,7 @@ function DiaryPage() {
         <div className="floating-element element-5">🦋</div>
         <div className="floating-element element-6">🌺</div>
       </div>
+      {includeNavbar && <Navbar />}
       <div className="diary-container">
         {/* Search */}
         {/* Removed search section here as it's moved to navbar */}
@@ -366,16 +368,16 @@ function DiaryPage() {
                       className="date-picker"
                       max={new Date().toISOString().split('T')[0]}
                     />
-                    <button 
-                      onClick={() => document.getElementById('hidden-date-picker').showPicker()} 
+                    <button
+                      onClick={() => document.getElementById('hidden-date-picker').showPicker()}
                       className="calendar-icon-btn"
                       title="Open Calendar"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2"/>
-                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2"/>
-                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2"/>
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" />
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" />
+                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2" />
                       </svg>
                     </button>
                     <input
@@ -392,8 +394,8 @@ function DiaryPage() {
                   <span>or choose quickly</span>
                 </div>
                 <div className="calendar-quick-dates">
-                  <button 
-                    onClick={() => handleDateSelect(new Date())} 
+                  <button
+                    onClick={() => handleDateSelect(new Date())}
                     className="quick-date-btn today-btn"
                   >
                     <span className="quick-date-icon">📝</span>
@@ -402,8 +404,8 @@ function DiaryPage() {
                       <span className="quick-date-subtitle">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                   </button>
-                  <button 
-                    onClick={() => handleDateSelect(new Date(Date.now() - 86400000))} 
+                  <button
+                    onClick={() => handleDateSelect(new Date(Date.now() - 86400000))}
                     className="quick-date-btn yesterday-btn"
                   >
                     <span className="quick-date-icon">📖</span>
@@ -412,8 +414,8 @@ function DiaryPage() {
                       <span className="quick-date-subtitle">{new Date(Date.now() - 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                   </button>
-                  <button 
-                    onClick={() => handleDateSelect(new Date(Date.now() - 7 * 86400000))} 
+                  <button
+                    onClick={() => handleDateSelect(new Date(Date.now() - 7 * 86400000))}
                     className="quick-date-btn week-ago-btn"
                   >
                     <span className="quick-date-icon">📚</span>
@@ -437,7 +439,7 @@ function DiaryPage() {
             </div>
 
             <div className="entry-editor">
-              <div 
+              <div
                 className="entry-editor-placeholder"
                 onClick={() => openFullScreenEditor()}
               >
@@ -462,8 +464,8 @@ function DiaryPage() {
           <div className="entries-section">
             <div className="entries-header">
               <h3>
-                {isSearching 
-                  ? `Search Results (${entries.length})` 
+                {isSearching
+                  ? `Search Results (${entries.length})`
                   : viewMode === 'latest'
                     ? `Latest Entries (${entries.length})`
                     : `Entries for ${formatDate(selectedDate)} (${entries.length})`
@@ -540,14 +542,14 @@ function DiaryPage() {
                     </div>
                     <div className="entry-content">
                       <div className="entry-header-info">
-                        <h3 
+                        <h3
                           className="entry-title"
                           onClick={() => toggleEntryExpansion(entry.id)}
                           title={expandedEntries.has(entry.id) ? "Show less" : "Show more"}
                         >
                           {generateEntryTitle(entry.content)}
                         </h3>
-                        <button 
+                        <button
                           className="expand-toggle-btn"
                           onClick={() => toggleEntryExpansion(entry.id)}
                           title={expandedEntries.has(entry.id) ? "Show less" : "Show more"}
@@ -555,7 +557,7 @@ function DiaryPage() {
                           {expandedEntries.has(entry.id) ? '▲' : '▼'}
                         </button>
                       </div>
-                      
+
                       <div className="entry-text">
                         {expandedEntries.has(entry.id) ? (
                           <div dangerouslySetInnerHTML={{ __html: entry.content }} />
@@ -563,9 +565,9 @@ function DiaryPage() {
                           <p className="entry-preview">{generateEntryPreview(entry.content)}</p>
                         )}
                       </div>
-                      
+
                       {!expandedEntries.has(entry.id) && stripHtmlTags(entry.content).length > 120 && (
-                        <button 
+                        <button
                           className="read-more-btn"
                           onClick={() => toggleEntryExpansion(entry.id)}
                         >
@@ -625,7 +627,7 @@ function DiaryPage() {
         cancelText={modalState.cancelText}
         showCancel={modalState.showCancel}
       />
-    </div>
+    </div >
   );
 }
 

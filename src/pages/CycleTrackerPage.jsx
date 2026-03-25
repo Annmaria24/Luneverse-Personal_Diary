@@ -1,4 +1,4 @@
- 
+
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Styles/CycleTrackerPage.css';
@@ -16,8 +16,9 @@ import { getUserSettings } from "../services/userService";
 
 
 import ProfileDropdown from '../components/ProfileDropdown';
+import Navbar from '../components/Navbar';
 
-function CycleTrackerPage({ hideTopToggle = false }) {
+function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
   const { currentUser } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -53,8 +54,8 @@ function CycleTrackerPage({ hideTopToggle = false }) {
 
 
 
-// Consumption tracking state
-// Removed consumption tracking state as per user request
+  // Consumption tracking state
+  // Removed consumption tracking state as per user request
 
   const symptoms = [
     { id: 'cramps', name: 'Cramps', icon: '🤕' },
@@ -133,7 +134,7 @@ function CycleTrackerPage({ hideTopToggle = false }) {
           const end = new Date(endKey + 'T00:00:00Z');
           while (d < end) {
             const key = d.toISOString().split('T')[0];
-            if (!cycleData[key] || !['start','ongoing','end'].includes(cycleData[key].periodStatus)) {
+            if (!cycleData[key] || !['start', 'ongoing', 'end'].includes(cycleData[key].periodStatus)) {
               await saveCycleEntry(currentUser.uid, d, {
                 periodStatus: 'ongoing',
                 type: 'period',
@@ -175,30 +176,30 @@ function CycleTrackerPage({ hideTopToggle = false }) {
   // Period notification function
   const checkPeriodNotifications = (stats) => {
     if (!stats || !stats.averageCycleLength) return;
-    
+
     const today = new Date();
     const lastPeriod = stats.lastPeriodDate ? new Date(stats.lastPeriodDate) : null;
-    
+
     if (!lastPeriod) return;
-    
+
     const averageCycleLength = stats.averageCycleLength;
-    
+
     // Check if period is due (within 2 days of expected date)
     const expectedPeriodDate = new Date(lastPeriod);
     expectedPeriodDate.setDate(expectedPeriodDate.getDate() + averageCycleLength);
-    
+
     const daysUntilExpected = Math.floor((expectedPeriodDate - today) / (1000 * 60 * 60 * 24));
-    
+
     // Show notification if period is due soon
     if (daysUntilExpected <= 2 && daysUntilExpected >= -1) {
-      const message = daysUntilExpected === 0 
+      const message = daysUntilExpected === 0
         ? "Your period is expected today! 🩸"
-        : daysUntilExpected === 1 
-        ? "Your period is expected tomorrow! 🩸"
-        : daysUntilExpected === -1
-        ? "Your period was expected yesterday! 🩸"
-        : `Your period is expected in ${daysUntilExpected} days! 🩸`;
-      
+        : daysUntilExpected === 1
+          ? "Your period is expected tomorrow! 🩸"
+          : daysUntilExpected === -1
+            ? "Your period was expected yesterday! 🩸"
+            : `Your period is expected in ${daysUntilExpected} days! 🩸`;
+
       // Show browser notification if permission granted
       if (Notification.permission === 'granted') {
         new Notification('Period Reminder', {
@@ -218,7 +219,7 @@ function CycleTrackerPage({ hideTopToggle = false }) {
           }
         });
       }
-      
+
       // Also show in-app notification
       console.log('🔔 Period Notification:', message);
     }
@@ -228,18 +229,18 @@ function CycleTrackerPage({ hideTopToggle = false }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Load cycle data
       const data = await getCycleData(currentUser.uid);
       setCycleData(data);
-      
+
       // Load cycle statistics
       const stats = await getCycleStats(currentUser.uid);
-      
+
       // Check for period notifications
       checkPeriodNotifications(stats);
       setCycleStats(stats);
-      
+
       // Load common symptoms
       const symptoms = await getCommonSymptoms(currentUser.uid);
       setCommonSymptoms(symptoms);
@@ -256,7 +257,7 @@ function CycleTrackerPage({ hideTopToggle = false }) {
         const pStats = await getPregnancyStats(currentUser.uid);
         setPregnancyStats(pStats);
       }
-      
+
     } catch (error) {
       console.error("Error loading cycle data:", error);
       setError(`Failed to load cycle data: ${error.message}. Please refresh the page and try again.`);
@@ -437,8 +438,8 @@ function CycleTrackerPage({ hideTopToggle = false }) {
   };
 
   const toggleSymptom = (symptomId) => {
-    setSelectedSymptoms(prev => 
-      prev.includes(symptomId) 
+    setSelectedSymptoms(prev =>
+      prev.includes(symptomId)
         ? prev.filter(id => id !== symptomId)
         : [...prev, symptomId]
     );
@@ -465,21 +466,21 @@ function CycleTrackerPage({ hideTopToggle = false }) {
 
   const getPeriodNotificationBanner = () => {
     if (!cycleStats || !cycleStats.averageCycleLength) return null;
-    
+
     const today = new Date();
     const lastPeriod = cycleStats.lastPeriodDate ? new Date(cycleStats.lastPeriodDate) : null;
-    
+
     if (!lastPeriod) return null;
-    
+
     const averageCycleLength = cycleStats.averageCycleLength;
     const expectedPeriodDate = new Date(lastPeriod);
     expectedPeriodDate.setDate(expectedPeriodDate.getDate() + averageCycleLength);
-    
+
     const daysUntilExpected = Math.floor((expectedPeriodDate - today) / (1000 * 60 * 60 * 24));
-    
+
     // Only show banner if period is due within 3 days
     if (daysUntilExpected > 3) return null;
-    
+
     const getBannerMessage = () => {
       if (daysUntilExpected === 0) return "Your period is expected today! 🩸";
       if (daysUntilExpected === 1) return "Your period is expected tomorrow! 🩸";
@@ -487,14 +488,14 @@ function CycleTrackerPage({ hideTopToggle = false }) {
       if (daysUntilExpected > 0) return `Your period is expected in ${daysUntilExpected} days! 🩸`;
       return `Your period was expected ${Math.abs(daysUntilExpected)} days ago! 🩸`;
     };
-    
+
     const getBannerClass = () => {
       if (daysUntilExpected === 0) return "period-banner today";
       if (daysUntilExpected === 1) return "period-banner tomorrow";
       if (daysUntilExpected < 0) return "period-banner overdue";
       return "period-banner upcoming";
     };
-    
+
     return (
       <div className={getBannerClass()}>
         <div className="banner-content">
@@ -521,16 +522,16 @@ function CycleTrackerPage({ hideTopToggle = false }) {
         await deletePregnancyEntry(currentUser.uid, selectedDate);
         const p = { ...pregnancyData }; delete p[dateKey]; setPregnancyData(p);
       }
-      
+
       // Remove from local state
       const newData = { ...cycleData };
       delete newData[dateKey];
       setCycleData(newData);
-      
+
       // Reload stats to reflect changes
       const stats = await getCycleStats(currentUser.uid);
       setCycleStats(stats);
-      
+
       setShowSymptomModal(false);
     } catch (error) {
       console.error("Error deleting cycle entry:", error);
@@ -554,8 +555,8 @@ function CycleTrackerPage({ hideTopToggle = false }) {
     for (let day = 1; day <= daysInMonth; day++) {
       const dayData = getDayData(day);
       const isToday = new Date().getDate() === day &&
-                     new Date().getMonth() === currentDate.getMonth() &&
-                     new Date().getFullYear() === currentDate.getFullYear();
+        new Date().getMonth() === currentDate.getMonth() &&
+        new Date().getFullYear() === currentDate.getFullYear();
 
       // Determine the type of data for more specific styling
       let dataClass = '';
@@ -563,26 +564,26 @@ function CycleTrackerPage({ hideTopToggle = false }) {
       const dateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
 
       // Check if this day is in the future
-    const isFuture = isFutureDate(dateObj);
+      const isFuture = isFutureDate(dateObj);
 
-    // Inference disabled: only show explicit entries
+      // Inference disabled: only show explicit entries
 
-    if (dayData) {
-      const hasPeriodData = dayData && dayData.periodStatus && dayData.periodStatus !== 'none';
-      const hasFlowData = dayData && dayData.type === 'period' && dayData.flow;
-      const hasOvulationData = dayData && dayData.type === 'ovulation';
-      const hasOnlySymptoms = dayData && dayData.symptoms && dayData.symptoms.length > 0 && !hasPeriodData && !hasFlowData && !hasOvulationData;
+      if (dayData) {
+        const hasPeriodData = dayData && dayData.periodStatus && dayData.periodStatus !== 'none';
+        const hasFlowData = dayData && dayData.type === 'period' && dayData.flow;
+        const hasOvulationData = dayData && dayData.type === 'ovulation';
+        const hasOnlySymptoms = dayData && dayData.symptoms && dayData.symptoms.length > 0 && !hasPeriodData && !hasFlowData && !hasOvulationData;
 
-      if (hasPeriodData || hasFlowData) {
-        dataClass = 'has-period-data';
-      } else if (hasOvulationData) {
-        dataClass = 'has-ovulation-data';
-      } else if (hasOnlySymptoms) {
-        dataClass = 'has-symptoms-only';
-      } else {
-        dataClass = 'has-data';
+        if (hasPeriodData || hasFlowData) {
+          dataClass = 'has-period-data';
+        } else if (hasOvulationData) {
+          dataClass = 'has-ovulation-data';
+        } else if (hasOnlySymptoms) {
+          dataClass = 'has-symptoms-only';
+        } else {
+          dataClass = 'has-data';
+        }
       }
-    }
 
       days.push(
         <div
@@ -638,7 +639,16 @@ function CycleTrackerPage({ hideTopToggle = false }) {
   if (error) {
     return (
       <div className="cycle-tracker-page">
-        <div className="error-container">
+        <div className="dashboard-background">
+          <div className="floating-element element-1">🌙</div>
+          <div className="floating-element element-2">✨</div>
+          <div className="floating-element element-3">🌸</div>
+          <div className="floating-element element-4">💜</div>
+          <div className="floating-element element-5">🦋</div>
+          <div className="floating-element element-6">🌺</div>
+        </div>
+        {includeNavbar && <Navbar />}
+        <div className="cycle-tracker-container">
           <div className="error-icon">⚠️</div>
           <p>{error}</p>
           <button onClick={loadCycleData} className="retry-btn">
@@ -650,56 +660,63 @@ function CycleTrackerPage({ hideTopToggle = false }) {
   }
 
   return (
-    <>
-      {/* Removed extra header to integrate with Navbar */}
-      <div className="cycle-tracker-page">
-        {/* Top toggles bar (hidden when parent provides one) */}
-        {!hideTopToggle && (
-          <div className="top-toggles">
-            <div className="cycle-view-toggle">
-              <button onClick={() => setViewMode('calendar')} className={`cycle-view-btn ${viewMode==='calendar'?'active':''}`}>Calendar</button>
-              <button onClick={() => setViewMode('insights')} className={`cycle-view-btn ${viewMode==='insights'?'active':''}`}>Insights</button>
-            </div>
+    <div className="cycle-tracker-page">
+      {includeNavbar && <Navbar />}
+      <div className="dashboard-background">
+        <div className="floating-element element-1">🌙</div>
+        <div className="floating-element element-2">✨</div>
+        <div className="floating-element element-3">🌸</div>
+        <div className="floating-element element-4">💜</div>
+        <div className="floating-element element-5">🦋</div>
+        <div className="floating-element element-6">🌺</div>
+      </div>
+      {/* Top toggles bar (hidden when parent provides one) */}
+      {!hideTopToggle && (
+        <div className="top-toggles">
+          <div className="cycle-view-toggle">
+            <button onClick={() => setViewMode('calendar')} className={`cycle-view-btn ${viewMode === 'calendar' ? 'active' : ''}`}>Calendar</button>
+            <button onClick={() => setViewMode('insights')} className={`cycle-view-btn ${viewMode === 'insights' ? 'active' : ''}`}>Insights</button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Header */}
-        {/* Removed extra header to integrate with Navbar */}
-        {/* <header className="cycle-header">
-          <div className="header-left">
-            <button onClick={goBack} className={`back-button ${isNavigating ? 'loading' : ''}`} disabled={isNavigating}>
-              {isNavigating ? (
-                <>
-                  <span className="loading-spinner">⏳</span>
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <span className="back-arrow">←</span>
-                  Back
-                </>
-              )}
-            </button>
-          </div>
-          <h1 className="header-title">Cycle Tracker</h1>
-          <div className="header-right">
-            <div className="view-toggle">
-              <button
-                onClick={() => setViewMode('calendar')}
-                className={`view-btn ${viewMode === 'calendar' ? 'active' : ''}`}
-              >
-                Calendar
-              </button>
-              <button
-                onClick={() => setViewMode('insights')}
-                className={`view-btn ${viewMode === 'insights' ? 'active' : ''}`}
-              >
-                Insights
+      {/* Header */}
+      {/* Removed extra header to integrate with Navbar */}
+      {/* <header className="cycle-header">
+            <div className="header-left">
+              <button onClick={goBack} className={`back-button ${isNavigating ? 'loading' : ''}`} disabled={isNavigating}>
+                {isNavigating ? (
+                  <>
+                    <span className="loading-spinner">⏳</span>
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <span className="back-arrow">←</span>
+                    Back
+                  </>
+                )}
               </button>
             </div>
-            <ProfileDropdown />
-          </div>
-        </header> */}
+            <h1 className="header-title">Cycle Tracker</h1>
+            <div className="header-right">
+              <div className="view-toggle">
+                <button
+                  onClick={() => setViewMode('calendar')}
+                  className={`view-btn ${viewMode === 'calendar' ? 'active' : ''}`}
+                >
+                  Calendar
+                </button>
+                <button
+                  onClick={() => setViewMode('insights')}
+                  className={`view-btn ${viewMode === 'insights' ? 'active' : ''}`}
+                >
+                  Insights
+                </button>
+              </div>
+              <ProfileDropdown />
+            </div>
+          </header> */}
 
       {/* Success Message */}
       {successMessage && (
@@ -756,24 +773,24 @@ function CycleTrackerPage({ hideTopToggle = false }) {
                 <span>›</span>
               </button>
               {/* <input
-                type="month"
-                className="month-input"
-                value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
-                onChange={(e) => {
-                  const [y, m] = e.target.value.split('-');
-                  const d = new Date(parseInt(y), parseInt(m) - 1, 1);
-                  setCurrentDate(d);
-                }}
-              /> */}
+                  type="month"
+                  className="month-input"
+                  value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
+                  onChange={(e) => {
+                    const [y, m] = e.target.value.split('-');
+                    const d = new Date(parseInt(y), parseInt(m) - 1, 1);
+                    setCurrentDate(d);
+                  }}
+                /> */}
             </div>
 
             {/* Month actions */}
             {/* Removed Clear records button as per user request */}
             {/* <div className="month-actions" style={{ display: 'flex', justifyContent: 'flex-end', margin: '8px 0' }}>
-              <button onClick={() => setShowDeleteModal(true)} className="danger-btn" title="Delete all tracking entries for this month">
-                Clear records
-              </button>
-            </div> */}
+                <button onClick={() => setShowDeleteModal(true)} className="danger-btn" title="Delete all tracking entries for this month">
+                  Clear records
+                </button>
+              </div> */}
 
             {/* Calendar */}
             <div className="calendar-section">
@@ -896,36 +913,36 @@ function CycleTrackerPage({ hideTopToggle = false }) {
       {/* Delete Month Confirmation Modal */}
       {/* Removed Clear records confirmation modal as per user request */}
       {/* {showDeleteModal && (
-        <div className="modal-overlay" onClick={() => !deleteModalBusy && setShowDeleteModal(false)}>
-          <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Clear records for {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
-              <button onClick={() => !deleteModalBusy && setShowDeleteModal(false)} className="close-btn" disabled={deleteModalBusy}>×</button>
-            </div>
-            <div className="modal-content">
-              <p>This will permanently delete all period tracking entries for this month. This action cannot be undone.</p>
-            </div>
-            <div className="modal-actions">
-              <button onClick={() => !deleteModalBusy && setShowDeleteModal(false)} className="cancel-btn" disabled={deleteModalBusy}>Cancel</button>
-              <button
-                onClick={async () => {
-                  try {
-                    setDeleteModalBusy(true);
-                    await deleteCurrentMonthPeriods();
-                    setShowDeleteModal(false);
-                  } finally {
-                    setDeleteModalBusy(false);
-                  }
-                }}
-                className="delete-btn"
-                disabled={deleteModalBusy}
-              >
-                {deleteModalBusy ? 'Clearing...' : 'Confirm Clear'}
-              </button>
+          <div className="modal-overlay" onClick={() => !deleteModalBusy && setShowDeleteModal(false)}>
+            <div className="symptom-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Clear records for {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
+                <button onClick={() => !deleteModalBusy && setShowDeleteModal(false)} className="close-btn" disabled={deleteModalBusy}>×</button>
+              </div>
+              <div className="modal-content">
+                <p>This will permanently delete all period tracking entries for this month. This action cannot be undone.</p>
+              </div>
+              <div className="modal-actions">
+                <button onClick={() => !deleteModalBusy && setShowDeleteModal(false)} className="cancel-btn" disabled={deleteModalBusy}>Cancel</button>
+                <button
+                  onClick={async () => {
+                    try {
+                      setDeleteModalBusy(true);
+                      await deleteCurrentMonthPeriods();
+                      setShowDeleteModal(false);
+                    } finally {
+                      setDeleteModalBusy(false);
+                    }
+                  }}
+                  className="delete-btn"
+                  disabled={deleteModalBusy}
+                >
+                  {deleteModalBusy ? 'Clearing...' : 'Confirm Clear'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )} */}
+        )} */}
 
       {/* Symptom Modal */}
       {showSymptomModal && (
@@ -942,43 +959,43 @@ function CycleTrackerPage({ hideTopToggle = false }) {
               <div className="period-section">
                 <h4>Period Status</h4>
                 <div className="period-options">
-              {/* Updated period status buttons to new design */}
-              <div className="period-btn-group">
-                {periodOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setPeriodStatus(option.id)}
-                    className={`period-btn-new ${periodStatus === option.id ? 'selected' : ''}`}
-                  >
-                    <span className={`period-icon-new ${option.id}`}>
-                      {option.icon}
-                    </span>
-                    <span className="period-name-new">{option.name}</span>
-                    {periodStatus === option.id && <div className="arrow-up"></div>}
-                  </button>
-                ))}
-              </div>
+                  {/* Updated period status buttons to new design */}
+                  <div className="period-btn-group">
+                    {periodOptions.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setPeriodStatus(option.id)}
+                        className={`period-btn-new ${periodStatus === option.id ? 'selected' : ''}`}
+                      >
+                        <span className={`period-icon-new ${option.id}`}>
+                          {option.icon}
+                        </span>
+                        <span className="period-name-new">{option.name}</span>
+                        {periodStatus === option.id && <div className="arrow-up"></div>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Flow Section - Only show if period is active */}
               {(periodStatus === 'start' || periodStatus === 'ongoing' || periodStatus === 'end') && (
                 <div className="flow-section">
-                <h4>Flow</h4>
-                <div className="flow-options">
-                  {flowLevels.map((level) => (
-                    <button
-                      key={level.id}
-                      onClick={() => setFlow(level.id)}
-                      className={`flow-btn ${flow === level.id ? 'selected' : ''}`}
-                      style={{ '--flow-color': level.color }}
-                    >
-                      <span className="flow-icon">{level.icon}</span>
-                      <span className="flow-name">{level.name}</span>
-                    </button>
-                  ))}
+                  <h4>Flow</h4>
+                  <div className="flow-options">
+                    {flowLevels.map((level) => (
+                      <button
+                        key={level.id}
+                        onClick={() => setFlow(level.id)}
+                        className={`flow-btn ${flow === level.id ? 'selected' : ''}`}
+                        style={{ '--flow-color': level.color }}
+                      >
+                        <span className="flow-icon">{level.icon}</span>
+                        <span className="flow-name">{level.name}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
               )}
 
               {/* Symptoms Section */}
@@ -1012,31 +1029,31 @@ function CycleTrackerPage({ hideTopToggle = false }) {
 
 
 
-          {/* Consumption marking section */}
-          {/* Removed consumption marking section as per user request */}
-          {/* <div className="consumption-section">
-            <h4>Mark Consumption</h4>
-            <div className="consumption-toggle">
-              <input
-                type="checkbox"
-                id="consumptionToggle"
-                checked={showConsumptionInput}
-                onChange={(e) => setShowConsumptionInput(e.target.checked)}
-              />
-              <label htmlFor="consumptionToggle">I consumed on this day</label>
-            </div>
-            {showConsumptionInput && (
-              <input
-                type="date"
-                className="consumption-date-input"
-                value={consumptionDate}
-                max={new Date().toISOString().split('T')[0]}
-                onChange={(e) => saveConsumptionDate(e.target.value)}
-              />
-            )}
-          </div> */}
+              {/* Consumption marking section */}
+              {/* Removed consumption marking section as per user request */}
+              {/* <div className="consumption-section">
+              <h4>Mark Consumption</h4>
+              <div className="consumption-toggle">
+                <input
+                  type="checkbox"
+                  id="consumptionToggle"
+                  checked={showConsumptionInput}
+                  onChange={(e) => setShowConsumptionInput(e.target.checked)}
+                />
+                <label htmlFor="consumptionToggle">I consumed on this day</label>
+              </div>
+              {showConsumptionInput && (
+                <input
+                  type="date"
+                  className="consumption-date-input"
+                  value={consumptionDate}
+                  max={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => saveConsumptionDate(e.target.value)}
+                />
+              )}
+            </div> */}
 
-            <div className="modal-actions">
+              <div className="modal-actions">
                 <button onClick={() => setShowSymptomModal(false)} className="cancel-btn">
                   Cancel
                 </button>
@@ -1055,7 +1072,6 @@ function CycleTrackerPage({ hideTopToggle = false }) {
         </div>
       )}
     </div>
-    </>
   );
 }
 

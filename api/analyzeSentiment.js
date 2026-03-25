@@ -20,6 +20,14 @@ export default async function handler(req, res) {
 
   if (!text) return res.status(400).json({ error: "No text provided" });
 
+  // Clean text of HTML tags and entities
+  const cleanInputs = text
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z0-9]+;/gi, " ")
+    .replace(/&#\d+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
   try {
    const hfRes = await fetch(
   "https://api-inference.huggingface.co/models/nlptown/bert-base-multilingual-uncased-sentiment",
@@ -29,7 +37,7 @@ export default async function handler(req, res) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.HUGGINGFACE_KEY}`,
     },
-    body: JSON.stringify({ inputs: text }),
+    body: JSON.stringify({ inputs: cleanInputs }),
   }
 );
 

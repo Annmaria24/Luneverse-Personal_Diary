@@ -902,3 +902,731 @@ Filtered Classifications: [
     "value": 0.1240913811007269
   }
 ]
+
+--- Prediction Debug ---
+Original: I am so happy today! Everything is going great.
+Processed: happi,go,great
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0000028874249919172713
+  },
+  {
+    "label": "Sad",
+    "value": 9.70602152326448e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 6.098629869398474e-7
+  },
+  {
+    "label": "Angry",
+    "value": 1.9696312828829397e-7
+  },
+  {
+    "label": "Calm",
+    "value": 1.866177335968097e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel really sad and lonely lately.
+Processed: realli,sad,lone,late
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 3.330803721560261e-8
+  },
+  {
+    "label": "Angry",
+    "value": 1.005884851161749e-9
+  },
+  {
+    "label": "Happy",
+    "value": 3.101941478138787e-10
+  },
+  {
+    "label": "Calm",
+    "value": 1.3701742554831845e-10
+  },
+  {
+    "label": "Stressed",
+    "value": 1.043533569151395e-10
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so angry at how things turned out!
+Processed: angri,thing,turn
+Filtered Classifications: [
+  {
+    "label": "Angry",
+    "value": 6.194347657762298e-7
+  },
+  {
+    "label": "Calm",
+    "value": 2.403410205413453e-7
+  },
+  {
+    "label": "Sad",
+    "value": 2.391338636166614e-7
+  },
+  {
+    "label": "Happy",
+    "value": 3.187417198869713e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 1.688013624565648e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel very calm and peaceful by the lake.
+Processed: calm,peaceful,lake
+Filtered Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.0006550740510957757
+  },
+  {
+    "label": "Happy",
+    "value": 0.000014725867458778075
+  },
+  {
+    "label": "Sad",
+    "value": 0.000002217849362562372
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000015115889747723355
+  },
+  {
+    "label": "Angry",
+    "value": 0.0000014986324978457156
+  }
+]
+
+--- Prediction Debug ---
+Original: The situation is very stressful and I feel overwhelmed.
+Processed: situat,stress,overwhelmed
+Filtered Classifications: [
+  {
+    "label": "Stressed",
+    "value": 6.441677799552135e-7
+  },
+  {
+    "label": "Sad",
+    "value": 1.406669785980359e-7
+  },
+  {
+    "label": "Angry",
+    "value": 4.85271475492898e-8
+  },
+  {
+    "label": "Calm",
+    "value": 1.4137707090667384e-8
+  },
+  {
+    "label": "Happy",
+    "value": 5.624853880358309e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so happy today! Everything is going great.
+Processed: happi,go,great
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0000028874249919172713
+  },
+  {
+    "label": "Sad",
+    "value": 9.70602152326448e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 6.098629869398474e-7
+  },
+  {
+    "label": "Angry",
+    "value": 1.9696312828829397e-7
+  },
+  {
+    "label": "Calm",
+    "value": 1.866177335968097e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel really sad and lonely lately.
+Processed: realli,sad,lone,late
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 3.330803721560261e-8
+  },
+  {
+    "label": "Angry",
+    "value": 1.005884851161749e-9
+  },
+  {
+    "label": "Happy",
+    "value": 3.101941478138787e-10
+  },
+  {
+    "label": "Calm",
+    "value": 1.3701742554831845e-10
+  },
+  {
+    "label": "Stressed",
+    "value": 1.043533569151395e-10
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so angry at how things turned out!
+Processed: angri,thing,turn
+Filtered Classifications: [
+  {
+    "label": "Angry",
+    "value": 6.194347657762298e-7
+  },
+  {
+    "label": "Calm",
+    "value": 2.403410205413453e-7
+  },
+  {
+    "label": "Sad",
+    "value": 2.391338636166614e-7
+  },
+  {
+    "label": "Happy",
+    "value": 3.187417198869713e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 1.688013624565648e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel very calm and peaceful by the lake.
+Processed: calm,peaceful,lake
+Filtered Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.0006550740510957757
+  },
+  {
+    "label": "Happy",
+    "value": 0.000014725867458778075
+  },
+  {
+    "label": "Sad",
+    "value": 0.000002217849362562372
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000015115889747723355
+  },
+  {
+    "label": "Angry",
+    "value": 0.0000014986324978457156
+  }
+]
+
+--- Prediction Debug ---
+Original: The situation is very stressful and I feel overwhelmed.
+Processed: situat,stress,overwhelmed
+Filtered Classifications: [
+  {
+    "label": "Stressed",
+    "value": 6.441677799552135e-7
+  },
+  {
+    "label": "Sad",
+    "value": 1.406669785980359e-7
+  },
+  {
+    "label": "Angry",
+    "value": 4.85271475492898e-8
+  },
+  {
+    "label": "Calm",
+    "value": 1.4137707090667384e-8
+  },
+  {
+    "label": "Happy",
+    "value": 5.624853880358309e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so happy today! Everything is going great.
+Processed: happi,go,great
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0000028874249919172713
+  },
+  {
+    "label": "Sad",
+    "value": 9.70602152326448e-7
+  },
+  {
+    "label": "Stressed",
+    "value": 6.098629869398474e-7
+  },
+  {
+    "label": "Angry",
+    "value": 1.9696312828829397e-7
+  },
+  {
+    "label": "Calm",
+    "value": 1.866177335968097e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel really sad and lonely lately.
+Processed: realli,sad,lone,late
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 3.330803721560261e-8
+  },
+  {
+    "label": "Angry",
+    "value": 1.005884851161749e-9
+  },
+  {
+    "label": "Happy",
+    "value": 3.101941478138787e-10
+  },
+  {
+    "label": "Calm",
+    "value": 1.3701742554831845e-10
+  },
+  {
+    "label": "Stressed",
+    "value": 1.043533569151395e-10
+  }
+]
+
+--- Prediction Debug ---
+Original: I am so angry at how things turned out!
+Processed: angri,thing,turn
+Filtered Classifications: [
+  {
+    "label": "Angry",
+    "value": 6.194347657762298e-7
+  },
+  {
+    "label": "Calm",
+    "value": 2.403410205413453e-7
+  },
+  {
+    "label": "Sad",
+    "value": 2.391338636166614e-7
+  },
+  {
+    "label": "Happy",
+    "value": 3.187417198869713e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 1.688013624565648e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: I feel very calm and peaceful by the lake.
+Processed: calm,peaceful,lake
+Filtered Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.0006550740510957757
+  },
+  {
+    "label": "Happy",
+    "value": 0.000014725867458778075
+  },
+  {
+    "label": "Sad",
+    "value": 0.000002217849362562372
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0000015115889747723355
+  },
+  {
+    "label": "Angry",
+    "value": 0.0000014986324978457156
+  }
+]
+
+--- Prediction Debug ---
+Original: The situation is very stressful and I feel overwhelmed.
+Processed: situat,stress,overwhelmed
+Filtered Classifications: [
+  {
+    "label": "Stressed",
+    "value": 6.441677799552135e-7
+  },
+  {
+    "label": "Sad",
+    "value": 1.406669785980359e-7
+  },
+  {
+    "label": "Angry",
+    "value": 4.85271475492898e-8
+  },
+  {
+    "label": "Calm",
+    "value": 1.4137707090667384e-8
+  },
+  {
+    "label": "Happy",
+    "value": 5.624853880358309e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: Feeling extremely happy today.
+Processed: extrem,happi
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.00004628129772758831
+  },
+  {
+    "label": "Sad",
+    "value": 0.00001497048319729601
+  },
+  {
+    "label": "Stressed",
+    "value": 0.00001058112282340635
+  },
+  {
+    "label": "Angry",
+    "value": 0.000004495897493537143
+  },
+  {
+    "label": "Calm",
+    "value": 0.0000019255557057489
+  }
+]
+
+--- Prediction Debug ---
+Original: Hi Diary,    Today I had an extremely difficult day. I have lost all hope and happiness of my life. I used to have good days, but all is lost now. There is absolutely nothing to look forward to in life.&nbsp;
+Processed: hi,diari,extrem,difficult,lost,hope,happi,life,us,good,dai,lost,absolut,noth,look,forward,life,nbsp
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 4.957925907331647e-29
+  },
+  {
+    "label": "Happy",
+    "value": 5.68300098388992e-30
+  },
+  {
+    "label": "Stressed",
+    "value": 7.18788055256621e-31
+  },
+  {
+    "label": "Angry",
+    "value": 1.3987151759811521e-31
+  },
+  {
+    "label": "Calm",
+    "value": 6.683486018957298e-34
+  }
+]
+
+--- Prediction Debug ---
+Original: Dear Diary, I'm extremely sad and overwhelmed today. Had a really bad day.
+Processed: dear,diari,extrem,sad,overwhelmed,realli,bad
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 9.442497396102007e-16
+  },
+  {
+    "label": "Stressed",
+    "value": 3.014926082243502e-16
+  },
+  {
+    "label": "Angry",
+    "value": 1.8768696931297853e-16
+  },
+  {
+    "label": "Calm",
+    "value": 5.42306088700976e-17
+  },
+  {
+    "label": "Happy",
+    "value": 3.557705898722035e-18
+  }
+]
+
+--- Prediction Debug ---
+Original: not feeling good.
+Processed: good
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0036716496197220032
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0026226068712300026
+  },
+  {
+    "label": "Angry",
+    "value": 0.002360346184107002
+  },
+  {
+    "label": "Sad",
+    "value": 0.0020980854969840017
+  },
+  {
+    "label": "Calm",
+    "value": 0.0013113034356150007
+  }
+]
+
+--- Prediction Debug ---
+Original: i am feeling anxious and scared
+Processed: anxiou,scare
+Filtered Classifications: [
+  {
+    "label": "Stressed",
+    "value": 0.0002237151682663058
+  },
+  {
+    "label": "Angry",
+    "value": 0.000005494985825434294
+  },
+  {
+    "label": "Sad",
+    "value": 0.000003326774043843556
+  },
+  {
+    "label": "Happy",
+    "value": 7.012317837513371e-7
+  },
+  {
+    "label": "Calm",
+    "value": 3.851111411497804e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: i am feeling anxious and scared
+Processed: anxiou,scare
+Filtered Classifications: [
+  {
+    "label": "Stressed",
+    "value": 0.0002237151682663058
+  },
+  {
+    "label": "Angry",
+    "value": 0.000005494985825434294
+  },
+  {
+    "label": "Sad",
+    "value": 0.000003326774043843556
+  },
+  {
+    "label": "Happy",
+    "value": 7.012317837513371e-7
+  },
+  {
+    "label": "Calm",
+    "value": 3.851111411497804e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: i was extremely sad today and i cried a lot
+Processed: extrem,sad,cri,lot
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 2.8133395719607235e-7
+  },
+  {
+    "label": "Happy",
+    "value": 1.3499649312859987e-7
+  },
+  {
+    "label": "Angry",
+    "value": 9.99088331897145e-8
+  },
+  {
+    "label": "Stressed",
+    "value": 3.4849313539419877e-8
+  },
+  {
+    "label": "Calm",
+    "value": 1.4137707090667384e-8
+  }
+]
+
+--- Prediction Debug ---
+Original: i feel terrible and deeply sad
+Processed: terribl,deepli,sad
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 1.6411147503104228e-7
+  },
+  {
+    "label": "Calm",
+    "value": 7.068853545333686e-8
+  },
+  {
+    "label": "Angry",
+    "value": 2.378781742612249e-8
+  },
+  {
+    "label": "Happy",
+    "value": 2.8124269401791595e-9
+  },
+  {
+    "label": "Stressed",
+    "value": 2.1780820962137415e-9
+  }
+]
+
+--- Prediction Debug ---
+Original: i am so happy and proud of myself today
+Processed: happi,proud
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.00009256259545517655
+  },
+  {
+    "label": "Sad",
+    "value": 0.00000998032213153068
+  },
+  {
+    "label": "Stressed",
+    "value": 0.000002645280705851587
+  },
+  {
+    "label": "Angry",
+    "value": 0.0000014986324978457156
+  },
+  {
+    "label": "Calm",
+    "value": 3.851111411497804e-7
+  }
+]
+
+--- Prediction Debug ---
+Original: Feeling extreme sadness with my life and everythinng around me just feels wrong.....
+Processed: extrem,sad,life,everythinng,around,feel,wrong
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 2.7914382927226648e-12
+  },
+  {
+    "label": "Angry",
+    "value": 5.406145609332653e-13
+  },
+  {
+    "label": "Happy",
+    "value": 4.098192578855871e-13
+  },
+  {
+    "label": "Calm",
+    "value": 3.726678140999586e-13
+  },
+  {
+    "label": "Stressed",
+    "value": 1.1012414216194693e-13
+  }
+]
+
+--- Prediction Debug ---
+Original: Feeling better now.
+Processed: better
+Filtered Classifications: [
+  {
+    "label": "Calm",
+    "value": 0.0034093889325990025
+  },
+  {
+    "label": "Happy",
+    "value": 0.002622606871230002
+  },
+  {
+    "label": "Sad",
+    "value": 0.0015735641227380014
+  },
+  {
+    "label": "Angry",
+    "value": 0.0013113034356150017
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0002622606871230002
+  }
+]
+
+--- Prediction Debug ---
+Original: Feeling loved and pleasant
+Processed: love,pleasant
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.00008765397296891718
+  },
+  {
+    "label": "Calm",
+    "value": 0.00002657266873933483
+  },
+  {
+    "label": "Sad",
+    "value": 0.00000887139745024949
+  },
+  {
+    "label": "Angry",
+    "value": 0.00000849225082112572
+  },
+  {
+    "label": "Stressed",
+    "value": 0.000003778972436930835
+  }
+]
+
+--- Prediction Debug ---
+Original: just existing
+Processed: exist
+Filtered Classifications: [
+  {
+    "label": "Happy",
+    "value": 0.0007867820613690007
+  },
+  {
+    "label": "Sad",
+    "value": 0.0005245213742460007
+  },
+  {
+    "label": "Calm",
+    "value": 0.00026226068712300037
+  },
+  {
+    "label": "Angry",
+    "value": 0.0002622606871230003
+  },
+  {
+    "label": "Stressed",
+    "value": 0.0002622606871230002
+  }
+]
