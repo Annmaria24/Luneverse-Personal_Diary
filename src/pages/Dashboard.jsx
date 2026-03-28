@@ -380,6 +380,7 @@ function Dashboard() {
           </div>
         </section>
 
+
         {/* Quick Stats */}
         <section className="stats-section">
           <div className="stats-grid">
@@ -515,12 +516,12 @@ function Dashboard() {
                   <h3>Wellness Insights</h3>
                 </div>
                 <p>Discover patterns in your wellness journey and get personalized insights.</p>
-                <button
-                  className="feature-button"
-                  onClick={() => navigate('/export')}
-                >
-                  View Insights
-                </button>
+                  <button
+                    className="feature-button"
+                    onClick={() => navigate('/insights')}
+                  >
+                    View Insights
+                  </button>
               </div>
             )}
 

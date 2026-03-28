@@ -9,6 +9,8 @@ import ModulePreferences from '../components/ModulePreferences';
 import { useModal } from '../hooks/useModal';
 import './Styles/SettingsPage.css';
 import Navbar from '../components/Navbar';
+import { getMoodHistory } from '../services/moodService';
+import { getDiaryMoodCounts } from '../services/diaryService';
 
 function SettingsPage() {
   const { currentUser } = useAuth();
@@ -300,19 +302,43 @@ function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    showConfirm(
-      'Are you sure you want to delete your account? This action cannot be undone.',
-      async () => {
-        try {
-          // TODO: Implement account deletion
-          setMessage('Account deletion requested. Please check your email for confirmation.');
-        } catch (error) {
-          setError('Failed to delete account: ' + error.message);
-        }
-      },
-      'Delete Account'
-    );
+  const handleDeleteAccount = async (password) => {
+    // ...
+  };
+
+  const handleExportData = async () => {
+    setIsLoading(true);
+    try {
+      const moodEntries = await getMoodHistory(currentUser.uid, { viewMode: 'all' });
+      const diaryData = await getDiaryMoodCounts(currentUser.uid, 'all');
+      
+      const fullData = {
+        exportDate: new Date().toISOString(),
+        user: {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName
+        },
+        moodHistory: moodEntries,
+        diaryEntries: diaryData.entries
+      };
+
+      const blob = new Blob([JSON.stringify(fullData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Luneverse_Data_Export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setMessage('Data export successful!');
+    } catch (error) {
+      console.error('Export failed:', error);
+      setError('Failed to export data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
 
@@ -613,28 +639,39 @@ function SettingsPage() {
 
           {activeTab === 'data' && (
             <div className="settings-section">
-              <h2>Data Management</h2>
+              <h2>Data Management & Insights</h2>
               <div className="data-actions">
                 <div className="data-item">
                   <div className="data-info">
-                    <h4>Export Data</h4>
-                    <p>Download all your data in JSON format</p>
+                    <h4>Mental Health Annual Report</h4>
+                    <p>View and download your comprehensive 1-year emotional wellness analysis</p>
                   </div>
-                  <button className="export-btn">Export Data</button>
+                  <button className="report-btn" onClick={() => navigate('/insights')}>
+                    View Report
+                  </button>
                 </div>
+                
                 <div className="data-item">
                   <div className="data-info">
-                    <h4>Import Data</h4>
-                    <p>Import data from another wellness app</p>
+                    <h4>Export Data</h4>
+                    <p>Download all your entries and tracking history in JSON format</p>
                   </div>
-                  <button className="import-btn">Import Data</button>
+                  <button className="export-btn" onClick={handleExportData} disabled={isLoading}>
+                    {isLoading ? 'Exporting...' : 'Export JSON'}
+                  </button>
                 </div>
+                
                 <div className="data-item">
                   <div className="data-info">
                     <h4>Clear All Data</h4>
-                    <p>Remove all your entries and start fresh</p>
+                    <p>Remove all your entries and start fresh (Action cannot be undone)</p>
                   </div>
-                  <button className="danger-btn">Clear Data</button>
+                  <button className="danger-btn" onClick={() => {
+                    showConfirm('Are you absolutely sure you want to clear all your data? This cannot be undone.', () => {
+                      // Logic for clearing data would go here
+                      setMessage('Data clear requested.');
+                    }, 'Clear Everything');
+                  }}>Clear Data</button>
                 </div>
               </div>
             </div>

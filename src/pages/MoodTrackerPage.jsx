@@ -4,13 +4,12 @@ import './Styles/MoodTrackerPage.css';
 import {
   addMoodEntry,
   getMoodHistory,
-  getMoodStats,
   updateMoodEntry,
   deleteMoodEntry,
-  hasTodayMoodEntry,
-  getAggregatedMoodCounts,
+  getUnifiedMoodStats, // Replaced getMoodStats, hasTodayMoodEntry, getAggregatedMoodCounts
   getEmotionalTrendData
 } from "../services/moodService";
+import { getDailySummaries } from "../services/wellnessService"; // New import
 import { generateEmotionalInsight } from "../services/aiMoodService";
 import MoodLineChart from '../components/charts/MoodLineChart';
 import Navbar from '../components/Navbar';
@@ -43,11 +42,14 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
   });
   const [aiInsight, setAiInsight] = useState('');
   const [aiInsightLoading, setAiInsightLoading] = useState(false);
+  const [historyViewMode, setHistoryViewMode] = useState('latest'); // 'latest' or 'date'
+  const [showHistoryCalendar, setShowHistoryCalendar] = useState(false);
+  const [selectedDateSummary, setSelectedDateSummary] = useState(null); // New state
 
   // Generate textual insight for mood distribution and emotional narrative
   const getMoodDistributionInsight = () => {
-    const { moodCounts, dominantMood, trendMessage, hasData } = aggregatedMoodData;
-    const total = aggregatedMoodData.totalEntries;
+    const { moodCounts, dominantMood, trendMessage } = aggregatedMoodData;
+    const total = aggregatedMoodData.totalEntries || 0;
 
     if (total === 0) return 'No emotional data available for this period.';
 
@@ -57,19 +59,19 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
     }
 
     // Fallback/detailed breakdown if trendMessage is somehow missing
-    const sortedMoods = Object.entries(moodCounts)
+    const sortedMoods = Object.entries(moodCounts || {})
       .filter(([mood, count]) => count > 0)
       .sort((a, b) => b[1] - a[1]);
 
-    const timePeriod = viewMode === 'today' ? 'today' : viewMode === 'week' ? 'week' : 'month';
-    let insight = `This ${timePeriod} your dominant mood was ${dominantMood}`;
+    const timePeriodLabel = viewMode === 'today' ? 'today' : viewMode === 'week' ? 'week' : 'month';
+    let summaryText = `This ${timePeriodLabel} your dominant mood was ${dominantMood || 'Neutral'}`;
 
     if (sortedMoods.length > 1) {
-      const secondMood = sortedMoods[1][0];
-      insight += ` with some periods of ${secondMood.toLowerCase()}`;
+      const secondMoodKey = sortedMoods[1][0];
+      summaryText += ` with some periods of ${secondMoodKey.toLowerCase()}`;
     }
 
-    return insight + '.';
+    return summaryText + '.';
   };
 
   // Generate compact statistical summary for small datasets
@@ -217,21 +219,19 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
         allHistory = history;
       }
 
-      // Load statistics
-      const moodStats = await getMoodStats(currentUser.uid, viewMode, selectedDate);
-      setStats(moodStats);
-
-      // Load aggregated mood counts (combining moodEntries + diaryEntries with finalMood)
-      const aggregatedData = await getAggregatedMoodCounts(currentUser.uid, viewMode, selectedDate);
-      setAggregatedMoodData(aggregatedData);
+      // Load unified stats (replaces getMoodStats, hasTodayMoodEntry, getAggregatedMoodCounts)
+      const unifiedStats = await getUnifiedMoodStats(currentUser.uid, viewMode, selectedDate);
+      setStats(unifiedStats.moodStats);
+      setAggregatedMoodData(unifiedStats.aggregatedMoodData);
+      setHasEntryToday(unifiedStats.hasTodayEntry);
 
       // Load emotional trend data for time-series line graph
       const trendData = await getEmotionalTrendData(currentUser.uid, viewMode, selectedDate);
       setEmotionalTrendData(trendData);
 
       // Check if user has entry for today
-      const todayEntry = await hasTodayMoodEntry(currentUser.uid);
-      setHasEntryToday(todayEntry);
+      // const todayEntry = await hasTodayMoodEntry(currentUser.uid); // Replaced by unifiedStats
+      // setHasEntryToday(todayEntry); // Replaced by unifiedStats
 
       // Calculate streak using ALL history, not just current view
       console.log('🔍 Streak Debug Info:', {
@@ -258,6 +258,51 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleHistoryDateSelect = async (date) => {
+    setSelectedDate(date);
+    setHistoryViewMode('date');
+    setShowHistoryCalendar(false);
+
+    // Fetch specifically for this date
+    try {
+      setLoading(true);
+      const history = await getMoodHistory(currentUser.uid, {
+        viewMode: 'today', // Fetch only for the selected day
+        selectedDate: date
+      });
+      setMoodHistory(history);
+
+      // Fetch daily summary for this specific date
+      const dateStr = date.toISOString().split('T')[0];
+      const summaries = await getDailySummaries(currentUser.uid, 365); // Get all then filter for simplicity or match exactly
+      const summary = summaries.find(s => s.date === dateStr);
+      setSelectedDateSummary(summary);
+
+      // Also load unified stats for this specific date
+      const unifiedStats = await getUnifiedMoodStats(currentUser.uid, 'today', date);
+      setStats(unifiedStats.moodStats);
+      setAggregatedMoodData(unifiedStats.aggregatedMoodData);
+      setHasEntryToday(unifiedStats.hasTodayEntry);
+
+      // Load emotional trend data for this specific date (will be a single point)
+      const trendData = await getEmotionalTrendData(currentUser.uid, 'today', date);
+      setEmotionalTrendData(trendData);
+
+    } catch (err) {
+      console.error('Error fetching history for date:', err);
+      setError('Failed to load history for selected date.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackToLatestHistory = async () => {
+    setHistoryViewMode('latest');
+    setSelectedDateSummary(null); // Clear summary when going back to latest
+    setSelectedDate(new Date()); // Reset selectedDate to today
+    await loadMoodData(); // Reload data for the 'latest' view
   };
 
   const handleMoodSelect = (mood) => {
@@ -630,6 +675,31 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
           </div>
         )}
 
+        {/* Calendar Picker for History */}
+        {showHistoryCalendar && (
+          <div className="calendar-modal" onClick={(e) => e.target.className === 'calendar-modal' && setShowHistoryCalendar(false)}>
+            <div className="calendar-content">
+              <div className="calendar-header">
+                <h3>Select Date</h3>
+                <button onClick={() => setShowHistoryCalendar(false)} className="close-calendar">✕</button>
+              </div>
+              <div className="calendar-body">
+                <input 
+                  type="date" 
+                  className="date-picker-large"
+                  value={selectedDate.toISOString().split('T')[0]}
+                  max={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => handleHistoryDateSelect(new Date(e.target.value))}
+                />
+                <div className="quick-dates">
+                  <button onClick={() => handleHistoryDateSelect(new Date())}>Today</button>
+                  <button onClick={() => handleHistoryDateSelect(new Date(Date.now() - 86400000))}>Yesterday</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* Stats Cards */}
         <div className="stats-grid">
@@ -726,49 +796,84 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
           )}
         </div>
 
-        {/* Mood History */}
+        {/* Mood History Section */}
         <div className="mood-history-section">
-          <h2>Mood History</h2>
+          <div className="mood-history-header">
+            <div className="history-title-group">
+              <h2>Mood History</h2>
+              <span className="history-subtitle">
+                {historyViewMode === 'latest' ? 'Showing most recent entries' : `Showing entries for ${selectedDate.toLocaleDateString()}`}
+              </span>
+            </div>
+            <div className="history-actions">
+              {historyViewMode === 'date' && (
+                <button onClick={handleBackToLatestHistory} className="history-back-btn">
+                  Back to Latest
+                </button>
+              )}
+              <button 
+                onClick={() => setShowHistoryCalendar(true)} 
+                className="history-calendar-btn"
+                title="Filter by date"
+              >
+                📅 Pick Date
+              </button>
+            </div>
+          </div>
+
+          {selectedDateSummary && (
+            <div className="daily-summary-dashboard-box">
+              <div className="summary-stat-item">
+                <span className="summary-label">Average Score</span>
+                <span className="summary-value">{selectedDateSummary.averageMoodScore}/5.0</span>
+              </div>
+              <div className="summary-stat-item">
+                <span className="summary-label">Dominant Mood</span>
+                <span className="summary-value" style={{ color: moodColors[selectedDateSummary.dominantMood] || 'var(--primary-purple)' }}>
+                  {selectedDateSummary.dominantMood}
+                </span>
+              </div>
+              <div className="summary-stat-item">
+                <span className="summary-label">Total Entries</span>
+                <span className="summary-value">{selectedDateSummary.entryCount}</span>
+              </div>
+            </div>
+          )}
+
           {moodHistory.length === 0 ? (
             <div className="no-history">
               <div className="no-history-icon">📊</div>
-              <p>No mood entries yet.</p>
-              <p>Start tracking to see your patterns!</p>
+              <p>No mood entries found {historyViewMode === 'date' ? 'for this date' : 'yet'}.</p>
+              <button onClick={handleBackToLatestHistory} className="show-latest-btn">View Latest Entries</button>
             </div>
           ) : (
-            <div className="history-list">
+            <div className="mood-aesthetic-list">
               {moodHistory.map((entry) => (
-                <div key={entry.id} className="history-item">
-                  <div className="history-mood">
-                    <span className="history-emoji">{entry.mood}</span>
-                    <div className="history-details">
-                      <h4>{entry.moodName}</h4>
-                      <p className="history-date">
-                        {entry.timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at{' '}
-                        {entry.timestamp.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
-                    </div>
+                <div key={entry.id} className="mood-preview-card">
+                  <div className="mood-preview-left">
+                    <span className="mood-bubble" style={{ backgroundColor: `${moodColors[entry.finalMood || entry.moodName] || '#7133d6'}15` }}>
+                      {entry.mood}
+                    </span>
                   </div>
-                  {entry.note && (
-                    <div className="history-note">
-                      <p>"{entry.note}"</p>
+                  <div className="mood-preview-body">
+                    <div className="mood-preview-title">
+                      <span className="mood-name-chip">{entry.moodName}</span>
+                      <span className="mood-time-label">
+                        {entry.timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                  )}
-                  <div className="history-actions">
-                    <button
-                      className="edit-history-btn"
-                      onClick={() => handleEditEntry(entry)}
-                    >
-                      Edit
+                    {entry.note ? (
+                      <p className="mood-preview-note">"{entry.note}"</p>
+                    ) : (
+                      <p className="mood-preview-placeholder">No notes recorded</p>
+                    )}
+                  </div>
+                  <div className="mood-preview-actions">
+                    <button className="preview-action-btn edit" onClick={() => handleEditEntry(entry)} title="Edit">
+                      ✏️
                     </button>
-                    <button
-                      className="delete-history-btn"
-                      onClick={() => handleDeleteEntry(entry.id)}
-                    >
-                      Delete
+                    <button className="preview-action-btn delete" onClick={() => handleDeleteEntry(entry.id)} title="Delete">
+                      🗑️
                     </button>
                   </div>
                 </div>

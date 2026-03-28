@@ -92,13 +92,13 @@ const ProfileDropdown = () => {
           <div className="dropdown-divider"></div>
           <button
             onClick={() => {
-              navigate('/export');
+              navigate('/insights');
               setIsDropdownOpen(false);
             }}
             className="dropdown-item"
           >
-            <span className="dropdown-icon">⬇️</span>
-            Export Data
+            <span className="dropdown-icon">📈</span>
+            Insights & Reports
           </button>
           <div className="dropdown-divider"></div>
           <button

@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { getCycleEntriesCountForMonth, getCycleStats } from '../services/cycleService';
 import { getPregnancyEntriesCountForMonth, getPregnancyStats } from '../services/pregnancyService';
 import Navbar from '../components/Navbar';
+import MoodLineChart from '../components/charts/MoodLineChart';
+import { generateYearlyReport } from '../services/wellnessService';
 import './Styles/InsightsPage.css';
 
 function InsightsPage() {
@@ -17,7 +19,9 @@ function InsightsPage() {
     cycle: { entries: [], count: 0, stats: {} },
     pregnancy: { entries: [], count: 0, stats: {} }
   });
-  
+  const [yearlyReport, setYearlyReport] = useState(null);
+  const [yearlyLoading, setYearlyLoading] = useState(false);
+
   const { currentDate, currentMonth, currentYear } = useMemo(() => {
     const date = new Date();
     return {
@@ -31,7 +35,7 @@ function InsightsPage() {
     const fetchInsightsData = async () => {
       try {
         setLoading(true);
-        
+
         console.log('Current date:', currentDate);
         console.log('Current month (1-indexed):', currentMonth);
         console.log('Current year:', currentYear);
@@ -49,30 +53,30 @@ function InsightsPage() {
             // Use a simple query without ordering to avoid index issues
             const { collection, query, where, getDocs } = await import('firebase/firestore');
             const { db } = await import('../firebase/config');
-            
+
             const journalRef = collection(db, "diaryEntries");
             const q = query(journalRef, where("userId", "==", currentUser.uid));
             const snapshot = await getDocs(q);
-            
+
             const journalEntries = snapshot.docs.map(doc => ({
               id: doc.id,
               ...doc.data(),
               timestamp: doc.data().timestamp?.toDate ? doc.data().timestamp.toDate() : new Date(doc.data().timestamp)
             }));
-            
+
             // Manual calculation for this month's data
             const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
             const currentMonthEnd = new Date(currentYear, currentMonth, 0);
-            
+
             const journalCount = journalEntries.filter(entry => {
               const entryDate = new Date(entry.timestamp || entry.date);
               return entryDate >= currentMonthStart && entryDate <= currentMonthEnd;
             }).length;
-            
+
             console.log('Journal entries fetched:', journalEntries.length);
             console.log('Journal count for this month:', journalCount);
             console.log('Month range:', currentMonthStart, 'to', currentMonthEnd);
-            
+
             data.journal = { entries: journalEntries, count: journalCount };
           } catch (error) {
             console.error('Error fetching journal data:', error);
@@ -85,38 +89,38 @@ function InsightsPage() {
             // Use a simple query without ordering to avoid index issues
             const { collection, query, where, getDocs } = await import('firebase/firestore');
             const { db } = await import('../firebase/config');
-            
+
             const moodRef = collection(db, "moodEntries");
             const q = query(moodRef, where("userId", "==", currentUser.uid));
             const snapshot = await getDocs(q);
-            
+
             const moodEntries = snapshot.docs.map(doc => ({
               id: doc.id,
               ...doc.data(),
               timestamp: doc.data().timestamp?.toDate ? doc.data().timestamp.toDate() : new Date(doc.data().timestamp)
             }));
-            
+
             // Manual calculation for this month's data
             const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
             const currentMonthEnd = new Date(currentYear, currentMonth, 0);
-            
+
             const moodCount = moodEntries.filter(entry => {
               const entryDate = new Date(entry.timestamp || entry.date);
               return entryDate >= currentMonthStart && entryDate <= currentMonthEnd;
             }).length;
-            
-            const averageMood = moodEntries.length > 0 
-              ? moodEntries.reduce((sum, entry) => sum + (entry.value || 0), 0) / moodEntries.length 
+
+            const averageMood = moodEntries.length > 0
+              ? moodEntries.reduce((sum, entry) => sum + (entry.value || 0), 0) / moodEntries.length
               : 0;
-            
+
             console.log('Mood entries fetched:', moodEntries.length);
             console.log('Mood count for this month:', moodCount);
             console.log('Average mood:', averageMood);
-            
-            data.mood = { 
-              entries: moodEntries, 
-              count: moodCount, 
-              averageMood: averageMood 
+
+            data.mood = {
+              entries: moodEntries,
+              count: moodCount,
+              averageMood: averageMood
             };
           } catch (error) {
             console.error('Error fetching mood data:', error);
@@ -155,14 +159,29 @@ function InsightsPage() {
     };
 
     fetchInsightsData();
+
+    // Fetch yearly report
+    const fetchYearlyReport = async () => {
+      if (!currentUser) return;
+      try {
+        setYearlyLoading(true);
+        const report = await generateYearlyReport(currentUser.uid);
+        setYearlyReport(report);
+      } catch (error) {
+        console.error("Error fetching yearly report:", error);
+      } finally {
+        setYearlyLoading(false);
+      }
+    };
+    fetchYearlyReport();
   }, [currentUser, modulePreferences, currentDate, currentMonth, currentYear]);
 
   const getMoodInsight = () => {
     const avgMood = insightsData.mood.averageMood;
     const entryCount = insightsData.mood.entries.length;
-    
+
     if (entryCount < 2) return 'Start tracking to see patterns';
-    
+
     // Analyze mood level and provide meaningful insights
     if (avgMood >= 4.0) {
       return '🌟 Maintaining positive mood';
@@ -177,35 +196,35 @@ function InsightsPage() {
 
   const getMoodTrend = () => {
     if (insightsData.mood.entries.length < 2) return 'Need more data';
-    
+
     // Sort entries by timestamp to ensure proper chronological order
     const sortedEntries = [...insightsData.mood.entries].sort((a, b) => {
       const dateA = new Date(a.timestamp || a.date);
       const dateB = new Date(b.timestamp || b.date);
       return dateA - dateB;
     });
-    
+
     // For monthly view, use all entries from this month
     const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
     const currentMonthEnd = new Date(currentYear, currentMonth, 0);
-    
+
     const thisMonthEntries = sortedEntries.filter(entry => {
       const entryDate = new Date(entry.timestamp || entry.date);
       return entryDate >= currentMonthStart && entryDate <= currentMonthEnd;
     });
-    
+
     if (thisMonthEntries.length < 2) return 'Need more data';
-    
+
     // Calculate trend based on first half vs second half of the month
     const midPoint = Math.floor(thisMonthEntries.length / 2);
     const firstHalf = thisMonthEntries.slice(0, midPoint);
     const secondHalf = thisMonthEntries.slice(midPoint);
-    
+
     if (firstHalf.length === 0 || secondHalf.length === 0) return 'Need more data';
-    
+
     const firstHalfAvg = firstHalf.reduce((sum, entry) => sum + (entry.value || 0), 0) / firstHalf.length;
     const secondHalfAvg = secondHalf.reduce((sum, entry) => sum + (entry.value || 0), 0) / secondHalf.length;
-    
+
     if (secondHalfAvg > firstHalfAvg + 0.3) return '📈 Improving';
     if (secondHalfAvg < firstHalfAvg - 0.3) return '📉 Declining';
     return '📊 Consistent';
@@ -214,14 +233,14 @@ function InsightsPage() {
   const getJournalInsight = () => {
     const entries = insightsData.journal.entries;
     if (entries.length === 0) return 'Start journaling to see insights';
-    
+
     const thisWeek = entries.filter(entry => {
       const entryDate = new Date(entry.date);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return entryDate >= weekAgo;
     }).length;
-    
+
     if (thisWeek >= 5) return '🌟 Excellent consistency!';
     if (thisWeek >= 3) return '✨ Good progress';
     return '💭 Keep writing regularly';
@@ -231,18 +250,18 @@ function InsightsPage() {
     let emotionalScore = 0;
     let maxScore = 0;
     let insights = [];
-    
+
     // Journal emotional engagement (0-40 points)
     if (modulePreferences.journal) {
       maxScore += 40;
       const journalCount = insightsData.journal.count;
       const totalEntries = insightsData.journal.entries.length;
-      
+
       if (journalCount > 0) {
         // Base score for writing regularly this month
         const writingScore = Math.min(20, (journalCount / 15) * 20);
         emotionalScore += writingScore;
-        
+
         // Bonus for consistent writing (emotional processing)
         if (journalCount >= 10) {
           emotionalScore += 20;
@@ -257,18 +276,18 @@ function InsightsPage() {
         insights.push("Previous journaling experience");
       }
     }
-    
+
     // Mood awareness and tracking (0-35 points)
     if (modulePreferences.moodTracker) {
       maxScore += 35;
       const moodCount = insightsData.mood.count;
       const moodEntries = insightsData.mood.entries;
-      
+
       if (moodCount > 0) {
         // Base score for mood awareness this month
         const awarenessScore = Math.min(20, (moodCount / 15) * 20);
         emotionalScore += awarenessScore;
-        
+
         // Bonus for positive mood trends
         if (moodCount >= 7) {
           const avgMood = insightsData.mood.averageMood;
@@ -289,7 +308,7 @@ function InsightsPage() {
         insights.push("Previous mood tracking experience");
       }
     }
-    
+
     // Relaxation and self-care (0-25 points)
     if (modulePreferences.relaxMode) {
       maxScore += 25;
@@ -298,18 +317,18 @@ function InsightsPage() {
       emotionalScore += 15;
       insights.push("Engaging in relaxation practices");
     }
-    
-    if (maxScore === 0) return { 
-      score: 0, 
-      percentage: 0, 
-      level: 'Starting Your Journey', 
+
+    if (maxScore === 0) return {
+      score: 0,
+      percentage: 0,
+      level: 'Starting Your Journey',
       description: 'Begin tracking your emotional wellness',
       insights: []
     };
-    
+
     const percentage = Math.round((emotionalScore / maxScore) * 100);
     let level, description;
-    
+
     if (percentage >= 80) {
       level = 'Thriving Well-being';
       description = 'Excellent emotional awareness and self-care';
@@ -326,12 +345,12 @@ function InsightsPage() {
       level = 'Starting Your Journey';
       description = 'Taking the first steps in emotional wellness';
     }
-    
-    return { 
-      score: Math.round(emotionalScore), 
-      maxScore, 
-      percentage, 
-      level, 
+
+    return {
+      score: Math.round(emotionalScore),
+      maxScore,
+      percentage,
+      level,
       description,
       insights: insights.slice(0, 3) // Show top 3 insights
     };
@@ -354,7 +373,7 @@ function InsightsPage() {
   return (
     <div className="insights-page">
       <Navbar />
-      
+
       <main className="insights-main">
         <div className="insights-header">
           <h1>Wellness Insights</h1>
@@ -494,7 +513,7 @@ function InsightsPage() {
               </div>
               <div className="insight-content">
                 <p>Enable tracking modules in Settings to see your wellness insights and data.</p>
-                <button 
+                <button
                   className="feature-button"
                   onClick={() => navigate('/settings?tab=modules')}
                 >
@@ -505,6 +524,65 @@ function InsightsPage() {
           )}
         </div>
 
+
+        {/* Yearly Mental Health Report */}
+        <section className="yearly-report-section">
+          <div className="yearly-report-card">
+            <div className="report-header">
+              <h2>1-Year Mental Health Report</h2>
+              <button
+                className="download-report-btn"
+                onClick={() => window.print()}
+                title="Save as PDF"
+              >
+                📥 Download Data
+              </button>
+            </div>
+
+            {yearlyLoading ? (
+              <div className="report-loading">Generating your annual analysis...</div>
+            ) : yearlyReport ? (
+              <div className="report-content">
+                <div className="report-summary-grid">
+                  <div className="report-stat-box">
+                    <span className="stat-label">Yearly Average</span>
+                    <span className="stat-value">{yearlyReport.yearlyAverage}/5.0</span>
+                  </div>
+                  <div className="report-stat-box">
+                    <span className="stat-label">Trend</span>
+                    <span className="stat-value" style={{ textTransform: 'capitalize' }}>
+                      {yearlyReport.trendDirection === 'improving' ? '📈 ' : yearlyReport.trendDirection === 'declining' ? '📉 ' : '📊 '}
+                      {yearlyReport.trendDirection}
+                    </span>
+                  </div>
+                  <div className="report-stat-box">
+                    <span className="stat-label">Stability</span>
+                    <span className="stat-value" style={{ textTransform: 'capitalize' }}>{yearlyReport.moodStability}</span>
+                  </div>
+                </div>
+
+                <div className="report-insight-text">
+                  <p>"{yearlyReport.insightSummary}"</p>
+                </div>
+
+                <div className="report-chart-container">
+                  <h3>Emotional Progression (Last 365 Days)</h3>
+                  <div className="chart-wrapper">
+                    <MoodLineChart
+                      dataPoints={yearlyReport.data.map(d => ({ x: d.date, y: d.score }))}
+                      size={350}
+                    />
+                  </div>
+                  <p className="chart-disclaimer">Chart shows daily emotional averages. Smooth curves indicate stable periods.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="no-report-data">
+                <p>Not enough data yet to generate a full annual report. Keep tracking your mood and journaling to see long-term patterns.</p>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* Future AI/ML Section Placeholder */}
         <section className="future-insights-section">

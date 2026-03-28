@@ -14,6 +14,7 @@ import {
   Timestamp
 } from "firebase/firestore";
 import { getErrorMessage } from "../utils/errorMessages";
+import { updateDailySummary } from "./wellnessService";
 
 const moodRef = collection(db, "moodEntries");
 
@@ -53,6 +54,11 @@ export const addMoodEntry = async (userId, moodData) => {
     });
 
     console.log("✅ [Interpretation Pipeline] Entry stored with ID:", docRef.id);
+    
+    // Aggregate for daily summary
+    const entryDate = date || new Date().toISOString().split("T")[0];
+    await updateDailySummary(userId, entryDate);
+    
     window.dispatchEvent(new Event('dashboardDataUpdated'));
 
     return docRef;
@@ -150,10 +156,17 @@ export const getMoodHistory = async (userId, options = {}) => {
 export const updateMoodEntry = async (entryId, updateData) => {
   try {
     const entryRef = doc(db, "moodEntries", entryId);
+    const entryDoc = await getDoc(entryRef);
+    const entryDate = entryDoc.data()?.date;
+
     await updateDoc(entryRef, {
       ...updateData,
       updatedAt: Timestamp.now()
     });
+
+    if (entryDate) {
+      await updateDailySummary(entryDoc.data().userId, entryDate);
+    }
 
     // Trigger dashboard update
     window.dispatchEvent(new Event('dashboardDataUpdated'));
@@ -167,7 +180,12 @@ export const updateMoodEntry = async (entryId, updateData) => {
 export const deleteMoodEntry = async (entryId) => {
   try {
     const entryRef = doc(db, "moodEntries", entryId);
-    await deleteDoc(entryRef);
+    const entryDoc = await getDoc(entryRef);
+    if (entryDoc.exists()) {
+      const { userId, date } = entryDoc.data();
+      await deleteDoc(entryRef);
+      if (date) await updateDailySummary(userId, date);
+    }
 
     // Trigger dashboard update
     window.dispatchEvent(new Event('dashboardDataUpdated'));
@@ -555,7 +573,7 @@ export const getAggregatedMoodCounts = async (userId, viewMode = 'month', select
     const scoreDiff = lastPoint.y - firstPoint.y;
 
     if (trendData.rawPoints.length < 2) {
-      trendMessage = `Your mood remained fairly consistent during this period.`;
+      trendMessage = `Your current emotional state reflects how you're feeling right now.`;
     } else if (Math.abs(scoreDiff) < 0.5) {
       trendMessage = `Your mood remained fairly consistent throughout the ${viewMode === 'today' ? 'day' : 'period'}.`;
     } else if (scoreDiff > 0.5) {
@@ -595,16 +613,13 @@ export const getAggregatedMoodCounts = async (userId, viewMode = 'month', select
 export const getUnifiedMoodStats = async (userId, viewMode = 'month', selectedDate = new Date()) => {
   try {
     const trendData = await getEmotionalTrendData(userId, viewMode, selectedDate);
+    const hasTodayEntry = await hasTodayMoodEntry(userId);
     
     if (trendData.rawPoints.length === 0) {
       return {
-        averageMood: 0,
-        totalEntries: 0,
-        mostCommonMood: "Neutral",
-        moodDistribution: {},
-        firstMood: "Neutral",
-        lastMood: "Neutral",
-        trendMessage: "No data available."
+        moodStats: { averageMood: 0, totalEntries: 0, mostCommonMood: "Neutral", moodDistribution: {} },
+        aggregatedMoodData: { moodCounts: { Happy: 0, Sad: 0, Angry: 0, Stressed: 0, Calm: 0, Neutral: 0 }, totalEntries: 0, dominantMood: "Neutral", trendMessage: "No data available." },
+        hasTodayEntry
       };
     }
 
@@ -623,17 +638,25 @@ export const getUnifiedMoodStats = async (userId, viewMode = 'month', selectedDa
     });
 
     return {
-      averageMood: parseFloat(averageScore.toFixed(1)), // 0-5 scale
-      totalEntries: trendData.totalEntries,
-      mostCommonMood: aggregated.dominantMood,
-      moodDistribution,
-      firstMood: aggregated.firstMood,
-      lastMood: aggregated.lastMood,
-      trendMessage: aggregated.trendMessage
+      moodStats: {
+        averageMood: parseFloat(averageScore.toFixed(1)), // 0-5 scale
+        totalEntries: trendData.totalEntries,
+        mostCommonMood: aggregated.dominantMood,
+        moodDistribution
+      },
+      aggregatedMoodData: {
+        ...aggregated,
+        hasData: trendData.rawPoints.length > 0
+      },
+      hasTodayEntry
     };
   } catch (error) {
     console.error("Error in getUnifiedMoodStats:", error);
-    return { averageMood: 0, totalEntries: 0, mostCommonMood: "Neutral", moodDistribution: {} };
+    return { 
+      moodStats: { averageMood: 0, totalEntries: 0, mostCommonMood: "Neutral", moodDistribution: {} },
+      aggregatedMoodData: { moodCounts: { Happy: 0, Sad: 0, Angry: 0, Stressed: 0, Calm: 0, Neutral: 0 }, totalEntries: 0, dominantMood: "Neutral" },
+      hasTodayEntry: false
+    };
   }
 };
 

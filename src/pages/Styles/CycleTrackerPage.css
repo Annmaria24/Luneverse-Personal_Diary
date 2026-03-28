@@ -127,7 +127,7 @@
   background: transparent;
   font-family: var(--font-primary);
   position: relative;
-  padding-top: var(--navbar-height);
+  padding-top: 0;
 }
 
 /* Background Elements */

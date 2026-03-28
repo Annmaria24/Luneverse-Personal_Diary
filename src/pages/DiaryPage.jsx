@@ -7,6 +7,7 @@ import ProfileDropdown from '../components/ProfileDropdown';
 import RichTextEditor from '../components/RichTextEditor';
 import FullScreenEditor from '../components/FullScreenEditor';
 import CustomModal from '../components/CustomModal';
+import DiaryBookModal from '../components/DiaryBookModal';
 import { useCustomModal } from '../hooks/useCustomModal';
 import Navbar from '../components/Navbar';
 
@@ -29,21 +30,47 @@ function DiaryPage({ includeNavbar = true }) {
   const [fullScreenContent, setFullScreenContent] = useState('');
   const [fullScreenMood, setFullScreenMood] = useState('');
   const [expandedEntries, setExpandedEntries] = useState(new Set());
+  const [currentPage, setCurrentPage] = useState(0); // book page index
+  const [showBookModal, setShowBookModal]   = useState(false);
+  const [bookStartPage, setBookStartPage]   = useState(0);
+  const [bookEntries, setBookEntries]       = useState([]);
+
+  const openBook = async (startIndex = 0) => {
+    // Open the modal immediately with current view's entries as a fallback layout
+    setBookEntries(entries);
+    setBookStartPage(startIndex);
+    setShowBookModal(true);
+    
+    // Always fetch ALL entries in the background so the book has no limit to its pages,
+    // allowing the user to turn back through all time regardless of the current list filter.
+    if (auth.currentUser) {
+      try {
+        const allEntries = await getDiaryEntries(auth.currentUser.uid);
+        // We always want to sync if the full list is different
+        if (allEntries.length > 0 && allEntries.length !== entries.length) {
+          const clickedId = entries[startIndex]?.id;
+          const newIndex = allEntries.findIndex(e => e.id === clickedId);
+          setBookEntries(allEntries);
+          if (newIndex !== -1) setBookStartPage(newIndex);
+        }
+      } catch (err) {
+        console.error("Failed to load full diary for book viewer:", err);
+      }
+    }
+  };
 
   const { modalState, showConfirm, showError } = useCustomModal();
 
   const loadLatestEntries = async () => {
     const user = auth.currentUser;
     if (!user) return;
-
     setLoading(true);
     setError(null);
     setIsSearching(false);
-
     try {
       const fetchedLatestEntries = await getLatestDiaryEntries(user.uid, 5);
       setEntries(fetchedLatestEntries);
-      console.log(`Loaded ${fetchedLatestEntries.length} latest entries`);
+      setCurrentPage(0);
     } catch (error) {
       console.error("Error loading latest entries:", error);
       setError("Failed to load latest diary entries. Please try again.");
@@ -56,16 +83,14 @@ function DiaryPage({ includeNavbar = true }) {
   const loadEntriesForDate = async (date) => {
     const user = auth.currentUser;
     if (!user) return;
-
     setLoading(true);
     setError(null);
     setIsSearching(false);
-
     try {
       const dateString = date.toDateString();
       const fetchedEntries = await getDiaryEntries(user.uid, dateString);
       setEntries(fetchedEntries);
-      console.log(`Loaded ${fetchedEntries.length} entries for ${dateString}`);
+      setCurrentPage(0);
     } catch (error) {
       console.error("Error loading entries:", error);
       setError("Failed to load diary entries. Please try again.");
@@ -212,6 +237,7 @@ function DiaryPage({ includeNavbar = true }) {
     }
 
     setSelectedDate(date);
+    setViewMode('date');
     setShowCalendar(false);
     await loadEntriesForDate(date);
   };
@@ -460,7 +486,7 @@ function DiaryPage({ includeNavbar = true }) {
             </div>
           </div>
 
-          {/* Entries */}
+          {/* Book-style Entry Viewer */}
           <div className="entries-section">
             <div className="entries-header">
               <h3>
@@ -489,6 +515,7 @@ function DiaryPage({ includeNavbar = true }) {
                 )}
               </div>
             </div>
+
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner">⏳</div>
@@ -515,89 +542,62 @@ function DiaryPage({ includeNavbar = true }) {
                 )}
               </div>
             ) : (
-              <div className="entries-list">
-                {entries.map((entry) => (
-                  <div key={entry.id} className="entry-card">
-                    <div className="entry-meta">
-                      <span className="entry-mood">{entry.mood}</span>
-                      <div className="entry-datetime">
-                        {viewMode === 'latest' && (
-                          <span className="entry-date">
-                            {entry.date || new Date(entry.timestamp?.toDate ? entry.timestamp.toDate() : entry.timestamp).toDateString()}
-                          </span>
-                        )}
-                        <span className="entry-time">
-                          {entry.timestamp?.toDate ?
-                            entry.timestamp.toDate().toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            }) :
-                            new Date(entry.timestamp).toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
-                          }
-                        </span>
-                      </div>
-                    </div>
-                    <div className="entry-content">
-                      <div className="entry-header-info">
-                        <h3
-                          className="entry-title"
-                          onClick={() => toggleEntryExpansion(entry.id)}
-                          title={expandedEntries.has(entry.id) ? "Show less" : "Show more"}
-                        >
-                          {generateEntryTitle(entry.content)}
-                        </h3>
-                        <button
-                          className="expand-toggle-btn"
-                          onClick={() => toggleEntryExpansion(entry.id)}
-                          title={expandedEntries.has(entry.id) ? "Show less" : "Show more"}
-                        >
-                          {expandedEntries.has(entry.id) ? '▲' : '▼'}
-                        </button>
-                      </div>
+              <div className="book-viewer">
+                {/* Entry cards — click to open book modal */}
+                <div className="diary-entry-list">
+                  {entries.map((entry, idx) => {
+                    const ts = entry.timestamp?.toDate
+                      ? entry.timestamp.toDate()
+                      : new Date(entry.timestamp);
+                    const timeLabel = ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    const stripped = (() => { const d = document.createElement('div'); d.innerHTML = entry.content || ''; return d.textContent || ''; })();
+                    const preview  = stripped.slice(0, 90) + (stripped.length > 90 ? '…' : '');
+                    const firstLine = stripped.split('\n')[0].trim();
+                    const title = (firstLine.length >= 6 && firstLine.length <= 60)
+                      ? firstLine
+                      : stripped.split(' ').slice(0, 7).join(' ') || 'Untitled';
 
-                      <div className="entry-text">
-                        {expandedEntries.has(entry.id) ? (
-                          <div dangerouslySetInnerHTML={{ __html: entry.content }} />
-                        ) : (
-                          <p className="entry-preview">{generateEntryPreview(entry.content)}</p>
-                        )}
+                    return (
+                      <div
+                        key={entry.id}
+                        className="diary-preview-card"
+                        onClick={() => openBook(idx)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && openBook(idx)}
+                      >
+                        <div className="diary-preview-left">
+                          <span className="diary-preview-mood">{entry.mood || '📓'}</span>
+                        </div>
+                        <div className="diary-preview-body">
+                          <div className="diary-preview-title">{title}</div>
+                          <div className="diary-preview-text">{preview || '(empty entry)'}</div>
+                        </div>
+                        <div className="diary-preview-right">
+                          <span className="diary-preview-time">{timeLabel}</span>
+                          <span className="diary-preview-open">Open ›</span>
+                        </div>
                       </div>
-
-                      {!expandedEntries.has(entry.id) && stripHtmlTags(entry.content).length > 120 && (
-                        <button
-                          className="read-more-btn"
-                          onClick={() => toggleEntryExpansion(entry.id)}
-                        >
-                          Read more
-                        </button>
-                      )}
-                    </div>
-                    <div className="entry-actions-bottom">
-                      <button
-                        className="edit-entry-btn"
-                        onClick={() => handleEdit(entry)}
-                        disabled={loading}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="delete-entry-btn"
-                        onClick={() => handleDelete(entry.id)}
-                        disabled={loading}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Diary Book Modal */}
+      <DiaryBookModal
+        key={bookEntries.length}
+        isOpen={showBookModal}
+        entries={bookEntries}
+        initialPage={bookStartPage}
+        onClose={() => setShowBookModal(false)}
+        onEdit={(entry) => { setShowBookModal(false); handleEdit(entry); }}
+        onDelete={(id) => { setShowBookModal(false); handleDelete(id); }}
+        viewMode={viewMode}
+      />
 
       {/* Floating Action Button for Mobile */}
       <button className="fab" onClick={() => openFullScreenEditor()}>

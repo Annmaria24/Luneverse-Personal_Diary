@@ -1,16 +1,8 @@
-/* ===========================
-   My Journal Page Layout
-=========================== */
 .my-journal-page {
   min-height: 100vh;
-  background: linear-gradient(135deg,
-      #fdf2f8 0%,
-      #fce7f3 25%,
-      #f3e8ff 50%,
-      #e0e7ff 75%,
-      #dbeafe 100%);
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   position: relative;
-  padding-top: var(--navbar-height);
+  padding-top: 112px; /* stay flush with navbar */
 }
 
 /* ===========================
@@ -125,14 +117,15 @@
 =========================== */
 .page-toolbar {
   position: sticky;
-  top: calc(var(--navbar-height, 112px) + 12px);
+  top: 112px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 24px 0 24px;
+  padding: 8px 24px;
   gap: 16px;
-  z-index: 3;
+  z-index: 100;
   pointer-events: auto;
+  margin: 0;
 }
 
 /* Position toggle buttons on the right side only when Diary tab is active */
@@ -197,14 +190,10 @@
    Floating Placement for Tabs
 =========================== */
 .tab-buttons.floating {
-  position: sticky;
-  /* Keep tabs below the navbar so they don't overlap editor */
-  top: calc(var(--navbar-height, 112px) + 12px);
-  margin: 12px 24px 0 auto;
-  /* Ensure these remain below the fullscreen editor and editor toolbar */
+  position: relative;
+  top: 0;
+  margin: 0;
   z-index: 100;
-  /* well below editor overlay/toolbar */
-  /* Ensure it doesn't get cut off */
   box-sizing: border-box;
   max-width: calc(100vw - 48px);
   pointer-events: auto;
@@ -212,7 +201,7 @@
 
 @media (min-width: 900px) {
   .tab-buttons.floating {
-    margin: 12px 24px 0 auto;
+    margin: 0;
   }
 }
 

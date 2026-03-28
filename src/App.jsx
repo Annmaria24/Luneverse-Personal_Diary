@@ -178,7 +178,7 @@ function App() {
                 }
               />
               <Route
-                path="/export"
+                path="/insights"
                 element={
                   <ProtectedRoute>
                     <InsightsPage />

@@ -542,11 +542,12 @@ input:checked+.toggle-slider:before {
 }
 
 .export-btn,
-.import-btn {
+.import-btn,
+.report-btn {
   background: var(--primary-purple);
   color: var(--neutral-white);
   border: none;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: 10px 20px;
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -554,8 +555,18 @@ input:checked+.toggle-slider:before {
   white-space: nowrap;
 }
 
-.export-btn:hover,
-.import-btn:hover {
+.report-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.report-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.export-btn:hover {
   background: var(--primary-purple-dark);
   transform: translateY(-1px);
 }

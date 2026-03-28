@@ -1630,3 +1630,29 @@ Filtered Classifications: [
     "value": 0.0002622606871230002
   }
 ]
+
+--- Prediction Debug ---
+Original: Hi diary,     Today felt really heavy. I woke up already tired and didn’t feel like doing anything.  Everything just felt pointless and I kept overthinking things again.     But towards the evening, I spoke to a friend and it helped a little.  I’m still not okay, but maybe tomorrow won’t be this bad.
+Processed: hi,diari,felt,realli,heavi,woke,alreadi,tire,anyth,felt,pointless,kept,overthink,thing,toward,even,spoke,friend,help,littl,okai,mayb,tomorrow,bad
+Filtered Classifications: [
+  {
+    "label": "Sad",
+    "value": 2.9044876896017457e-40
+  },
+  {
+    "label": "Angry",
+    "value": 3.324112333964836e-41
+  },
+  {
+    "label": "Calm",
+    "value": 3.3948470103542145e-44
+  },
+  {
+    "label": "Stressed",
+    "value": 4.088995771243251e-45
+  },
+  {
+    "label": "Happy",
+    "value": 3.4368353919436353e-46
+  }
+]

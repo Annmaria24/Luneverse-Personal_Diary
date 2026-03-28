@@ -58,7 +58,7 @@ function preprocessText(text) {
 
     const filtered = tokens.filter(token => !stopwordsList.includes(token));
 
-    const protectedWords = ['wonderful', 'amazing', 'grateful', 'blessed', 'fantastic', 'frustrating', 'overwhelmed', 'peaceful'];
+    const protectedWords = ['wonderful', 'amazing', 'grateful', 'blessed', 'fantastic', 'frustrating', 'overwhelmed', 'peaceful', 'empty', 'hopeless', 'tired', 'lost', 'overthinking', 'heavy', 'pointless'];
     const stemmed = filtered.map(token => {
         if (protectedWords.includes(token)) {
             return token; // Keep intact
@@ -216,10 +216,17 @@ async function trainModel() {
 
             // Sad (sadness)
             { text: "I feel incredibly sad and heartbroken tonight.", label: "sadness" },
-            { text: "Today brought back some hard memories, feeling very lonely and sad.", label: "sadness" }
+            { text: "Today brought back some hard memories, feeling very lonely and sad.", label: "sadness" },
+            { text: "Everything just feels empty and hollow.", label: "sadness" },
+            { text: "I'm feeling so hopeless about the future, like nothing matters.", label: "sadness" },
+            { text: "I'm so exhausted and tired of trying.", label: "sadness" },
+            { text: "I feel completely lost and don't know what to do.", label: "sadness" },
+            { text: "My mind is racing, I am overthinking every little detail.", label: "sadness" },
+            { text: "My heart feels really heavy with all this sadness.", label: "sadness" },
+            { text: "It all just feels so pointless and bleak.", label: "sadness" }
         ];
 
-        // Add 50 copies of core keywords to truly dominate biases
+        // Add copies of core keywords to truly dominate biases
         const boosters = [
             { text: "amazing", label: "joy" },
             { text: "wonderful", label: "joy" },
@@ -227,7 +234,14 @@ async function trainModel() {
             { text: "blessed", label: "joy" },
             { text: "overwhelmed", label: "fear" },
             { text: "frustrating", label: "anger" },
-            { text: "peaceful", label: "love" }
+            { text: "peaceful", label: "love" },
+            { text: "empty", label: "sadness" },
+            { text: "hopeless", label: "sadness" },
+            { text: "tired", label: "sadness" },
+            { text: "lost", label: "sadness" },
+            { text: "overthinking", label: "sadness" },
+            { text: "heavy", label: "sadness" },
+            { text: "pointless", label: "sadness" }
         ];
 
         boosters.forEach(b => {

@@ -1,0 +1,126 @@
+.wellness-status-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+  border-left: 6px solid #8b5cf6;
+  position: relative;
+  transition: all 0.3s ease;
+  animation: cardFadeIn 0.5s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wellness-status-card.risk-high {
+  border-left-color: #8b5cf6;
+  background: linear-gradient(to right, #ffffff, #faf5ff);
+}
+
+.wellness-status-card.risk-moderate {
+  border-left-color: #f59e0b;
+  background: linear-gradient(to right, #ffffff, #fffbeb);
+}
+
+.wellness-status-card.risk-low {
+  border-left-color: #10b981;
+  background: linear-gradient(to right, #ffffff, #f0fdf4);
+}
+
+.wellness-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.wellness-icon {
+  font-size: 1.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wellness-title-group h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.wellness-tag {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.wellness-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.wellness-close:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.wellness-card-body {
+  margin-bottom: 0.8rem;
+}
+
+.wellness-reasoning {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.wellness-recommendation {
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-weight: var(--font-weight-medium, 500);
+  background: rgba(0, 0, 0, 0.03);
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-top: 0.5rem;
+  border-left: 3px solid rgba(139, 92, 246, 0.3);
+}
+
+.risk-high .wellness-recommendation {
+  background: rgba(139, 92, 246, 0.1);
+  border-left-color: #8b5cf6;
+}
+
+.risk-moderate .wellness-recommendation {
+  background: rgba(245, 158, 11, 0.1);
+  border-left-color: #f59e0b;
+}
+
+.wellness-card-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 0.6rem;
+}
+
+.wellness-card-footer small {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}

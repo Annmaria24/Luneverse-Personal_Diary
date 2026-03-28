@@ -12,8 +12,13 @@ service cloud.firestore {
 
     // Users: self read/write; admins can read/write any
     match /users/{userId} {
-      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      allow write, update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Daily Summaries: direct owner access to resolve permission delays
+    match /users/{userId}/dailySummaries/{date} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read, write: if isAdmin();
     }
 
     // Owned collections by userId

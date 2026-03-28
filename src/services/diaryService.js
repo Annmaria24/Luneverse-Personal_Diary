@@ -12,44 +12,61 @@ import {
   updateDoc
 } from "firebase/firestore";
 import { classifyMood } from "./aiMoodService";
+import { updateDailySummary } from "./wellnessService";
 
 // Add a new diary entry
 export const addDiaryEntry = async (userId, entryData) => {
   try {
-    console.log("📝 [Interpretation Pipeline] Starting diary analysis...");
+    console.log("📝 [Interpretation Pipeline] Starting diary analysis in background...");
 
-    // Use the unified classification service
-    // This will handle local ML prediction + OpenAI fallback
-    const analysis = await classifyMood(entryData.content, entryData.mood || "");
-
-    console.log(`🧠 [Interpretation Pipeline] Result:`, {
-      contentMood: analysis.finalMood,
-      confidence: analysis.confidence,
-      manualHint: entryData.mood
-    });
+    // Determine initial fallback mood so we can save immediately
+    const initialMood = entryData.mood ? normalizeMood(entryData.mood) : "Neutral";
 
     const docRef = await addDoc(collection(db, "diaryEntries"), {
       userId,
       title: entryData.title || "Untitled Entry",
       content: entryData.content,
       mood: entryData.mood || "", // Original manual selection
-      finalMood: analysis.finalMood, // Interpreted mood
-      moodConfidence: analysis.confidence,
-      moodClassificationError: analysis.error,
+      finalMood: initialMood, // Will be updated by background process
+      moodConfidence: 0.5,
+      moodClassificationError: null,
       tags: entryData.tags || [],
       date: entryData.date,
       timestamp: new Date(),
       createdAt: new Date(),
     });
 
-    console.log("✅ [Interpretation Pipeline] Saved to database with ID:", docRef.id);
+    console.log("✅ [Interpretation Pipeline] Saved initial entry to database with ID:", docRef.id);
     window.dispatchEvent(new Event('dashboardDataUpdated'));
+
+    // Process mood in background without blocking the UI
+    classifyMood(entryData.content, entryData.mood || "")
+      .then(async (analysis) => {
+        console.log(`🧠 [Interpretation Pipeline] Background Result:`, {
+          contentMood: analysis.finalMood,
+          confidence: analysis.confidence
+        });
+        await updateDoc(docRef, {
+          finalMood: analysis.finalMood,
+          moodConfidence: analysis.confidence,
+          moodClassificationError: analysis.error || null
+        });
+        
+        // Update daily summary on that date
+        const entryDate = entryData.date || new Date().toISOString().split("T")[0];
+        await updateDailySummary(userId, entryDate);
+        
+        window.dispatchEvent(new Event('dashboardDataUpdated'));
+      })
+      .catch((err) => {
+        console.error("❌ [Interpretation Pipeline] Background Error:", err);
+      });
 
     return {
       id: docRef.id,
-      finalMood: analysis.finalMood,
-      confidence: analysis.confidence,
-      error: analysis.error
+      finalMood: initialMood,
+      confidence: 0.5,
+      error: null
     };
   } catch (error) {
     console.error("❌ [Interpretation Pipeline] Error:", error);
@@ -167,7 +184,13 @@ export const getLatestDiaryEntries = async (userId, limitCount = 10) => {
 // Delete a diary entry
 export const deleteDiaryEntry = async (id) => {
   try {
-    await deleteDoc(doc(db, "diaryEntries", id));
+    const entryRef = doc(db, "diaryEntries", id);
+    const entryDoc = await getDoc(entryRef);
+    if (entryDoc.exists()) {
+      const { userId, date } = entryDoc.data();
+      await deleteDoc(entryRef);
+      if (userId && date) await updateDailySummary(userId, date);
+    }
   } catch (error) {
     console.error("Error deleting diary entry:", error);
     throw error;
@@ -177,53 +200,41 @@ export const deleteDiaryEntry = async (id) => {
 // Update a diary entry
 export const updateDiaryEntry = async (id, updatedData) => {
   try {
-    // If content or mood changed, re-classify mood using OpenAI
-    let finalMood = updatedData.finalMood; // Keep existing if not updating content/mood
-    let moodConfidence = updatedData.moodConfidence;
-    let moodClassificationError = null;
-
-    if (updatedData.content !== undefined || updatedData.mood !== undefined) {
-      try {
-        const plainText = (updatedData.content || "")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/&[a-z0-9]+;/gi, " ")
-          .replace(/&#\d+;/gi, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-        console.log("Sending updated diary text to ML server...");
-        const response = await fetch("http://localhost:5000/predict", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: plainText })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("Received ML server response:", result);
-
-        finalMood = result.mood || "Neutral";
-        moodConfidence = result.confidence || 0.5;
-      } catch (error) {
-        console.warn("ML backend prediction failed during update:", error);
-        // Keep existing finalMood or use manual mood
-        if (!finalMood) {
-          finalMood = updatedData.mood || "Neutral";
-        }
-        moodClassificationError = error.message || "ML prediction failed";
-      }
-    }
-
     const entryRef = doc(db, "diaryEntries", id);
-    await updateDoc(entryRef, {
+    
+    const immediateData = {
       ...updatedData,
-      finalMood: finalMood,
-      moodConfidence: moodConfidence,
-      moodClassificationError: moodClassificationError,
-      updatedAt: new Date() // Add updated timestamp
-    });
+      updatedAt: new Date()
+    };
+    
+    // Perform the update immediately
+    await updateDoc(entryRef, immediateData);
+
+    // If content or mood changed, re-classify mood using AI asynchronously
+    if (updatedData.content !== undefined || updatedData.mood !== undefined) {
+      console.log("Sending updated diary text to background ML pipeline...");
+      
+      const contentToClassify = updatedData.content !== undefined ? updatedData.content : "";
+      const moodToClassify = updatedData.mood !== undefined ? updatedData.mood : "";
+      
+      classifyMood(contentToClassify, moodToClassify)
+        .then(async (result) => {
+          console.log("Background ML pipeline returned for update:", result);
+          await updateDoc(entryRef, {
+            finalMood: result.finalMood,
+            moodConfidence: result.confidence,
+            moodClassificationError: result.error || null,
+          });
+          
+          // Fetch userId as well
+          const entryDoc = await getDoc(entryRef);
+          const { userId, date } = entryDoc.data();
+          if (userId && date) await updateDailySummary(userId, date);
+
+          window.dispatchEvent(new Event('dashboardDataUpdated'));
+        })
+        .catch(err => console.warn("Background ML update failed:", err));
+    }
   } catch (error) {
     console.error("Error updating diary entry:", error);
     throw error;

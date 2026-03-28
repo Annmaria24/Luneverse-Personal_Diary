@@ -1,11 +1,9 @@
 .pregnancy-tracker-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
-  font-family: 'Inter', sans-serif;
-  color: #1f2937;
-  background-attachment: fixed;
-  /* ensure consistent background */
-  padding-top: var(--navbar-height);
+  background: transparent;
+  font-family: 'Inter', -apple-system, sans-serif;
+  position: relative;
+  padding-top: 0;
 }
 
 
