@@ -1120,3 +1120,39 @@ body>div[style*="position: fixed"] {
     font-size: 0.8rem !important;
   }
 }
+
+/* Top Actions Row - Fixed alignment */
+.dashboard-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 24px 0;
+  position: relative;
+  z-index: 10;
+  pointer-events: none; /* Allow clicks to pass through to the button */
+}
+
+.affirmations-floating-btn {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  transition: all 0.3s ease;
+  pointer-events: auto; /* Re-enable clicks for the button itself */
+}
+
+.affirmations-floating-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
+}
+
+.affirmations-floating-btn.loading {
+  opacity: 0.8;
+  cursor: wait;
+}
