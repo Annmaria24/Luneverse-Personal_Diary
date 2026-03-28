@@ -55,93 +55,7 @@ function Dashboard() {
     }, 800);
   }, [navigate]);
 
-  // Create completely independent fixed button - always show
-  useEffect(() => {
-    console.log('Creating affirmations button, relaxMode:', modulePreferences?.relaxMode);
-
-    // Remove any existing button
-    const existingButton = document.getElementById('daily-affirmations-fixed');
-    if (existingButton) {
-      existingButton.remove();
-    }
-
-    // Create a completely isolated container with direct style assignment
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = 'daily-affirmations-fixed';
-
-    // Use fixed positioning so it stays near the navbar
-    buttonContainer.style.position = 'fixed';
-    buttonContainer.style.top = '80px';
-    buttonContainer.style.right = '30px';
-    buttonContainer.style.zIndex = '99999';
-    buttonContainer.style.width = 'fit-content';
-    buttonContainer.style.height = 'fit-content';
-    buttonContainer.style.margin = '0';
-    buttonContainer.style.padding = '0';
-    buttonContainer.style.border = 'none';
-    buttonContainer.style.background = 'transparent';
-    buttonContainer.style.fontFamily = 'inherit';
-    buttonContainer.style.fontSize = 'inherit';
-    buttonContainer.style.lineHeight = 'inherit';
-    buttonContainer.style.textAlign = 'left';
-    buttonContainer.style.textDecoration = 'none';
-    buttonContainer.style.verticalAlign = 'baseline';
-    buttonContainer.style.boxSizing = 'border-box';
-    buttonContainer.style.transform = 'translateZ(0)';
-    buttonContainer.style.willChange = 'transform';
-    buttonContainer.style.isolation = 'isolate';
-    buttonContainer.style.pointerEvents = 'auto';
-
-    const button = document.createElement('button');
-    button.style.position = 'relative';
-    button.style.display = 'inline-block';
-    button.style.background = 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)';
-    button.style.color = 'white';
-    button.style.border = 'none';
-    button.style.borderRadius = '12px';
-    button.style.padding = '12px 16px';
-    button.style.boxShadow = '0 6px 18px rgba(124,58,237,0.25)';
-    button.style.cursor = 'pointer';
-    button.style.fontSize = '14px';
-    button.style.fontWeight = '500';
-    button.style.whiteSpace = 'nowrap';
-    button.style.margin = '0';
-    button.style.width = 'auto';
-    button.style.height = 'auto';
-    button.style.outline = 'none';
-    button.style.fontFamily = 'inherit';
-    button.style.textAlign = 'center';
-    button.style.textDecoration = 'none';
-    button.style.verticalAlign = 'middle';
-    button.style.boxSizing = 'border-box';
-    button.style.userSelect = 'none';
-
-    button.textContent = '✨ Daily Affirmations';
-    button.onclick = () => {
-      console.log('Button clicked, navigating to affirmations');
-      handleNavigateWithLoading('/relax?section=affirmations', 'affirmations');
-    };
-
-    buttonContainer.appendChild(button);
-
-    // Try to find a better parent element for sticky positioning
-    const mainContent = document.querySelector('.dashboard-content') ||
-      document.querySelector('main') ||
-      document.querySelector('.app') ||
-      document.body;
-
-    mainContent.appendChild(buttonContainer);
-
-    console.log('Button created and appended to body');
-
-    // No need for complex scroll handling with sticky positioning
-
-    return () => {
-      if (buttonContainer && buttonContainer.parentNode) {
-        buttonContainer.parentNode.removeChild(buttonContainer);
-      }
-    };
-  }, [handleNavigateWithLoading, modulePreferences?.relaxMode]);
+  // Removed dynamic button injection - now handled in JSX for better scroll behavior
 
   // Daily affirmations notification - trigger when dashboard loads
   useEffect(() => {
@@ -369,6 +283,18 @@ function Dashboard() {
 
       {/* Header */}
       <Navbar />
+
+      <div className="dashboard-top-actions">
+        {modulePreferences?.relaxMode && (
+          <button
+            className={`affirmations-floating-btn ${loadingStates.affirmations ? 'loading' : ''}`}
+            onClick={() => handleNavigateWithLoading('/relax?section=affirmations', 'affirmations')}
+            disabled={loadingStates.affirmations}
+          >
+            {loadingStates.affirmations ? '⏳ Loading...' : '✨ Daily Affirmations'}
+          </button>
+        )}
+      </div>
 
       {/* Main Content */}
       <main className="dashboard-main">
