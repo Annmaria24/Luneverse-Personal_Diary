@@ -143,6 +143,14 @@
 .calendar-insights-buttons {
   display: flex;
   gap: 12px;
+  margin-top: -4px; /* move a bit up to align with right side */
+}
+
+.view-toggle {
+  display: flex;
+  gap: 12px;
+  padding: 6px; /* match right side */
+  margin-top: -4px; /* move a bit up to align with right side */
 }
 
 /* ===========================

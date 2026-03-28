@@ -32,10 +32,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 6px; /* match right side */
   border-radius: 14px;
   background: linear-gradient(135deg, #4b0082, #c71585);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.08);
+  margin-top: -4px; /* move a bit up to align with right side */
 }
 
 .cycle-view-btn {
