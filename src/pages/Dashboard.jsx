@@ -69,14 +69,14 @@ function Dashboard() {
     const buttonContainer = document.createElement('div');
     buttonContainer.id = 'daily-affirmations-fixed';
 
-    // Use sticky positioning that moves with scroll
-    buttonContainer.style.position = 'sticky';
-    buttonContainer.style.top = '100px';
-    buttonContainer.style.float = 'right';
+    // Use fixed positioning so it stays near the navbar
+    buttonContainer.style.position = 'fixed';
+    buttonContainer.style.top = '80px';
+    buttonContainer.style.right = '30px';
     buttonContainer.style.zIndex = '99999';
     buttonContainer.style.width = 'fit-content';
     buttonContainer.style.height = 'fit-content';
-    buttonContainer.style.margin = '20px 30px 0 0';
+    buttonContainer.style.margin = '0';
     buttonContainer.style.padding = '0';
     buttonContainer.style.border = 'none';
     buttonContainer.style.background = 'transparent';

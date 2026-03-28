@@ -147,3 +147,6 @@ functions/.runtimeconfig.json
 
 # Additional project-specific files
 luneverse-app/node_modules/
+API_KEYS_SUMMARY.md
+OPENAI_INTEGRATION.md
+image.png
