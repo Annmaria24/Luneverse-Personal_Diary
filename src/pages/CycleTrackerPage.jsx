@@ -639,14 +639,16 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
   if (error) {
     return (
       <div className="cycle-tracker-page">
-        <div className="dashboard-background">
-          <div className="floating-element element-1">🌙</div>
-          <div className="floating-element element-2">✨</div>
-          <div className="floating-element element-3">🌸</div>
-          <div className="floating-element element-4">💜</div>
-          <div className="floating-element element-5">🦋</div>
-          <div className="floating-element element-6">🌺</div>
-        </div>
+        {includeNavbar && (
+          <div className="dashboard-background">
+            <div className="floating-element element-1">🌙</div>
+            <div className="floating-element element-2">✨</div>
+            <div className="floating-element element-3">🌸</div>
+            <div className="floating-element element-4">💜</div>
+            <div className="floating-element element-5">🦋</div>
+            <div className="floating-element element-6">🌺</div>
+          </div>
+        )}
         {includeNavbar && <Navbar />}
         <div className="cycle-tracker-container">
           <div className="error-icon">⚠️</div>
@@ -662,14 +664,16 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
   return (
     <div className="cycle-tracker-page">
       {includeNavbar && <Navbar />}
-      <div className="dashboard-background">
-        <div className="floating-element element-1">🌙</div>
-        <div className="floating-element element-2">✨</div>
-        <div className="floating-element element-3">🌸</div>
-        <div className="floating-element element-4">💜</div>
-        <div className="floating-element element-5">🦋</div>
-        <div className="floating-element element-6">🌺</div>
-      </div>
+      {includeNavbar && (
+        <div className="dashboard-background">
+          <div className="floating-element element-1">🌙</div>
+          <div className="floating-element element-2">✨</div>
+          <div className="floating-element element-3">🌸</div>
+          <div className="floating-element element-4">💜</div>
+          <div className="floating-element element-5">🦋</div>
+          <div className="floating-element element-6">🌺</div>
+        </div>
+      )}
       {/* Top toggles bar (hidden when parent provides one) */}
       {!hideTopToggle && (
         <div className="top-toggles">

@@ -654,14 +654,16 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
 
   return (
     <div className="mood-tracker-page">
-      <div className="dashboard-background" style={{ zIndex: 1 }}>
-        <div className="floating-element element-1">🌙</div>
-        <div className="floating-element element-2">✨</div>
-        <div className="floating-element element-3">🌸</div>
-        <div className="floating-element element-4">💜</div>
-        <div className="floating-element element-5">🦋</div>
-        <div className="floating-element element-6">🌺</div>
-      </div>
+      {includeNavbar && (
+        <div className="dashboard-background" style={{ zIndex: 1 }}>
+          <div className="floating-element element-1">🌙</div>
+          <div className="floating-element element-2">✨</div>
+          <div className="floating-element element-3">🌸</div>
+          <div className="floating-element element-4">💜</div>
+          <div className="floating-element element-5">🦋</div>
+          <div className="floating-element element-6">🌺</div>
+        </div>
+      )}
       {includeNavbar && <Navbar />}
       {/* View Toggle moved to navbar */}
 
