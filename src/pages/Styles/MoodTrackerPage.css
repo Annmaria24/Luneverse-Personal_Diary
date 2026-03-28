@@ -919,6 +919,49 @@
   }
 }
 
+/* Simple Aesthetic No-History State */
+.no-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: rgba(113, 51, 214, 0.03); /* subtle purple hint */
+  border-radius: 16px;
+  border: 1px dashed #d1d5db;
+  text-align: center;
+}
+
+.no-history-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 2px 8px rgba(236, 72, 153, 0.2));
+}
+
+.no-history p {
+  color: #7c3aed; /* purple text hint */
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.show-latest-btn {
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
+}
+
+.show-latest-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(124, 58, 237, 0.3);
+}
+
 .insight-card::before {
   content: '';
   position: absolute;

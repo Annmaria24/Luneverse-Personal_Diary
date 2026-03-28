@@ -1129,7 +1129,7 @@ body>div[style*="position: fixed"] {
   position: relative;
   z-index: 10;
   pointer-events: none; /* Allow clicks to pass through to the button */
-  margin-top: 12px; /* Pull it into content area from under the Navbar */
+  margin-top: 48px; /* Pulled it further into view to prevent clipping by the Header */
 }
 
 .affirmations-floating-btn {

@@ -842,7 +842,7 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
 
           {moodHistory.length === 0 ? (
             <div className="no-history">
-              <div className="no-history-icon">📊</div>
+              <div className="no-history-icon">🌸</div>
               <p>No mood entries found {historyViewMode === 'date' ? 'for this date' : 'yet'}.</p>
               <button onClick={handleBackToLatestHistory} className="show-latest-btn">View Latest Entries</button>
             </div>
