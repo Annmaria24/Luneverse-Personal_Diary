@@ -4,7 +4,7 @@
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
   background-attachment: fixed; /* ensure consistent background */
-  padding-top: 136px; /* push content down while buttons stay sticky at 48px */
+  padding-top: 136px; /* push content down while buttons stay sticky at 12px */
 }
 
 .my-journal-page {
@@ -16,11 +16,11 @@
 
 .page-toolbar {
   position: sticky;
-  top: 48px;
+  top: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 24px;
+  padding: 0 24px;
   gap: 16px;
   z-index: 100;
   pointer-events: auto;
