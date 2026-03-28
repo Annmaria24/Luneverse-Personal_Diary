@@ -4,12 +4,12 @@
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
   background-attachment: fixed; /* ensure consistent background */
-  padding-top: 112px; /* stay flush with 112px navbar */
+  padding-top: 64px; /* navbar 64px */
 }
 
 .page-toolbar {
   position: sticky;
-  top: 112px;
+  top: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;

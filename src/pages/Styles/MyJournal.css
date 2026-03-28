@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   position: relative;
-  padding-top: 112px; /* stay flush with navbar */
+  padding-top: 64px; /* stay flush with navbar */
 }
 
 /* ===========================
@@ -117,7 +117,7 @@
 =========================== */
 .page-toolbar {
   position: sticky;
-  top: 112px;
+  top: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;
