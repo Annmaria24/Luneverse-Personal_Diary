@@ -55,8 +55,6 @@ function Dashboard() {
     }, 800);
   }, [navigate]);
 
-  // Removed dynamic button injection - now handled in JSX for better scroll behavior
-
   // Daily affirmations notification - trigger when dashboard loads
   useEffect(() => {
     const getTodayKey = () => {
@@ -285,15 +283,13 @@ function Dashboard() {
       <Navbar />
 
       <div className="dashboard-top-actions">
-        {modulePreferences?.relaxMode && (
-          <button
-            className={`affirmations-floating-btn ${loadingStates.affirmations ? 'loading' : ''}`}
-            onClick={() => handleNavigateWithLoading('/relax?section=affirmations', 'affirmations')}
-            disabled={loadingStates.affirmations}
-          >
-            {loadingStates.affirmations ? '⏳ Loading...' : '✨ Daily Affirmations'}
-          </button>
-        )}
+        <button
+          className={`affirmations-floating-btn ${loadingStates.affirmations ? 'loading' : ''}`}
+          onClick={() => handleNavigateWithLoading('/relax?section=affirmations', 'affirmations')}
+          disabled={loadingStates.affirmations}
+        >
+          {loadingStates.affirmations ? '⏳ Loading...' : '✨ Daily Affirmations'}
+        </button>
       </div>
 
       {/* Main Content */}
