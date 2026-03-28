@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #e0e7ff 75%, #dbeafe 100%);
   position: relative;
-  padding-top: 64px; /* stay flush with navbar */
+  padding-top: 136px; /* push content down while buttons stay sticky at 64px */
 }
 
 /* ===========================
