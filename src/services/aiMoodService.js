@@ -91,25 +91,27 @@ export const classifyMood = async (diaryText, manualMood = "") => {
     }
 
     // --- STEP 2: Weighted Aggregation ---
-    // If ML gave a strong signal, trust it more (0.6 diary + 0.4 manual)
-    // If ML confidence is low (<0.4), let manual mood have equal say (0.5 / 0.5)
+    // If a manual mood is provided, it's a very strong signal.
+    // We trust it 70% and let the AI nudge it 30%.
     const diaryScore = MOOD_SCORES[diaryMood] ?? 3;
-    const diaryWeight = diaryConfidence >= 0.4 ? 0.6 : 0.5;
-    const manualWeight = 1 - diaryWeight;
+    const diaryWeight = 0.3; // Give AI 30% say
+    const manualWeight = 0.7; // Give manual 70% say
+    
     const weightedScore = (diaryScore * diaryWeight) + (manualScore * manualWeight);
 
     // Map weighted score back to label
+    // Scale: Sad (0), Angry (1), Stressed (2), Neutral (3), Calm (4), Happy (5)
     let finalMood = "Neutral";
-    if (weightedScore < 0.8) finalMood = "Sad";
-    else if (weightedScore < 1.8) finalMood = "Angry";
-    else if (weightedScore < 2.8) finalMood = "Stressed";
-    else if (weightedScore < 3.8) finalMood = "Neutral";
-    else if (weightedScore < 4.8) finalMood = "Calm";
+    if (weightedScore < 0.7) finalMood = "Sad";
+    else if (weightedScore < 1.7) finalMood = "Angry";
+    else if (weightedScore < 2.7) finalMood = "Stressed";
+    else if (weightedScore < 3.7) finalMood = "Neutral";
+    else if (weightedScore < 4.7) finalMood = "Calm";
     else finalMood = "Happy";
 
     console.log(`⚖️ [AI Service] Weighted Aggregation:`, {
-      diary: `${diaryMood} (${diaryScore}) x 0.7`,
-      manual: `${normalizedManual} (${manualScore}) x 0.3`,
+      diary: `${diaryMood} (${diaryScore}) x 0.3`,
+      manual: `${normalizedManual} (${manualScore}) x 0.7`,
       resultScore: weightedScore.toFixed(2),
       finalCategory: finalMood
     });
@@ -136,19 +138,65 @@ function mapManualMoodToFinal(manualMood) {
   if (!manualMood) return "Neutral";
 
   const moodLower = manualMood.toLowerCase();
+  
+  // Mapping including common emojis used in the app
   const moodMap = {
+    // Happy
+    '😊': "Happy",
+    '🥰': "Happy",
+    '✨': "Happy",
     happy: "Happy",
     loved: "Happy",
     grateful: "Happy",
+    joy: "Happy",
+    
+    // Sad
+    '😔': "Sad",
+    '😢': "Sad",
+    '😭': "Sad",
+    '💔': "Sad",
     sad: "Sad",
     crying: "Sad",
+    lonely: "Sad",
+    heartbroken: "Sad",
+    depressed: "Sad",
+    
+    // Angry
+    '😤': "Angry",
+    '😠': "Angry",
+    '😡': "Angry",
     frustrated: "Angry",
+    angry: "Angry",
+    annoyed: "Angry",
+    
+    // Stressed
+    '😰': "Stressed",
+    '😫': "Stressed",
+    '😟': "Stressed",
     anxious: "Stressed",
+    stressed: "Stressed",
+    overwhelmed: "Stressed",
     tired: "Stressed",
+    fear: "Stressed",
+    
+    // Calm
+    '😌': "Calm",
+    '🌊': "Calm",
+    '🧘': "Calm",
     calm: "Calm",
+    peaceful: "Calm",
+    relaxed: "Calm",
+    
+    // Neutral
+    '😐': "Neutral",
+    '😶': "Neutral",
     neutral: "Neutral",
   };
 
+  // Check for direct emoji match first
+  if (moodMap[manualMood]) return moodMap[manualMood];
+
+  // Then check for keywords in the string
   for (const [key, value] of Object.entries(moodMap)) {
     if (moodLower.includes(key)) return value;
   }

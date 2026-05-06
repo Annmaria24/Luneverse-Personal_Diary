@@ -355,7 +355,7 @@ function getEmotionalScoreFromValue(value) {
 /**
  * Get emotional trend data for time-series line graph.
  * Aggregates multiple entries within the same time unit (day/timestamp) using weighted averaging.
- * Diary ML: 0.7 weight | Manual Mood: 0.3 weight
+ * Diary ML: 0.3 weight | Manual Mood: 0.7 weight
  */
 export const getEmotionalTrendData = async (userId, viewMode = 'month', selectedDate = new Date()) => {
   try {
@@ -427,8 +427,8 @@ export const getEmotionalTrendData = async (userId, viewMode = 'month', selected
 
       let finalScore;
       if (diaryAvg !== null && manualAvg !== null) {
-        // Weighted combination: 0.7 Diary ML + 0.3 Manual Selection
-        finalScore = (diaryAvg * 0.7) + (manualAvg * 0.3);
+        // Weighted combination: 0.3 Diary ML + 0.7 Manual Selection
+        finalScore = (diaryAvg * 0.3) + (manualAvg * 0.7);
       } else {
         finalScore = diaryAvg ?? manualAvg ?? 3; // Neutral baseline
       }

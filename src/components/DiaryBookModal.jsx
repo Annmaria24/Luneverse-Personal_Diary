@@ -21,17 +21,18 @@ export default function DiaryBookModal({
 }) {
   const pageFlipRef = useRef(null);
 
-  // Use state to track the current index in the entries array
-  const [activeIdx, setActiveIdx] = useState(initialPage);
+  // actualInitialPage maps the "newest-first" card index to the "oldest-first" book index
+  const actualInitialPage = entries.length > 0 ? (entries.length - 1 - initialPage) : 0;
+
+  // Use state to track the current index in the entries array (chronological order)
+  const [activeIdx, setActiveIdx] = useState(actualInitialPage);
 
   // Sync state if initialPage or entries change externally
   useEffect(() => {
-    const idxInOrdered = entries.length > 0 ? (entries.length - 1 - initialPage) : 0;
-    setActiveIdx(idxInOrdered);
-  }, [initialPage, entries.length]);
+    setActiveIdx(actualInitialPage);
+  }, [actualInitialPage]);
 
   const chronologicalEntries = [...entries].reverse(); // Oldest-first order
-  const actualInitialPage = entries.length > 0 ? (entries.length - 1 - initialPage) : 0;
 
   // Close on Escape key
   useEffect(() => {
@@ -40,16 +41,21 @@ export default function DiaryBookModal({
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  // Turn to initial page on load
+  // Turn to initial page on load or when actualInitialPage changes
   useEffect(() => {
-    if (isOpen && pageFlipRef.current && actualInitialPage > 0) {
-      setTimeout(() => {
+    if (isOpen && pageFlipRef.current) {
+      // Small delay ensures the library has calculated dimensions and loaded pages
+      const timer = setTimeout(() => {
         try {
-          pageFlipRef.current.pageFlip().turnToPage(actualInitialPage * 2);
+          const pageFlip = pageFlipRef.current.pageFlip();
+          if (pageFlip) {
+            pageFlip.turnToPage(actualInitialPage * 2);
+          }
         } catch (e) {
           console.error("Flip transition error:", e);
         }
-      }, 100); // Wait for initialization
+      }, 150); 
+      return () => clearTimeout(timer);
     }
   }, [isOpen, actualInitialPage]);
 
@@ -134,10 +140,17 @@ export default function DiaryBookModal({
 
           <div className="book-right-content">
             <div className="book-right-header">
-              <span style={{ fontSize: '1.1rem' }}>{entry.mood}</span>
-              <span className="book-right-time">
-                {entry.date ?? formatDate(entry)} &middot; {formatTime(entry)}
-              </span>
+              <span className="book-right-mood-icon">{entry.mood || '📓'}</span>
+              <div className="book-right-time-group">
+                <span className="book-right-time">
+                  {formatDate(entry)} &middot; {formatTime(entry)}
+                </span>
+                {entry.updatedAt && (
+                  <span className="book-right-edited">
+                    (Edited on {entry.updatedAt.toDate ? entry.updatedAt.toDate().toLocaleDateString() : new Date(entry.updatedAt).toLocaleDateString()})
+                  </span>
+                )}
+              </div>
             </div>
 
             <h2 className="book-right-title">{getTitle(entry.content)}</h2>
@@ -182,6 +195,7 @@ export default function DiaryBookModal({
           className="page-flip-container"
           ref={pageFlipRef}
           onFlip={onFlip}
+          startPage={actualInitialPage * 2}
         >
           {pagesData}
         </HTMLFlipBook>

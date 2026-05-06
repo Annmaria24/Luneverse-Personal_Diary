@@ -277,7 +277,6 @@ function DiaryPage({ includeNavbar = true }) {
     if (isEditing && editingEntryId) {
       // Update existing entry
       const entryData = {
-        date: selectedDate.toDateString(),
         content: content,
         mood: mood
       };
@@ -352,14 +351,16 @@ function DiaryPage({ includeNavbar = true }) {
 
   return (
     <div className="diary-page">
-      <div className="dashboard-background">
-        <div className="floating-element element-1">🌙</div>
-        <div className="floating-element element-2">✨</div>
-        <div className="floating-element element-3">🌸</div>
-        <div className="floating-element element-4">💜</div>
-        <div className="floating-element element-5">🦋</div>
-        <div className="floating-element element-6">🌺</div>
-      </div>
+      {includeNavbar && (
+        <div className="dashboard-background">
+          <div className="floating-element element-1">🌙</div>
+          <div className="floating-element element-2">✨</div>
+          <div className="floating-element element-3">🌸</div>
+          <div className="floating-element element-4">💜</div>
+          <div className="floating-element element-5">🦋</div>
+          <div className="floating-element element-6">🌺</div>
+        </div>
+      )}
       {includeNavbar && <Navbar />}
       <div className="diary-container">
         {/* Search */}

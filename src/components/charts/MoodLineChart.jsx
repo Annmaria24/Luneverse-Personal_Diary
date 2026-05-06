@@ -66,6 +66,7 @@ const MoodLineChart = ({ dataPoints = [], size = 260, showYLabels = true, showXL
               x1={padding.left}
               y1={y}
               x2={padding.left + chartWidth}
+              y2={y}
               stroke="#f1f5f9"
               strokeWidth="0.5"
             />
@@ -115,30 +116,52 @@ const MoodLineChart = ({ dataPoints = [], size = 260, showYLabels = true, showXL
         </g>
       ))}
 
-      {/* X-axis simplified labels (Start and End) */}
+      {/* X-axis simplified labels (distributed across timeline) */}
       {showXLabels && points.length > 1 && (
-        <>
-          <text
-            x={points[0].x}
-            y={padding.top + chartHeight + 20}
-            textAnchor="start"
-            fontSize="10"
-            fontWeight="600"
-            fill="#64748b"
-          >
-            {dataPoints[0].x}
-          </text>
-          <text
-            x={points[points.length - 1].x}
-            y={padding.top + chartHeight + 20}
-            textAnchor="end"
-            fontSize="10"
-            fontWeight="600"
-            fill="#64748b"
-          >
-            {dataPoints[dataPoints.length - 1].x}
-          </text>
-        </>
+        <g className="x-axis-labels">
+          {(() => {
+            const labelIndices = [];
+            const count = points.length;
+            
+            if (count <= 4) {
+              // Show all labels if few points
+              for (let i = 0; i < count; i++) labelIndices.push(i);
+            } else {
+              // Show 4 evenly distributed labels
+              labelIndices.push(0);
+              labelIndices.push(Math.floor(count / 3));
+              labelIndices.push(Math.floor((2 * count) / 3));
+              labelIndices.push(count - 1);
+            }
+
+            return labelIndices.map(idx => {
+              const p = points[idx];
+              const dateStr = dataPoints[idx].x;
+              // Format date string if it's YYYY-MM-DD to MM-DD
+              let displayDate = dateStr;
+              if (dateStr.length === 7 && dateStr.includes('-')) {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                displayDate = months[parseInt(dateStr.split('-')[1]) - 1] || dateStr;
+              } else if (dateStr.length === 10 && dateStr.includes('-')) {
+                displayDate = dateStr.slice(5);
+              }
+
+              return (
+                <text
+                  key={idx}
+                  x={p.x}
+                  y={padding.top + chartHeight + 20}
+                  textAnchor={idx === 0 ? "start" : idx === count - 1 ? "end" : "middle"}
+                  fontSize="10"
+                  fontWeight="600"
+                  fill="#64748b"
+                >
+                  {displayDate}
+                </text>
+              );
+            });
+          })()}
+        </g>
       )}
     </svg>
   );

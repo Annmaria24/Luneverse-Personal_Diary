@@ -1092,3 +1092,65 @@
     width: 100%;
   }
 }
+
+/* Insights Page Interactive Chart Styles */
+.insight-card.clickable {
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.insight-card.clickable:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #ede9fe;
+  background: linear-gradient(to bottom, #ffffff, #fcfaff);
+}
+
+.card-header-with-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.zoom-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f5f3ff;
+  color: #7c3aed;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid #ddd6fe;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+
+.insight-card.clickable:hover .zoom-badge {
+  background: #7c3aed;
+  color: white;
+  transform: scale(1.1);
+}
+
+.card-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 12px;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.insight-card.clickable:hover .card-hint {
+  color: #7c3aed;
+  opacity: 1;
+}
+
+/* Adjustments for integrated charts in grid */
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}

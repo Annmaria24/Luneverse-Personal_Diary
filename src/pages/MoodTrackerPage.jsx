@@ -143,12 +143,12 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
     { emoji: '🥰', name: 'Loved', color: '#f59e0b', value: 5 },
     { emoji: '😌', name: 'Calm', color: '#06b6d4', value: 4 },
     { emoji: '😐', name: 'Neutral', color: '#6b7280', value: 3 },
-    { emoji: '😔', name: 'Sad', color: '#3b82f6', value: 2 },
-    { emoji: '😤', name: 'Frustrated', color: '#ef4444', value: 2 },
-    { emoji: '😢', name: 'Crying', color: '#8b5cf6', value: 1 },
+    { emoji: '😔', name: 'Sad', color: '#3b82f6', value: 0 },
+    { emoji: '😤', name: 'Frustrated', color: '#ef4444', value: 1 },
+    { emoji: '😢', name: 'Crying', color: '#8b5cf6', value: 0 },
     { emoji: '😴', name: 'Tired', color: '#64748b', value: 2 },
     { emoji: '🤗', name: 'Grateful', color: '#84cc16', value: 5 },
-    { emoji: '😰', name: 'Anxious', color: '#f97316', value: 1 }
+    { emoji: '😰', name: 'Anxious', color: '#f97316', value: 2 }
   ];
 
   // Mood colors for final categories
@@ -633,14 +633,16 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
   if (loading) {
     return (
       <div className="mood-tracker-page">
-        <div className="dashboard-background">
-          <div className="floating-element element-1">🌙</div>
-          <div className="floating-element element-2">✨</div>
-          <div className="floating-element element-3">🌸</div>
-          <div className="floating-element element-4">💜</div>
-          <div className="floating-element element-5">🦋</div>
-          <div className="floating-element element-6">🌺</div>
-        </div>
+        {includeNavbar && (
+          <div className="dashboard-background">
+            <div className="floating-element element-1">🌙</div>
+            <div className="floating-element element-2">✨</div>
+            <div className="floating-element element-3">🌸</div>
+            <div className="floating-element element-4">💜</div>
+            <div className="floating-element element-5">🦋</div>
+            <div className="floating-element element-6">🌺</div>
+          </div>
+        )}
         {includeNavbar && <Navbar />}
         <div className="mood-tracker-container">
           <div className="loading-state">

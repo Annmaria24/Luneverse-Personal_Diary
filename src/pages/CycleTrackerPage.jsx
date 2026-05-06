@@ -17,6 +17,7 @@ import { getUserSettings } from "../services/userService";
 
 import ProfileDropdown from '../components/ProfileDropdown';
 import Navbar from '../components/Navbar';
+import ChartZoomModal from '../components/ChartZoomModal';
 
 function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
   const { currentUser } = useAuth();
@@ -53,6 +54,9 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
   const [pregnancyStats, setPregnancyStats] = useState({ currentWeek: 0, currentTrimester: 1 });
 
 
+
+  // Chart zoom state
+  const [zoomedChart, setZoomedChart] = useState(null); // 'cycle', 'symptoms', 'stats', null
 
   // Consumption tracking state
   // Removed consumption tracking state as per user request
@@ -243,8 +247,11 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
 
       // Load common symptoms
       const symptoms = await getCommonSymptoms(currentUser.uid);
-      setCommonSymptoms(symptoms);
-      const timeline = await getRecentCycles(currentUser.uid, 6);
+      const refreshed = await getCycleData(currentUser.uid);
+      setCycleData(refreshed);
+
+      // Load 24 months of history for the scrollable chart
+      const timeline = await getRecentCycles(currentUser.uid, 24);
       setRecentCycles(timeline);
 
       // Pregnancy settings and data
@@ -861,12 +868,19 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
                 <div className="regularity-score">85%</div>
                 <p>Your cycles are fairly regular</p>
               </div>
-              <div className="insight-card">
-                <h3>Cycle History</h3>
+              <div className="insight-card clickable" onClick={() => setZoomedChart('cycle')}>
+                <div className="card-header-with-badge">
+                  <h3>Cycle History</h3>
+                  <span className="zoom-badge">🔍 Zoom</span>
+                </div>
                 <LineBarTimeline data={recentCycles} height={160} />
+                <p className="card-hint">Click to see detailed lengths and flow intensity.</p>
               </div>
-              <div className="insight-card">
-                <h3>Common Symptoms</h3>
+              <div className="insight-card clickable" onClick={() => setZoomedChart('symptoms')}>
+                <div className="card-header-with-badge">
+                  <h3>Common Symptoms</h3>
+                  <span className="zoom-badge">🔍 Detail</span>
+                </div>
                 <div className="common-symptoms">
                   {commonSymptoms.length > 0 ? (
                     commonSymptoms.slice(0, 3).map((symptom, index) => (
@@ -898,6 +912,7 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
                     });
                   })()}
                 </svg>
+                <p className="card-hint">Click to see frequency breakdown.</p>
               </div>
               <div className="insight-card">
                 <h3>Cycle Statistics</h3>
@@ -1074,6 +1089,16 @@ function CycleTrackerPage({ hideTopToggle = false, includeNavbar = true }) {
             </div>
           </div>
         </div>
+      )}
+      {/* Chart Zoom Modal */}
+      {zoomedChart && (
+        <ChartZoomModal
+          type={zoomedChart}
+          data={zoomedChart === 'cycle' ? recentCycles : commonSymptoms}
+          stats={cycleStats}
+          formatSymptomName={formatSymptomName}
+          onClose={() => setZoomedChart(null)}
+        />
       )}
     </div>
   );

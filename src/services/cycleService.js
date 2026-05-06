@@ -259,14 +259,11 @@ export const getCycleStats = async (userId) => {
 
         if (cycleCount > 0) {
           stats.averageCycleLength = Math.round(totalDays / cycleCount);
-          stats.totalCycles = cycleCount;
-          console.log(`✅ Final calculation: ${totalDays} total days ÷ ${cycleCount} cycles = ${stats.averageCycleLength} days average`);
         } else {
-          // Fallback to default if no valid cycles found
           stats.averageCycleLength = 28;
-          stats.totalCycles = 0;
-          console.log('⚠️ No valid cycles found, using default 28 days');
         }
+        stats.totalCycles = allPeriodStarts.length;
+        console.log(`✅ Final calculation: ${totalDays} total days ÷ ${cycleCount} completed cycles. Total starts: ${stats.totalCycles}`);
       }
     }
 
@@ -290,8 +287,8 @@ export const getRecentCycles = async (userId, count = 6) => {
   for (let i = 0; i < starts.length; i++) {
     const start = starts[i];
     const nextStart = starts[i + 1];
-    const endDate = nextStart ? new Date(nextStart.date) : new Date(start.date);
     const startDate = new Date(start.date);
+    const endDate = nextStart ? new Date(nextStart.date) : new Date();
     const cycleLength = Math.max(1, Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)));
     // period length: count entries from start until nextStart that are period type
     const periodDays = entries.filter(e => {
@@ -362,40 +359,26 @@ export const addCycleEntry = async (userId, flow, symptoms, notes = "") => {
 // Get count of cycle entries for the current month
 export const getCycleEntriesCountForMonth = async (userId, year, month) => {
   try {
-    // First try the optimized query
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 1);
+    // Filter based on the 'date' string field instead of 'createdAt' timestamp
+    // Date string is YYYY-MM-DD
+    const monthStr = String(month + 1).padStart(2, '0');
+    const startPattern = `${year}-${monthStr}`;
 
-    try {
-      const q = query(
-        cycleRef,
-        where("userId", "==", userId),
-        where("createdAt", ">=", startDate),
-        where("createdAt", "<", endDate)
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.size;
-    } catch (indexError) {
-      console.warn("Composite index not available, using client-side filtering:", indexError);
+    const q = query(
+      cycleRef,
+      where("userId", "==", userId)
+    );
+    const snapshot = await getDocs(q);
 
-      // Fallback to client-side filtering
-      const q = query(
-        cycleRef,
-        where("userId", "==", userId)
-      );
-      const snapshot = await getDocs(q);
+    let count = 0;
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.date && data.date.startsWith(startPattern)) {
+        count++;
+      }
+    });
 
-      let count = 0;
-      snapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-        if (createdAt >= startDate && createdAt < endDate) {
-          count++;
-        }
-      });
-
-      return count;
-    }
+    return count;
   } catch (error) {
     console.error("Error fetching cycle entries count:", error);
     return 0; // Return 0 instead of throwing to prevent dashboard from breaking

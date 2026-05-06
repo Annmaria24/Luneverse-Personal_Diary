@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../../firebase/config';
-import { collection, getCountFromServer, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, getCountFromServer, doc, getDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import AdminNavbar from '../../components/AdminNavbar';
 import { Link } from 'react-router-dom';
 import './Styles/Admin.css';
@@ -481,9 +481,7 @@ const AdminDashboard = () => {
                 }
                 setSeries(sampleSeries);
                 setSignupSeries(sampleSignups);
-                setSessions(sampleSeries.reduce((acc, cur) => acc + cur.value, 0));
-                setAvgSessionMins(Math.floor(Math.random() * 30) + 10);
-              }}>Generate Sample Data</button>
+               }}>Generate Sample Data</button>
             </div>
           </div>
           <div style={{ overflowX: 'auto' }}>
@@ -492,6 +490,7 @@ const AdminDashboard = () => {
                 <tr>
                   <th className="th">Email</th>
                   <th className="th">Name</th>
+                  <th className="th">Gender</th>
                   <th className="th">Joined</th>
                   <th className="th">Admin</th>
                 </tr>
@@ -501,16 +500,30 @@ const AdminDashboard = () => {
                   <tr key={u.id}>
                     <td className="td">{u.email}</td>
                     <td className="td">{u.displayName || '—'}</td>
+                    <td className="td">
+                      <span style={{ 
+                        padding: '2px 8px', 
+                        borderRadius: '12px', 
+                        background: u.gender === 'female' ? '#fdf2f8' : '#f1f5f9',
+                        color: u.gender === 'female' ? '#be185d' : '#475569',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        textTransform: 'capitalize'
+                      }}>
+                        {u.gender || '—'}
+                      </span>
+                    </td>
                     <td className="td">{u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : '—'}</td>
                     <td className="td">{u.isAdmin ? 'Yes' : 'No'}</td>
                   </tr>
                 ))}
                 {!recentUsers.length && (
-                  <tr><td className="td" colSpan={4} style={{ opacity: 0.8, textAlign: 'center' }}>No users found.</td></tr>
+                  <tr><td className="td" colSpan={5} style={{ opacity: 0.8, textAlign: 'center' }}>No users found.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
+      </div>
         </div>
       </div>
     </div>

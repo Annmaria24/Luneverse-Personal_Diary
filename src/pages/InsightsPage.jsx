@@ -6,7 +6,7 @@ import { getCycleEntriesCountForMonth, getCycleStats } from '../services/cycleSe
 import { getPregnancyEntriesCountForMonth, getPregnancyStats } from '../services/pregnancyService';
 import Navbar from '../components/Navbar';
 import MoodLineChart from '../components/charts/MoodLineChart';
-import { generateYearlyReport } from '../services/wellnessService';
+import { generateYearlyReport, rebuildDailySummaries } from '../services/wellnessService';
 import './Styles/InsightsPage.css';
 
 function InsightsPage() {
@@ -130,8 +130,8 @@ function InsightsPage() {
         // Fetch cycle data
         if (modulePreferences.cycleTracker) {
           try {
-            const cycleStats = await getCycleStats();
-            const cycleCount = await getCycleEntriesCountForMonth(currentMonth, currentYear);
+            const cycleStats = await getCycleStats(currentUser.uid);
+            const cycleCount = await getCycleEntriesCountForMonth(currentUser.uid, currentYear, currentMonth - 1);
             data.cycle = { entries: [], count: cycleCount, stats: cycleStats };
           } catch (error) {
             console.error('Error fetching cycle data:', error);
@@ -141,8 +141,8 @@ function InsightsPage() {
         // Fetch pregnancy data
         if (modulePreferences.pregnancyTracker) {
           try {
-            const pregnancyStats = await getPregnancyStats();
-            const pregnancyCount = await getPregnancyEntriesCountForMonth(currentMonth, currentYear);
+            const pregnancyStats = await getPregnancyStats(currentUser.uid);
+            const pregnancyCount = await getPregnancyEntriesCountForMonth(currentUser.uid, currentYear, currentMonth - 1);
             data.pregnancy = { entries: [], count: pregnancyCount, stats: pregnancyStats };
           } catch (error) {
             console.error('Error fetching pregnancy data:', error);
@@ -160,15 +160,35 @@ function InsightsPage() {
 
     fetchInsightsData();
 
-    // Fetch yearly report
+    // Fetch yearly report for graph
     const fetchYearlyReport = async () => {
       if (!currentUser) return;
+      
+      setYearlyLoading(true);
+      
+      // Safety timeout to ensure loading state clears
+      const timeoutId = setTimeout(() => {
+        setYearlyLoading(false);
+        console.warn("Yearly report fetch timed out.");
+      }, 20000);
+
       try {
-        setYearlyLoading(true);
-        const report = await generateYearlyReport(currentUser.uid);
+        let report = await generateYearlyReport(currentUser.uid);
+        
+        // If no report data, check if we need to rebuild summaries (first time/migration)
+        if (!report || !report.data || report.data.length === 0) {
+          console.log("No yearly report data found, attempting to rebuild summaries...");
+          const rebuildSuccess = await rebuildDailySummaries(currentUser.uid);
+          if (rebuildSuccess) {
+            report = await generateYearlyReport(currentUser.uid);
+          }
+        }
+        
+        clearTimeout(timeoutId);
         setYearlyReport(report);
       } catch (error) {
-        console.error("Error fetching yearly report:", error);
+        console.error('Error generating yearly report:', error);
+        clearTimeout(timeoutId);
       } finally {
         setYearlyLoading(false);
       }
@@ -448,6 +468,17 @@ function InsightsPage() {
                   <p className="mood-insight">{getMoodInsight()}</p>
                   <p className="mood-trend">Trend: {getMoodTrend()}</p>
                 </div>
+                {yearlyReport && yearlyReport.data && yearlyReport.data.length > 0 && (
+                  <div className="insight-chart-mini" style={{ height: '80px', margin: '15px 0' }}>
+                    <MoodLineChart 
+                      dataPoints={yearlyReport.data
+                        .slice(-7)
+                        .filter(d => d && typeof d.score === 'number' && !isNaN(d.score))
+                        .map(d => ({ x: d.date, y: d.score }))} 
+                      size={100}
+                    />
+                  </div>
+                )}
                 <div className="insight-details">
                   <p>This month: {insightsData.mood.count} entries</p>
                   <p>Total tracked: {insightsData.mood.entries.length} days</p>
@@ -569,7 +600,9 @@ function InsightsPage() {
                   <h3>Emotional Progression (Last 365 Days)</h3>
                   <div className="chart-wrapper">
                     <MoodLineChart
-                      dataPoints={yearlyReport.data.map(d => ({ x: d.date, y: d.score }))}
+                      dataPoints={yearlyReport.data
+                        .filter(d => d && typeof d.score === 'number' && !isNaN(d.score))
+                        .map(d => ({ x: d.date, y: d.score }))}
                       size={350}
                     />
                   </div>

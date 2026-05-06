@@ -53,12 +53,12 @@ function preprocessText(text) {
     const tokens = tokenizer.tokenize(processed);
 
     const baseStopwords = (natural.stopwords && Array.isArray(natural.stopwords)) ? natural.stopwords : [];
-    const customStopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't", 'feel', 'feeling', 'day', 'today', 'everything', 'complete', 'completely'];
+    const customStopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't", 'feel', 'feeling', 'day', 'today', 'complete', 'completely'];
     const stopwordsList = Array.from(new Set([...baseStopwords, ...customStopwords]));
 
     const filtered = tokens.filter(token => !stopwordsList.includes(token));
 
-    const protectedWords = ['wonderful', 'amazing', 'grateful', 'blessed', 'fantastic', 'frustrating', 'overwhelmed', 'peaceful', 'empty', 'hopeless', 'tired', 'lost', 'overthinking', 'heavy', 'pointless'];
+    const protectedWords = ['wonderful', 'amazing', 'grateful', 'blessed', 'fantastic', 'frustrating', 'overwhelmed', 'peaceful', 'empty', 'hopeless', 'tired', 'lost', 'overthinking', 'heavy', 'pointless', 'hate', 'worst'];
     const stemmed = filtered.map(token => {
         if (protectedWords.includes(token)) {
             return token; // Keep intact
@@ -164,12 +164,17 @@ async function trainModel() {
 
             // Angry (anger)
             { text: "frustrating day", label: "anger" },
+            { text: "hate it", label: "anger" },
+            { text: "I hate this", label: "anger" },
+            { text: "worst day ever", label: "anger" },
             { text: "Today was such a frustrating day; everything went wrong.", label: "anger" },
             { text: "This frustrating day is finally over, thank goodness.", label: "anger" },
             { text: "Felt very frustrated with the slow progress today.", label: "anger" },
             { text: "I had a frustrating day at the office today.", label: "anger" },
             { text: "I am so angry and frustrated right now.", label: "anger" },
             { text: "It's so frustrating when people don't listen.", label: "anger" },
+            { text: "I hate everything happening around me.", label: "anger" },
+            { text: "Worst experience ever.", label: "anger" },
 
             // Stressed (fear)
             { text: "overwhelmed", label: "fear" },
@@ -215,6 +220,8 @@ async function trainModel() {
             { text: "Looking at my calendar just makes me feel overwhelmed.", label: "fear" },
 
             // Sad (sadness)
+            { text: "hate myself", label: "sadness" },
+            { text: "worst feeling", label: "sadness" },
             { text: "I feel incredibly sad and heartbroken tonight.", label: "sadness" },
             { text: "Today brought back some hard memories, feeling very lonely and sad.", label: "sadness" },
             { text: "Everything just feels empty and hollow.", label: "sadness" },
@@ -223,7 +230,9 @@ async function trainModel() {
             { text: "I feel completely lost and don't know what to do.", label: "sadness" },
             { text: "My mind is racing, I am overthinking every little detail.", label: "sadness" },
             { text: "My heart feels really heavy with all this sadness.", label: "sadness" },
-            { text: "It all just feels so pointless and bleak.", label: "sadness" }
+            { text: "It all just feels so pointless and bleak.", label: "sadness" },
+            { text: "Worst day of my life.", label: "sadness" },
+            { text: "I hate being sad.", label: "sadness" }
         ];
 
         // Add copies of core keywords to truly dominate biases
@@ -234,6 +243,8 @@ async function trainModel() {
             { text: "blessed", label: "joy" },
             { text: "overwhelmed", label: "fear" },
             { text: "frustrating", label: "anger" },
+            { text: "hate", label: "anger" },
+            { text: "worst", label: "sadness" },
             { text: "peaceful", label: "love" },
             { text: "empty", label: "sadness" },
             { text: "hopeless", label: "sadness" },

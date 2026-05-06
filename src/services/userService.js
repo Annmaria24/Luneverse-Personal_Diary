@@ -17,6 +17,7 @@ export const createUserProfile = async (user, isGoogleSignup = false) => {
       email: user.email,
       displayName: user.displayName || "",
       photoURL: user.photoURL || "",
+      gender: user.gender || "female", // Default to Female for this app context
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
       hasPassword: isGoogleSignup ? false : true, // ✅ Explicitly set based on signup method

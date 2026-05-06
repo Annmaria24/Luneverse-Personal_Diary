@@ -53,7 +53,7 @@ function Reflect({ embedded = false }) {
       // Proxy: Port 5001 (Secured Channel)
       const proxyUrl = 'http://localhost:5001/chat';
       
-      const chatHistory = messages.slice(-5).map(m => ({
+      const chatHistory = messages.slice(-15).map(m => ({
         role: m.type === 'user' ? 'user' : 'assistant',
         content: m.text
       }));

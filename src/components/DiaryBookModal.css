@@ -194,26 +194,49 @@
 .book-right-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.6rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(180,140,220,0.25);
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(180, 140, 220, 0.2);
+}
+
+.book-right-mood-icon {
+  font-size: 1.4rem;
+  padding: 4px;
+  background: rgba(113, 51, 214, 0.05);
+  border-radius: 8px;
+}
+
+.book-right-time-group {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  text-align: right;
 }
 
 .book-right-time {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #7133d6;
+  font-family: inherit;
+}
+
+.book-right-edited {
+  font-size: 0.72rem;
   color: #a17ad6;
   font-style: italic;
-  margin-left: auto;
+  font-weight: normal;
+  margin-top: 1px;
 }
 
 .book-right-title {
   font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: #4a2090;
   margin: 0 0 1rem 0;
-  line-height: 1.4;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .book-right-body {

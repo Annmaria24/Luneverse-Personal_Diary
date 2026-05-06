@@ -16,6 +16,7 @@ function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [gender, setGender] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -90,6 +91,15 @@ function SignUpPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+
+      // ✅ Create profile immediately with gender
+      await createUserProfile({
+        uid: user.uid,
+        email: user.email,
+        displayName: "",
+        photoURL: "",
+        gender: gender
+      });
 
       await sendEmailVerification(user, {
         url: `${window.location.origin}/verify-email`,
@@ -191,6 +201,24 @@ function SignUpPage() {
                     {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
                 </div>
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="gender">Gender</label>
+                <select
+                  id="gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="gender-select"
+                  required
+                >
+                  <option value="" disabled>Select your gender</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="non-binary">Non-binary</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
 
               <div className="form-agreement">
