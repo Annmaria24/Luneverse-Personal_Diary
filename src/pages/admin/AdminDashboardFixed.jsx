@@ -113,11 +113,20 @@ const AdminDashboardFixed = () => {
             <div className="card-value">{avgSessionMins ?? '—'}</div>
           </div>
           <div className="card">
-            <div className="card-title">Quick Links</div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <Link to="/admin/users" style={{ color: '#a7c5ff' }}>Users</Link>
-              <Link to="/admin/feedback" style={{ color: '#a7c5ff' }}>Feedback</Link>
-              <Link to="/admin/settings" style={{ color: '#a7c5ff' }}>Settings</Link>
+            <div className="card-title">Average Rating</div>
+            <div className="card-value">
+              {feedbackStats.averageRating ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>{feedbackStats.averageRating.toFixed(1)}</span>
+                  <span style={{ fontSize: '18px', color: '#fbbf24' }}>
+                    {'★'.repeat(Math.round(feedbackStats.averageRating))}
+                    {'☆'.repeat(5 - Math.round(feedbackStats.averageRating))}
+                  </span>
+                </div>
+              ) : '—'}
+            </div>
+            <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '4px' }}>
+              Based on {feedbackStats.totalFeedback} responses
             </div>
           </div>
         </div>
@@ -185,26 +194,14 @@ const AdminDashboardFixed = () => {
             <h3>Recent Users</h3>
             <div style={{ display: 'flex', gap: 8 }}>
               <button 
-                className="button primary" 
-                onClick={async () => {
-                  try {
-                    console.log('Recomputing averages...');
-                    const r = await recomputeActivityAverages();
-                    setAvgSessionMins(Math.round((r.averageSessionMinutes || 0) * 10) / 10);
-                    showSuccess('Averages recomputed successfully!');
-                  } catch (error) {
-                    console.error('Error recomputing averages:', error);
-                    showError('Failed to recompute averages: ' + error.message);
-                  }
-                }}
-              >
-                Recompute Averages
-              </button>
-              <button 
                 className="button success" 
                 onClick={async () => {
                   try {
-                    console.log('Refreshing data...');
+                    console.log('Refreshing analytics and recomputing averages...');
+                    // Recompute averages first
+                    await recomputeActivityAverages();
+                    
+                    // Then refresh all totals and lists
                     const totals = await getTotals();
                     setTotalUsers(totals.users);
                     setAvgSessionMins(Math.round((totals.averageSessionMinutes || 0) * 10) / 10);
@@ -213,34 +210,15 @@ const AdminDashboardFixed = () => {
                     setSeries(s);
                     setSessions(s.reduce((acc, cur) => acc + (cur.value || 0), 0));
                     setSignupSeries(await getSignupSeries(14));
-                    showSuccess('Data refreshed successfully!');
+                    
+                    showSuccess('Analytics refreshed and recomputed!');
                   } catch (error) {
                     console.error('Error refreshing data:', error);
                     showError('Failed to refresh data: ' + error.message);
                   }
                 }}
               >
-                Refresh Data
-              </button>
-              <button 
-                className="button" 
-                onClick={async () => {
-                  try {
-                    console.log('Seeding sample sessions...');
-                    await seedSampleSessionsForCurrentUser(7, 3);
-                    const s = await getSessionSeries(14);
-                    setSeries(s);
-                    setSessions(s.reduce((acc, cur) => acc + (cur.value || 0), 0));
-                    const totals = await getTotals();
-                    setAvgSessionMins(Math.round((totals.averageSessionMinutes || 0) * 10) / 10);
-                    showSuccess('Sample sessions seeded successfully!');
-                  } catch (e) {
-                    console.error('Failed to seed sessions:', e);
-                    showError('Failed to seed sessions: ' + e.message);
-                  }
-                }}
-              >
-                Seed Sessions
+                Refresh Analytics
               </button>
             </div>
           </div>

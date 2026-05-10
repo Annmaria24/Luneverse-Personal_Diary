@@ -7,7 +7,7 @@ import RelaxSound from './RelaxSound';
 import RelaxQuotes from './RelaxQuotes';
 import RelaxFlow from './RelaxFlow';
 // Visuals removed
-import Reflect from './Reflect';
+// Visuals removed
 import RelaxAffirmations from './RelaxAffirmations';
 import { useSearchParams } from 'react-router-dom';
 
@@ -34,8 +34,7 @@ function RelaxMode() {
       case 'flow':
         return <RelaxFlow embedded />;
       // visuals removed
-      case 'reflect':
-        return <Reflect embedded />;
+      // reflect removed
       case 'affirmations':
         return <RelaxAffirmations embedded />;
       default:
@@ -77,12 +76,7 @@ function RelaxMode() {
               🎨 Flow Mode
             </button>
             {/* Visuals removed */}
-            <button
-              className={`relax-link ${activeSection === 'reflect' ? 'active' : ''}`}
-              onClick={() => setActiveSection('reflect')}
-            >
-              🪞 Gentle Reflections
-            </button>
+
             <button
               className={`relax-link ${activeSection === 'affirmations' ? 'active' : ''}`}
               onClick={() => setActiveSection('affirmations')}

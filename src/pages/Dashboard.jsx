@@ -101,44 +101,96 @@ function Dashboard() {
     }
   }, [navigate, showSuccess]);
 
-  // Period notification check
+  // Comprehensive Reminders Check
   useEffect(() => {
-    const checkPeriodNotification = async () => {
-      if (!currentUser || !modulePreferences?.cycleTracker) return;
+    const checkAllReminders = async () => {
+      if (!currentUser) return;
+
+      const getTodayKey = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      };
+      const todayKey = getTodayKey();
+      const lastNotify = localStorage.getItem(`reminders_last_notify_${currentUser.uid}`);
+      
+      if (lastNotify === todayKey) return;
 
       try {
-        const cycleStats = await getCycleStats(currentUser.uid);
-        if (!cycleStats || !cycleStats.averageCycleLength) return;
+        const userSettings = await getUserSettings(currentUser.uid);
+        let delay = 500;
+        let notificationsShown = false;
 
-        const today = new Date();
-        const lastPeriod = cycleStats.lastPeriodDate ? new Date(cycleStats.lastPeriodDate) : null;
+        // 1. Period Reminders
+        if (modulePreferences?.cycleTracker && userSettings?.periodReminders !== false) {
+          const cycleStats = await getCycleStats(currentUser.uid);
+          if (cycleStats && cycleStats.averageCycleLength && cycleStats.lastPeriodDate) {
+            const today = new Date();
+            const lastPeriod = new Date(cycleStats.lastPeriodDate);
+            const expectedPeriodDate = new Date(lastPeriod);
+            expectedPeriodDate.setDate(expectedPeriodDate.getDate() + cycleStats.averageCycleLength);
+            
+            const daysUntilExpected = Math.ceil((expectedPeriodDate - today) / (1000 * 60 * 60 * 24));
 
-        if (!lastPeriod) return;
-
-        const averageCycleLength = cycleStats.averageCycleLength;
-        const expectedPeriodDate = new Date(lastPeriod);
-        expectedPeriodDate.setDate(expectedPeriodDate.getDate() + averageCycleLength);
-
-        const daysUntilExpected = Math.floor((expectedPeriodDate - today) / (1000 * 60 * 60 * 24));
-
-        // Show notification if period is due within 2 days
-        if (daysUntilExpected <= 2 && daysUntilExpected >= -1) {
-          const message = daysUntilExpected === 0
-            ? "Your period is expected today! 🩸"
-            : daysUntilExpected === 1
-              ? "Your period is expected tomorrow! 🩸"
-              : daysUntilExpected === -1
-                ? "Your period was expected yesterday! 🩸"
-                : `Your period is expected in ${daysUntilExpected} days! 🩸`;
-
-          showSuccess(message);
+            if (daysUntilExpected <= 2 && daysUntilExpected >= -1) {
+              const message = daysUntilExpected === 0
+                ? "Your period is expected today! 🩸"
+                : daysUntilExpected === 1
+                  ? "Your period is expected tomorrow! 🩸"
+                  : daysUntilExpected === -1
+                    ? "Your period was expected yesterday! 🩸"
+                    : `Your period is expected in ${daysUntilExpected} days! 🩸`;
+              
+              setTimeout(() => showSuccess(message), delay);
+              delay += 500;
+              notificationsShown = true;
+            } else if (daysUntilExpected < -1 && cycleStats.currentPhase !== 'Menstrual') {
+              setTimeout(() => showSuccess(`Your period seems to be delayed by ${Math.abs(daysUntilExpected)} days. 🩸`), delay);
+              delay += 500;
+              notificationsShown = true;
+            }
+          }
         }
+
+        // 2. Pregnancy Appointment Reminders
+        if (modulePreferences?.pregnancyTracker && userSettings?.pregnancyTrackingEnabled) {
+          const pregnancyStats = await getPregnancyStats(currentUser.uid);
+          if (pregnancyStats && pregnancyStats.nextAppointment) {
+            const appointmentDate = new Date(pregnancyStats.nextAppointment.date);
+            const today = new Date();
+            const daysUntil = Math.ceil((appointmentDate - today) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntil >= 0 && daysUntil <= 2) {
+              setTimeout(() => showSuccess(`Reminder: Doctor appointment ${daysUntil === 0 ? 'today' : 'in ' + daysUntil + ' days'}! 👩‍⚕️`), delay);
+              delay += 500;
+              notificationsShown = true;
+            }
+          }
+        }
+
+        // 3. Mood Reminders
+        if (modulePreferences?.moodTracker && userSettings?.moodReminders !== false) {
+           setTimeout(() => showSuccess('Don\'t forget to log your mood today! 📊'), delay);
+           delay += 500;
+           notificationsShown = true;
+        }
+
+        // 4. Journal Reminders
+        if (modulePreferences?.journal && userSettings?.journalReminders === true) {
+           setTimeout(() => showSuccess('Take a moment to write in your journal today! 📝'), delay);
+           delay += 500;
+           notificationsShown = true;
+        }
+
+        if (notificationsShown) {
+          localStorage.setItem(`reminders_last_notify_${currentUser.uid}`, todayKey);
+        }
+
       } catch (error) {
-        console.error('Error checking period notification:', error);
+        console.error('Error checking reminders:', error);
       }
     };
 
-    checkPeriodNotification();
+    checkAllReminders();
   }, [currentUser, modulePreferences, showSuccess]);
 
   // Fetch counts for journal, mood, and cycle entries for current month

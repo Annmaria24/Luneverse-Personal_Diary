@@ -12,16 +12,27 @@ export const createUserProfile = async (user, isGoogleSignup = false) => {
   const snap = await getDoc(userRef);
 
   if (!snap.exists()) {
+    // Default module preferences
+    const defaultPrefs = {
+      journal: true,
+      moodTracker: true,
+      relaxMode: true,
+      cycleTracker: true,
+      pregnancyTracker: false
+    };
+
     await setDoc(userRef, {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName || "",
       photoURL: user.photoURL || "",
-      gender: user.gender || "female", // Default to Female for this app context
+      gender: user.gender || "female", 
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
-      hasPassword: isGoogleSignup ? false : true, // ✅ Explicitly set based on signup method
+      hasPassword: isGoogleSignup ? false : true, 
       isAdmin: false,
+      modulePreferences: defaultPrefs,
+      pregnancyTrackingEnabled: defaultPrefs.pregnancyTracker
     });
     const created = await getDoc(userRef);
     return created.exists() ? created.data() : null;

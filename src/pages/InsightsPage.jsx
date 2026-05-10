@@ -250,6 +250,19 @@ function InsightsPage() {
     return '📊 Consistent';
   };
 
+  const getMoodSuggestion = () => {
+    const trend = getMoodTrend();
+    if (trend.includes('Declining')) {
+      return "Your mood seems to be dipping. Consider taking a short walk, or trying Guided Breathing in Relax Mode.";
+    } else if (trend.includes('Improving')) {
+      return "You're on a great path! Keep up the positive habits that are boosting your mood.";
+    } else if (trend.includes('Consistent')) {
+      return "Your mood is stable. It's a great time to focus on personal growth or enjoy your favorite hobbies.";
+    } else {
+      return "Track your mood for a few more days to unlock personalized suggestions.";
+    }
+  };
+
   const getJournalInsight = () => {
     const entries = insightsData.journal.entries;
     if (entries.length === 0) return 'Start journaling to see insights';
@@ -378,6 +391,73 @@ function InsightsPage() {
 
   const wellnessScore = getWellnessScore();
 
+  const downloadCSV = () => {
+    const MOOD_TO_SCORE = {
+      Happy: 5, Loved: 5, Grateful: 5, Healthy: 5,
+      Calm: 4, Relaxed: 4, Peaceful: 4,
+      Neutral: 3,
+      Stressed: 2, Anxious: 2, Tired: 2, Overwhelmed: 2,
+      Angry: 1, Frustrated: 1, Annoyed: 1,
+      Sad: 0, Crying: 0, Lonely: 0, Depressed: 0
+    };
+
+    const formatDateStr = (dateObj, fallback) => {
+      try {
+        if (!dateObj) return fallback;
+        const d = new Date(dateObj);
+        if (isNaN(d.getTime())) return fallback;
+        // Format as YYYY-MM-DD to be standard, but Excel might still need column expansion
+        return d.toISOString().split('T')[0];
+      } catch (e) {
+        return fallback;
+      }
+    };
+
+    const moodData = (insightsData.mood?.entries || []).map(entry => {
+      const entryDate = formatDateStr(entry.timestamp || entry.date, entry.date || 'Unknown Date');
+      const score = typeof entry.value === 'number' ? entry.value : (MOOD_TO_SCORE[entry.moodName] ?? 3);
+      return {
+        date: entryDate,
+        score: score,
+        emotion: entry.moodName || 'Neutral',
+        source: 'Mood Tracker'
+      };
+    });
+
+    const journalData = (insightsData.journal?.entries || []).map(entry => {
+      const entryDate = formatDateStr(entry.timestamp || entry.date, entry.date || 'Unknown Date');
+      const score = typeof entry.score === 'number' ? entry.score : (MOOD_TO_SCORE[entry.finalMood] ?? 3);
+      return {
+        date: entryDate,
+        score: score,
+        emotion: entry.finalMood || 'Neutral',
+        source: 'Diary Entry'
+      };
+    });
+
+    const allData = [...moodData, ...journalData].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (allData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    const headers = ['Date', 'Mood Score (0-5)', 'Primary Emotion', 'Data Source'];
+    const csvContent = [
+      headers.join(','),
+      ...allData.map(d => `"${d.date}","${d.score}","${d.emotion}","${d.source}"`)
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `luneverse_raw_data_${currentYear}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <div className="insights-page">
@@ -468,15 +548,9 @@ function InsightsPage() {
                   <p className="mood-insight">{getMoodInsight()}</p>
                   <p className="mood-trend">Trend: {getMoodTrend()}</p>
                 </div>
-                {yearlyReport && yearlyReport.data && yearlyReport.data.length > 0 && (
-                  <div className="insight-chart-mini" style={{ height: '80px', margin: '15px 0' }}>
-                    <MoodLineChart 
-                      dataPoints={yearlyReport.data
-                        .slice(-7)
-                        .filter(d => d && typeof d.score === 'number' && !isNaN(d.score))
-                        .map(d => ({ x: d.date, y: d.score }))} 
-                      size={100}
-                    />
+                {insightsData.mood.entries.length > 0 && (
+                  <div className="insight-suggestion" style={{ margin: '15px 0', padding: '12px', backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: '8px', fontSize: '0.9rem', fontStyle: 'italic', color: '#555' }}>
+                    💡 {getMoodSuggestion()}
                   </div>
                 )}
                 <div className="insight-details">
@@ -561,13 +635,22 @@ function InsightsPage() {
           <div className="yearly-report-card">
             <div className="report-header">
               <h2>1-Year Mental Health Report</h2>
-              <button
-                className="download-report-btn"
-                onClick={() => window.print()}
-                title="Save as PDF"
-              >
-                📥 Download Data
-              </button>
+              <div className="report-actions" style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  className="download-report-btn"
+                  onClick={downloadCSV}
+                  title="Export to Excel/CSV"
+                >
+                  📊 Export Data
+                </button>
+                <button
+                  className="download-report-btn"
+                  onClick={() => window.print()}
+                  title="Save as PDF"
+                >
+                  📥 Print PDF
+                </button>
+              </div>
             </div>
 
             {yearlyLoading ? (

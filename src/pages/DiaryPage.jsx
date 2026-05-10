@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import './Styles/DiaryPage.css';
 import { addDiaryEntry, getDiaryEntries, getLatestDiaryEntries, updateDiaryEntry, deleteDiaryEntry } from "../services/diaryService";
@@ -377,7 +378,7 @@ function DiaryPage({ includeNavbar = true }) {
 
 
         {/* Calendar Modal */}
-        {showCalendar && (
+        {showCalendar && createPortal(
           <div className="calendar-modal" onClick={(e) => e.target.classList.contains('calendar-modal') && setShowCalendar(false)}>
             <div className="calendar-content">
               <div className="calendar-header">
@@ -454,7 +455,8 @@ function DiaryPage({ includeNavbar = true }) {
                 </div>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* Main Content */}

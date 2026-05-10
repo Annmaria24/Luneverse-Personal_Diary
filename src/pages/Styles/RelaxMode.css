@@ -92,16 +92,14 @@
 /* ================= Sidebar ================= */
 .relax-sidebar {
   width: 260px;
-  /* Subtle pink card feel */
   background: rgba(252, 231, 243, 0.8);
   backdrop-filter: blur(12px);
   border-right: 1px solid rgba(236, 72, 153, 0.15);
-  height: calc(100vh - 112px);
+  height: 100%; /* Fill the container height */
   overflow-y: auto;
   box-shadow: 4px 0 20px rgba(236, 72, 153, 0.08);
   padding: 1.5rem;
-  position: sticky;
-  top: 112px;
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
 }
 
 /* ================= Main Content ================= */
@@ -353,8 +351,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.2rem;
-  min-height: 280px; /* slightly tighter */
+  gap: 1.5rem;
+  min-height: 400px; /* Use min-height instead of fixed height */
+  width: 100%;
 }
 
 /* Orb & Glow */
@@ -381,7 +380,7 @@
   position: absolute;
   pointer-events: none;
   z-index: 1;
-  transition: all 1.5s ease-in-out;
+  /* transition removed to avoid conflict with framer-motion */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -390,11 +389,12 @@
 .breathe-orb {
   width: 220px;
   height: 220px;
+  flex-shrink: 0; /* Prevent squashing */
   border-radius: 50%;
   background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,0.95), rgba(124,58,237,0.4), rgba(236,72,153,0.3));
   box-shadow: 0 0 45px rgba(124,58,237,0.4), 0 0 70px rgba(236,72,153,0.25);
   z-index: 2;
-  transition: all 1.5s ease-in-out;
+  /* transition removed to avoid conflict with framer-motion */
 }
 
 .breathe-orb.dim {
@@ -409,10 +409,12 @@
 }
 
 .timer {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: var(--font-weight-bold);
   color: var(--neutral-gray-700);
   margin-top: 0.5rem;
+  font-family: 'Courier New', Courier, monospace; /* Prevent width jitter */
+  letter-spacing: 1px;
 }
 
 .breathe-controls {

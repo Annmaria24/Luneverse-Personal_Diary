@@ -23,6 +23,12 @@ function SignUpPage() {
 
   // ✅ GOOGLE SIGN-UP FUNCTION
   const handleGoogleSignUp = async () => {
+    if (!gender) {
+      setError("Please select your gender before signing up with Google.");
+      return;
+    }
+    setError("");
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -31,14 +37,15 @@ function SignUpPage() {
 
       // ✅ Create or update Firestore profile
       await createUserProfile(
-  {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName || "",
-    photoURL: user.photoURL || "",
-  },
-  true // ✅ explicitly says it's a Google signup
-);
+        {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || "",
+          gender: gender // ✅ Pass selected gender
+        },
+        true // ✅ explicitly says it's a Google signup
+      );
 
 
       await updateLastLogin(user.uid);
@@ -65,6 +72,12 @@ function SignUpPage() {
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!gender) {
+      setError("Please select your gender.");
       setIsLoading(false);
       return;
     }
@@ -241,13 +254,17 @@ function SignUpPage() {
               </button>
             </form>
 
-            <button
-              type="button"
-              onClick={handleGoogleSignUp}
-              className="google-login-btn"
-            >
-              Sign up with Google
-            </button>
+            <div className="alternative-login">
+              <p className="or-divider"><span>Or continue with</span></p>
+              <button
+                type="button"
+                onClick={handleGoogleSignUp}
+                className="google-login-btn"
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+                Sign up with Google
+              </button>
+            </div>
 
             <div className="form-footer">
               <p>

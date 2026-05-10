@@ -389,6 +389,25 @@ function MoodTrackerPage({ viewMode = 'today', includeNavbar = true }) {
       return 'Start tracking';
     }
 
+    // Check for significant trends to avoid toxic positivity on a bad downward day
+    if (emotionalTrendData && emotionalTrendData.rawPoints && emotionalTrendData.rawPoints.length > 1) {
+      const points = emotionalTrendData.rawPoints;
+      const first = points[0].y;
+      const last = points[points.length - 1].y;
+      
+      if (first - last >= 1.5) {
+        return 'Declining'; // Huge dip
+      }
+      if (last - first >= 1.5) {
+        return 'Improving'; // Huge spike
+      }
+      
+      // If the day ended very poorly despite a decent average
+      if (avgMood >= 3.0 && last <= 2.0) {
+        return 'Tough End';
+      }
+    }
+
     // Analyze mood level and provide professional insights
     if (avgMood >= 4.0) {
       return 'Thriving';

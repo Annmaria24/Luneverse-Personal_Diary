@@ -13,6 +13,7 @@ function SetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [gender, setGender] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -28,12 +29,18 @@ function SetPasswordPage() {
       return;
     }
 
+    if (!gender) {
+      toast.error("Please select a gender");
+      return;
+    }
+
     try {
       await updatePassword(auth.currentUser, password);
 
-      // Mark user as having a password in Firestore
+      // Mark user as having a password and save gender in Firestore
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         hasPassword: true,
+        gender: gender,
       });
 
       toast.success("Password set successfully!");
@@ -57,8 +64,8 @@ function SetPasswordPage() {
       </div>
 
       <div className="set-password-container">
-        <h2>Set Your Password</h2>
-        <p>Create a password to log in without Google next time.</p>
+        <h2>Complete Your Profile</h2>
+        <p>Set a password and complete your details to continue.</p>
 
         <form onSubmit={handleSubmit}>
           {/* Password */}
@@ -105,8 +112,27 @@ function SetPasswordPage() {
             </div>
           </div>
 
+          {/* Gender */}
+          <div className="input-group">
+            <label htmlFor="gender">Gender</label>
+            <select
+              id="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="gender-select"
+              required
+            >
+              <option value="" disabled>Select your gender</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="non-binary">Non-binary</option>
+              <option value="prefer-not-to-say">Prefer not to say</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
           <button type="submit" className="save-password-btn">
-            Save Password
+            Complete Profile
           </button>
         </form>
       </div>

@@ -103,18 +103,20 @@ function RelaxBreathe() {
             transition={{ duration: 2, ease: "easeInOut" }}
           />
 
-          <AnimatePresence>
-            <motion.div
-              className="phase-label"
-              key={phase}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              {phase === 'inhale' ? 'Inhale' : phase === 'exhale' ? 'Exhale' : 'Hold'}
-            </motion.div>
-          </AnimatePresence>
+          <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                className="phase-label"
+                key={phase}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                {phase === 'inhale' ? 'Inhale' : phase === 'exhale' ? 'Exhale' : 'Hold'}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
           <div className="timer">
             {String(Math.floor(seconds / 60)).padStart(2, '0')}:
@@ -147,5 +149,3 @@ function RelaxBreathe() {
 }
 
 export default RelaxBreathe;
-
-

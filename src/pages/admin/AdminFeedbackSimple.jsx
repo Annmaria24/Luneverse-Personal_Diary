@@ -15,24 +15,26 @@ const AdminFeedbackSimple = () => {
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
+  const load = async () => {
+    setLoading(true);
+    // Load admin feedback
+    const q = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data(), type: 'admin' })));
+
+    // Load user feedback
+    try {
+      const userFeedback = await getAllUserFeedback();
+      setUserFeedbacks(userFeedback.map(f => ({ ...f, type: 'user' })));
+    } catch (error) {
+      console.error('Error loading user feedback:', error);
+      setUserFeedbacks([]);
+    }
+
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      // Load admin feedback
-      const q = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data(), type: 'admin' })));
-
-      // Load user feedback
-      try {
-        const userFeedback = await getAllUserFeedback();
-        setUserFeedbacks(userFeedback.map(f => ({ ...f, type: 'user' })));
-      } catch (error) {
-        console.error('Error loading user feedback:', error);
-        setUserFeedbacks([]);
-      }
-
-      setLoading(false);
-    };
     load();
   }, []);
 
@@ -117,12 +119,39 @@ const AdminFeedbackSimple = () => {
             </>
           )}
 
-          <div className="filters">
-            <select className="select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-              <option value="all">All</option>
-              <option value="new">New</option>
-              <option value="reviewed">Reviewed</option>
-            </select>
+          <div className="filters" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ position: 'relative', width: 'auto', minWidth: '150px' }}>
+              <select 
+                className="select" 
+                value={statusFilter} 
+                onChange={e => setStatusFilter(e.target.value)} 
+                style={{ width: '100%', paddingRight: '35px' }}
+              >
+                <option value="all">All</option>
+                <option value="new">New</option>
+                <option value="reviewed">Reviewed</option>
+              </select>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                right: '12px',
+                transform: 'translateY(-50%)',
+                color: '#ffffff',
+                pointerEvents: 'none',
+                fontSize: '12px',
+                opacity: 0.8
+              }}>
+                ▼
+              </div>
+            </div>
+            
+            <button 
+              className="button success" 
+              onClick={load}
+              disabled={loading}
+            >
+              {loading ? 'Refreshing...' : 'Refresh Data'}
+            </button>
           </div>
 
           {loading ? (
